@@ -1,18 +1,16 @@
 import compression from "compression";
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import helmet from "helmet";
 import morgan from "morgan";
 import router from "./routes/index";
 import dotenv from "dotenv";
 import { MongoConnection } from "./dbs/mongoose.init";
-import { errorHandler } from "./helpers/errorMiddleware";
 import { Obj } from "./interfaces";
-import { startGRPCAuthService } from "./grpc/server";
+import { redisInstance } from "./dbs/redis.init";
 dotenv.config();
 
 MongoConnection();
-startGRPCAuthService();
-
+redisInstance.initRedis();
 const app = express();
 
 app.use(express.json());
@@ -29,6 +27,13 @@ app.use((req, res, next) => {
   next(error);
 });
 
-app.use(errorHandler);
+app.use((error: Obj, req: Request, res: Response, next: NextFunction) => {
+  const statusCode = error.status ?? 500;
+  res.status(statusCode).json({
+    status: "error",
+    code: statusCode,
+    message: error.message || "Internal Server Error",
+  });
+});
 
 export default app;

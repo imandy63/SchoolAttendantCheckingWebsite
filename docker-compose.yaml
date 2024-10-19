@@ -1,0 +1,52 @@
+version: "3.8"
+
+services:
+  final_auth_server:
+    container_name: final_auth_server
+    build: ./Server/Auth/
+    ports:
+      - "39899:39899"
+    networks:
+      - final-network
+    env_file:
+      - ./Server/Auth/.env
+    environment:
+      - REDIS_HOST=final_redis
+      - MONGODB_HOST=final_mongo
+      - MONGODB_PORT=27017
+      - MONGODB_DATABASE_NAME="activity_tracking"
+    depends_on:
+      final_redis:
+        condition: service_healthy
+      final_mongo:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "redis-cli", "PING"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  final_redis:
+    container_name: final_redis
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - final-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "PING"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  final_mongo:
+    container_name: final_mongo
+    image: mongodb/mongodb-community-server:latest
+    ports:
+      - "39990:27017"
+    networks:
+      - final-network
+
+networks:
+  final-network:
+    name: final-network

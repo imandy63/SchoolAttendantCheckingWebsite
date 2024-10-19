@@ -1,5 +1,5 @@
 import express from "express";
-import authRouter from "./access";
+import authRouter from "./auth";
 const router = express.Router();
 
 router.get("/", (req, res) => {
@@ -8,6 +8,6 @@ router.get("/", (req, res) => {
   });
 });
 
-router.use("/v1/api/auth", authRouter);
+router.use("/api/auth", authRouter);
 
 export default router;

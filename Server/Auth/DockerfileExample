@@ -17,7 +17,7 @@ COPY . .
 RUN npm install -g typescript ts-node
 
 # Expose the port your app runs on
-EXPOSE 3102 50051
+EXPOSE 3102
 
 # Define the command to run the app
 CMD ["npm", "run", "dev"]

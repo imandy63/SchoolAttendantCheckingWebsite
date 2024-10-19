@@ -1,0 +1,178 @@
+{
+	"info": {
+		"_postman_id": "90068cd2-488b-42ae-9975-76f1be926367",
+		"name": "Auth",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "22711676",
+		"_collection_link": "https://orange-meteor-319397.postman.co/workspace/Final~d8435ef8-c155-4cfb-92fb-732b0e372010/collection/22711676-90068cd2-488b-42ae-9975-76f1be926367?action=share&source=collection_link&creator=22711676"
+	},
+	"item": [
+		{
+			"name": "File import",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/C:/Users/kongh/Desktop/DATN/data/insert_data.xlsx"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:39899/api/auth/import-xlsx",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "39899",
+					"path": [
+						"api",
+						"auth",
+						"import-xlsx"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json()\r",
+							"pm.globals.set(\"final-token\", response.metadata.tokens.accessToken)\r",
+							"pm.globals.set(\"final-rtoken\", response.metadata.tokens.refreshToken)\r",
+							"pm.globals.set(\"final-client\", response.metadata.user._id)"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"studentId\": \"2001215836\",\r\n    \"password\": \"123\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:39899/api/auth/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "39899",
+					"path": [
+						"api",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Authenticating",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{final-token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-rtoken-id",
+						"value": "{{final-rtoken}}",
+						"type": "text"
+					},
+					{
+						"key": "x-client-id",
+						"value": "{{final-client}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:39899/api/auth/authenticate",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "39899",
+					"path": [
+						"api",
+						"auth",
+						"authenticate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Handle refresh token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json()\r",
+							"pm.globals.set(\"final-token\", response.metadata.tokens.accessToken)\r",
+							"pm.globals.set(\"final-rtoken\", response.metadata.tokens.refreshToken)"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-client-id",
+						"value": "{{final-client}}",
+						"type": "text"
+					},
+					{
+						"key": "x-rtoken-id",
+						"value": "{{final-rtoken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:39899/api/auth/refresh-token",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "39899",
+					"path": [
+						"api",
+						"auth",
+						"refresh-token"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

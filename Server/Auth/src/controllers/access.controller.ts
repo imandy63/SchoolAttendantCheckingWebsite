@@ -1,9 +1,9 @@
 import { CREATED, SuccessResponse } from "../core/success.response";
 import AccessService from "../services/access.service";
-import { findByEmail } from "../models/repositories/shop.repo";
 import { NextFunction, Request, Response } from "express";
 import { IPayload } from "../interfaces/auth";
 import { IKeyStore } from "../models/keyToken.model";
+import { BadRequestError } from "../core/error.response";
 
 interface CustomRequest extends Request {
   refreshToken: string;
@@ -12,6 +12,17 @@ interface CustomRequest extends Request {
 }
 
 class AccessController {
+  importXLSX = async (req: Request, res: Response, next: NextFunction) => {
+    const file = req.file;
+    if (!file) {
+      throw new BadRequestError("Missing file");
+    }
+    new SuccessResponse({
+      message: "Upload successfully",
+      metadata: await AccessService.importXlsxData(file.path),
+    }).send(res);
+  };
+
   handleRefreshToken = async (
     req: Request,
     res: Response,
@@ -21,8 +32,7 @@ class AccessController {
       message: "Get token success",
       metadata: await AccessService.handleRefreshToken({
         refreshToken: req.headers["x-rtoken-id"] as string,
-        user: req.headers["x-client-id"] as string,
-        email: req.body.email,
+        userId: req.headers["x-client-id"] as string,
       }),
     }).send(res);
   };
@@ -41,19 +51,17 @@ class AccessController {
     }).send(res);
   };
 
-  signup = async (req: Request, res: Response, next: NextFunction) => {
-    new CREATED({
-      message: "Registered successfully!",
-      metadata: await AccessService.signup(req.body),
-    }).send(res);
-  };
-
   authentication = async (req: Request, res: Response, next: NextFunction) => {
+    const accessToken = req.headers["authorization"]
+      ?.toString()
+      .split(" ")[1] as string;
+    const userId = req.headers["x-client-id"]?.toString() as string;
+    console.log(accessToken, userId);
     new SuccessResponse({
       message: "Validated",
       metadata: await AccessService.verification({
-        userId: req.body.user,
-        accessToken: req.body.accessToken,
+        userId: userId,
+        accessToken: accessToken,
       }),
     }).send(res);
   };

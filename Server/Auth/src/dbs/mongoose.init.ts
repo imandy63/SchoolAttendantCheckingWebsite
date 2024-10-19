@@ -1,8 +1,6 @@
 import { ExecException } from "child_process";
 import mongoose from "mongoose";
-import { MONGODB_CONFIG } from "../config/mongodb.config";
-
-const connectionString = MONGODB_CONFIG.URI;
+import { MONGODB_CONFIG } from "../configs/mongodb.config";
 
 class MongooseDB {
   static instance: any;
@@ -11,8 +9,13 @@ class MongooseDB {
   }
 
   connect(type = "mongodb") {
-    if (!connectionString) {
-      throw new Error("Mongodb URI is not provided or does not exist");
+    const host = MONGODB_CONFIG.HOST;
+    const port = MONGODB_CONFIG.PORT;
+    const databaseName = MONGODB_CONFIG.DATABASE_NAME;
+    const connectionString = `mongodb://${host}:${port}/${databaseName}`;
+
+    if (!host || !port || !databaseName) {
+      throw new Error("Mongodb host or port or database name is missing");
     }
 
     if (1 === 1) {
