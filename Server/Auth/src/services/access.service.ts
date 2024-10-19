@@ -1,20 +1,17 @@
-import { StudentPayload, students } from "../models/auth.model";
+import { students } from "../models/auth.model";
 import bcrypt from "bcryptjs";
-import { keyTokenModel } from "../models/keyToken.model";
 import { createTokenPairV2, verifyJWT } from "../auth/authUtils";
-import { convertToObjectIdMongoose, getInfoData } from "../utils";
+import { getInfoData } from "../utils";
 import {
   BadRequestError,
-  ForbiddenError,
   AuthFailureError,
   NotFoundError,
 } from "../core/error.response";
 import XLSX from "xlsx";
-import { Obj, StringObj } from "../interfaces";
-import { generateKey, generateKeyRSA } from "../utils/generateKey";
+import { StringObj } from "../interfaces";
+import { generateKeyRSA } from "../utils/generateKey";
 import { findByStudentId } from "../models/repositories/auth.repo";
 import { redisInstance } from "../dbs/redis.init";
-import fs from "fs";
 import { StudentExcelRow } from "../interfaces/auth";
 
 type IHandleRefreshToken = {
@@ -23,9 +20,9 @@ type IHandleRefreshToken = {
 };
 
 class AccessService {
-  static async importXlsxData(filePath: string) {
+  static async importXlsxData(fileBuffer: Buffer) {
     try {
-      const workbook = XLSX.readFile(filePath);
+      const workbook = XLSX.read(fileBuffer, { type: "buffer" });
 
       const sheetName = workbook.SheetNames[0];
       const sheetData: StudentExcelRow[] = XLSX.utils.sheet_to_json(
@@ -33,6 +30,16 @@ class AccessService {
       );
 
       for (const row of sheetData) {
+        const foundStudent = await students
+          .findOne({
+            student_id: row["student_id"].toString(),
+          })
+          .lean();
+
+        if (!!foundStudent) {
+          continue;
+        }
+
         const hashedPassword = await bcrypt.hash(
           row["password"].toString(),
           10
@@ -52,11 +59,9 @@ class AccessService {
         });
       }
 
-      fs.unlinkSync(filePath);
-
       return { success: true, message: "Data imported successfully!" };
     } catch (error) {
-      console.error("Error importing XLSX data:", error);
+      console.error("Error importing XLSX data:");
       throw new BadRequestError("Failed to import XLSX data");
     }
   }

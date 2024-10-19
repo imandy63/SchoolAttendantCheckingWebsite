@@ -2,25 +2,17 @@ import { CREATED, SuccessResponse } from "../core/success.response";
 import AccessService from "../services/access.service";
 import { NextFunction, Request, Response } from "express";
 import { IPayload } from "../interfaces/auth";
-import { IKeyStore } from "../models/keyToken.model";
 import { BadRequestError } from "../core/error.response";
-
-interface CustomRequest extends Request {
-  refreshToken: string;
-  user: IPayload;
-  keyStore: IKeyStore;
-}
 
 class AccessController {
   importXLSX = async (req: Request, res: Response, next: NextFunction) => {
-    console.log(req.file?.path);
     const file = req.file;
     if (!file) {
       throw new BadRequestError("Missing file");
     }
     new SuccessResponse({
       message: "Upload successfully",
-      metadata: await AccessService.importXlsxData(file.path),
+      metadata: await AccessService.importXlsxData(file.buffer),
     }).send(res);
   };
 
@@ -38,7 +30,7 @@ class AccessController {
     }).send(res);
   };
 
-  logout = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  logout = async (req: Request, res: Response, next: NextFunction) => {
     new SuccessResponse({
       message: "Log out successfully",
       metadata: await AccessService.logout(req.body.user),
