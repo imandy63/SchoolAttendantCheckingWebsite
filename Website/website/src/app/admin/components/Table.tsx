@@ -6,6 +6,12 @@ type TableProps = {
 };
 
 export const Table = ({ headers, data, actions }: TableProps) => {
+  const totalRows = 10; // Số hàng mặc định hiển thị trên mỗi trang
+
+  // Tạo dữ liệu cho các hàng trống
+  const emptyRows = totalRows - data.length > 0 ? totalRows - data.length : 0;
+  const paddedData = [...data, ...Array(emptyRows).fill(null)]; // Sử dụng null cho hàng trống
+
   return (
     <table className="min-w-full bg-white border border-gray-300">
       <thead>
@@ -22,14 +28,21 @@ export const Table = ({ headers, data, actions }: TableProps) => {
         </tr>
       </thead>
       <tbody>
-        {data.map((row, index) => (
+        {paddedData.map((row, index) => (
           <tr key={index} className="border-b hover:bg-gray-50">
-            {Object.values(row).map((value, idx) => (
-              <td key={idx} className="py-2 px-4 text-gray-800">
-                {value}
+            {headers.map((header, idx) => {
+              const key = header.toLowerCase().replace(/\s/g, "_"); // Định dạng để khớp tên khóa
+              return (
+                <td key={idx} className="py-2 px-4 text-gray-800">
+                  {row ? row[key] || <span className="text-gray-400">--</span> : <span className="text-gray-400">--</span>}
+                </td>
+              );
+            })}
+            {actions && (
+              <td>
+                {row ? actions(row) : null}
               </td>
-            ))}
-            {actions && <td>{actions(row)}</td>}
+            )}
           </tr>
         ))}
       </tbody>

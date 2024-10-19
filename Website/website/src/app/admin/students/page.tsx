@@ -18,6 +18,39 @@ const studentData = [
     diem_ren_luyen: "100",
     tong_so_hoat_dong: "8",
   },
+  {
+    mssv: "2001215836",
+    ho_va_ten: "Kong Hoa Hung",
+    ngay_sinh: "06/03/2003",
+    lop: "12DHTH01",
+    khoa: "12",
+    diem_ren_luyen: "100",
+    tong_so_hoat_dong: "8",
+  }, {
+    mssv: "2001215836",
+    ho_va_ten: "Kong Hoa Hung",
+    ngay_sinh: "06/03/2003",
+    lop: "12DHTH01",
+    khoa: "12",
+    diem_ren_luyen: "100",
+    tong_so_hoat_dong: "8",
+  }, {
+    mssv: "2001215836",
+    ho_va_ten: "Kong Hoa Hung",
+    ngay_sinh: "06/03/2003",
+    lop: "12DHTH01",
+    khoa: "12",
+    diem_ren_luyen: "100",
+    tong_so_hoat_dong: "8",
+  }, {
+    mssv: "2001215836",
+    ho_va_ten: "Kong Hoa Hung",
+    ngay_sinh: "06/03/2003",
+    lop: "12DHTH01",
+    khoa: "12",
+    diem_ren_luyen: "100",
+    tong_so_hoat_dong: "8",
+  }
 ];
 
 export default function Students() {
