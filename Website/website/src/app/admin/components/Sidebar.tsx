@@ -5,7 +5,7 @@ export const Sidebar = () => {
   const [active, setActive] = useState("dashboard");
 
   const menuItems = [
-    { name: "Dashboard", icon: "📊", href: "/" },
+    { name: "Dashboard", icon: "📊", href: "/admin/dashboard" },
     { name: "Sinh viên", icon: "👨‍🎓", href: "/admin/students" }, 
     { name: "Hoạt động", icon: "⚡", href: "/admin/activities" },
     { name: "Bài viết", icon: "📝", href: "/admin/posts" },
