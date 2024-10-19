@@ -13,6 +13,7 @@ interface CustomRequest extends Request {
 
 class AccessController {
   importXLSX = async (req: Request, res: Response, next: NextFunction) => {
+    console.log(req.file?.path);
     const file = req.file;
     if (!file) {
       throw new BadRequestError("Missing file");

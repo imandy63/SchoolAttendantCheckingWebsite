@@ -1,0 +1,25 @@
+[{
+  "_id": {
+    "$oid": "6713792afcd4c00b8c926a69"
+  },
+  "student_id": "2001215836",
+  "password": "$2a$10$FZjxMViR0aeDVP0A3iTu8ugUc62QEItypudaowSK.3PTKNpw7rW1C",
+  "role": "student",
+  "student_name": "Kong Hoa Hưng",
+  "student_avatar_url": "",
+  "student_address": "123 ABC",
+  "student_class": {
+    "class_name": "12DHTH01",
+    "faculty": "Information Technology"
+  },
+  "student_activity_point": 10,
+  "subscribed_categories": [],
+  "student_participated_activities": [],
+  "created_at": {
+    "$date": "2024-10-19T09:17:30.450Z"
+  },
+  "modified_at": {
+    "$date": "2024-10-19T09:17:30.450Z"
+  },
+  "__v": 0
+}]

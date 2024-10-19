@@ -1,6 +1,5 @@
 import { StudentPayload, students } from "../models/auth.model";
 import bcrypt from "bcryptjs";
-import crypto from "crypto";
 import { keyTokenModel } from "../models/keyToken.model";
 import { createTokenPairV2, verifyJWT } from "../auth/authUtils";
 import { convertToObjectIdMongoose, getInfoData } from "../utils";
@@ -66,7 +65,6 @@ class AccessService {
     refreshToken,
     userId,
   }: IHandleRefreshToken) => {
-    console.log(userId);
     const publicKeyFound = await redisInstance.get(`publicKey::${userId}`);
     if (!publicKeyFound) {
       throw new NotFoundError("Not found Key Store!");
