@@ -1,5 +1,0 @@
-PORT=3102
-
-GRPC_PORT=50051
-
-MONGODB_URI="mongodb://mongo:1111"
