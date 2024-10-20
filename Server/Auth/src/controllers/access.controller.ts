@@ -31,9 +31,11 @@ class AccessController {
   };
 
   logout = async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.headers["x-client-id"]?.toString() as string;
+
     new SuccessResponse({
       message: "Log out successfully",
-      metadata: await AccessService.logout(req.body.user),
+      metadata: await AccessService.logout(userId),
     }).send(res);
   };
 
@@ -56,6 +58,22 @@ class AccessController {
         userId: userId,
         accessToken: accessToken,
       }),
+    }).send(res);
+  };
+
+  isAdmin = async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.headers["x-client-id"]?.toString() as string;
+    new SuccessResponse({
+      message: "Is admin",
+      metadata: await AccessService.isAdmin({ userId }),
+    }).send(res);
+  };
+
+  isUnionWorker = async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.headers["x-client-id"]?.toString() as string;
+    new SuccessResponse({
+      message: "Is union worker",
+      metadata: await AccessService.isUnionWorker({ userId }),
     }).send(res);
   };
 }

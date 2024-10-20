@@ -1,7 +1,7 @@
 import { students } from "../models/auth.model";
 import bcrypt from "bcryptjs";
 import { createTokenPairV2, verifyJWT } from "../auth/authUtils";
-import { getInfoData } from "../utils";
+import { convertToObjectIdMongoose, getInfoData } from "../utils";
 import {
   BadRequestError,
   AuthFailureError,
@@ -13,6 +13,7 @@ import { generateKeyRSA } from "../utils/generateKey";
 import { findByStudentId } from "../models/repositories/auth.repo";
 import { redisInstance } from "../dbs/redis.init";
 import { StudentExcelRow } from "../interfaces/auth";
+import { Role } from "../enum/role.enum";
 
 type IHandleRefreshToken = {
   refreshToken: string;
@@ -65,6 +66,30 @@ class AccessService {
       throw new BadRequestError("Failed to import XLSX data");
     }
   }
+
+  static isAdmin = async ({ userId }: { userId: string }) => {
+    const foundUser = await students.findById(
+      convertToObjectIdMongoose(userId)
+    );
+
+    if (!foundUser) {
+      throw new AuthFailureError("User is not registered!");
+    }
+
+    return { status: foundUser.role === Role.ADMIN };
+  };
+
+  static isUnionWorker = async ({ userId }: { userId: string }) => {
+    const foundUser = await students.findById(
+      convertToObjectIdMongoose(userId)
+    );
+
+    if (!foundUser) {
+      throw new AuthFailureError("User is not registered!");
+    }
+
+    return { status: foundUser.role === Role.UNION_WORKER };
+  };
 
   static handleRefreshToken = async ({
     refreshToken,

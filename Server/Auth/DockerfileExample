@@ -1,23 +1,24 @@
-# Use an official Node.js runtime as a parent image
-FROM node:20
+FROM node:20-alpine AS builder
 
-# Set the working directory inside the container
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install dependencies
 RUN npm install
-
-# Copy the rest of the application code
 COPY . .
 
-# Install TypeScript globally
-RUN npm install -g typescript ts-node
+RUN npm run build
 
-# Expose the port your app runs on
-EXPOSE 3102
+FROM node:20-alpine AS production
 
-# Define the command to run the app
-CMD ["npm", "run", "dev"]
+WORKDIR /usr/src/app
+
+COPY --from=builder /usr/src/app/package*.json ./
+
+RUN npm install --omit=dev
+
+COPY --from=builder /usr/src/app/dist ./dist
+
+EXPOSE 39899
+
+CMD ["node", "dist/server.js"]

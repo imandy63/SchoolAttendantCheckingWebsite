@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 import { MongoConnection } from "./dbs/mongoose.init";
 import { Obj } from "./interfaces";
 import { redisInstance } from "./dbs/redis.init";
+import cors from "cors";
 dotenv.config();
 
 MongoConnection();
@@ -18,6 +19,14 @@ app.use(express.urlencoded({ extended: false }));
 app.use(morgan("dev"));
 app.use(helmet());
 app.use(compression());
+
+app.use(
+  cors({
+    origin: "*", // Allow your frontend origin
+    methods: "GET,POST,PUT,DELETE,OPTIONS",
+    allowedHeaders: "*", // Allow Authorization header
+  })
+);
 
 app.use("", router);
 
