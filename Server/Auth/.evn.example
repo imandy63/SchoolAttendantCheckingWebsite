@@ -8,3 +8,5 @@ MONGODB_URI="mongodb://localhost:27017/activity_tracking"
 MONGODB_HOST=localhost
 MONGODB_PORT=27017
 MONGODB_DATABASE_NAME=activity_tracking
+
+FE_URL=http://localhost:3000
