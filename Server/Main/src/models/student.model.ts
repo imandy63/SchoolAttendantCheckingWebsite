@@ -1,58 +1,50 @@
-import { InferSchemaType, model, Schema, Types } from "mongoose"; // Erase if already required
+import { Schema, model, InferSchemaType } from "mongoose";
+import { Participation_Status, Role } from "../enum/role.enum";
+import { text } from "express";
 
 const DOCUMENT_NAME = "Student";
 const COLLECTION_NAME = "Students";
+
 const studentSchema = new Schema(
   {
-    student_id: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    student_name: {
-      type: String,
-      required: true,
-    },
-    student_avatar_url: {
-      type: String,
-      required: true,
-    },
-    student_address: {
-      type: String,
-      required: true,
-    },
+    student_id: { type: String, required: true, unique: true }, // For auth and student info
+    password: { type: String, required: true }, // For auth
+    role: { type: String, default: Role.STUDENT, enum: Role }, // For auth
+
+    student_name: { type: String, required: true },
+    student_avatar_url: { type: String, default: "" },
+    student_address: { type: String, required: true },
     student_class: {
-      type: String,
-      required: true,
+      class_name: { type: String, required: true },
+      faculty: { type: String, required: true },
     },
-    student_activity_point: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
+    student_activity_point: { type: Number, default: 0 },
     student_participated_activities: {
-      type: Array,
-      required: true,
+      type: [
+        {
+          name: { type: String },
+          status: {
+            type: String,
+            default: Participation_Status.REGISTERED,
+            enum: Participation_Status,
+          },
+          point: { type: Number },
+        },
+      ],
+      default: [],
     },
-    password: {
-      type: String,
-      required: true,
-    },
-    role: {
-      type: String,
-      required: true,
-      enum: ["", "ADMIN"],
-      default: "student",
-    },
+    subscribed_categories: { type: [{ type: String }], default: [] },
   },
   {
+    collection: COLLECTION_NAME,
     timestamps: {
       createdAt: "created_at",
       updatedAt: "modified_at",
     },
-    collection: COLLECTION_NAME,
   }
 );
 
-export const student = model(DOCUMENT_NAME, studentSchema);
+studentSchema.index({ student_name: "text" });
+
+export const students = model(DOCUMENT_NAME, studentSchema);
 export type StudentPayload = InferSchemaType<typeof studentSchema>;

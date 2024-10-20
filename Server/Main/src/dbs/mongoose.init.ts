@@ -38,6 +38,4 @@ class MongooseDB {
   }
 }
 
-const MongoConnection = MongooseDB.getInstance;
-
-export { MongoConnection };
+export { MongooseDB };

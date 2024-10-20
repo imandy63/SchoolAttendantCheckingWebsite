@@ -1,9 +1,9 @@
 PORT=39899
 
-REDIS_HOST="127.0.0.1"
+REDIS_HOST=127.0.0.1
 REDIS_PORT=6379
 
-MONGODB_URI="mongodb://localhost:27017/activity_tracking"
+MONGODB_URI=mongodb://localhost:27017/activity_tracking
 
 MONGODB_HOST=localhost
 MONGODB_PORT=27017

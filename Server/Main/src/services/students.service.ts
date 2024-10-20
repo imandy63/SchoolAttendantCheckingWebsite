@@ -1,15 +1,22 @@
 import { BadRequestError, NotFoundError } from "../core/error.response";
-import { student, StudentPayload } from "../models/student.model";
+import { Participation_Status } from "../enum/role.enum";
+import { StudentParticipatedActivity } from "../interface/activity.interface";
+import { students, StudentPayload } from "../models/student.model";
 
 export class StudentService {
   static getStudent = async ({ student_id }: StudentPayload) => {
-    return await student.find({ student_id }).lean();
+    return await students.find({ student_id }).lean();
   };
 
-  static getStudents = async ({ page = 1, limit = 10 }) => {
-    return await student
-      .find()
-      .sort({ student_id: 1 })
+  static getStudents = async ({
+    page = 1,
+    limit = 10,
+    sort = "student_id",
+    search = "",
+  }) => {
+    return await students
+      .find({ student_name: { $regex: search, $options: "i" } })
+      .sort({ [sort]: 1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .lean();
@@ -27,7 +34,7 @@ export class StudentService {
       throw new BadRequestError("Student id is required");
     }
 
-    const updatedStudent = await student.findOneAndUpdate(
+    const updatedStudent = await students.findOneAndUpdate(
       { student_id },
       {
         student_name,
@@ -46,9 +53,23 @@ export class StudentService {
     return updatedStudent;
   };
 
-  static studentJoinActivity = async (student_id: string, activity: {}) => {
-    return await student.findByIdAndUpdate(
-      { student_id: student_id },
+  static studentJoinActivity = async (
+    student_id: string,
+    activity: StudentParticipatedActivity
+  ) => {
+    return await students.findByIdAndUpdate(
+      {
+        student_id: student_id,
+        $and: [
+          {
+            "student_participated_activities.name": { $ne: activity.name },
+          },
+          {
+            "student_participated_activities.status":
+              Participation_Status.REGISTERED,
+          },
+        ],
+      },
       { $addToSet: { student_participated_activities: activity } },
       { new: true }
     );
@@ -56,12 +77,12 @@ export class StudentService {
 
   static studentLeaveActivity = async (
     student_id: string,
-    activity_bame: string
+    activity_name: string
   ) => {
-    return await student
+    return await students
       .findOneAndUpdate(
         { student_id: student_id },
-        { $pull: { "student_participated_activities.name": activity_bame } },
+        { $pull: { "student_participated_activities.name": activity_name } },
         { new: true }
       )
       .lean();
@@ -74,7 +95,7 @@ export class StudentService {
     student_id: string;
     point: Number;
   }) => {
-    return await student.findOneAndUpdate(
+    return await students.findOneAndUpdate(
       { student_id: student_id },
       { $inc: { student_activity_point: point } },
       { new: true }

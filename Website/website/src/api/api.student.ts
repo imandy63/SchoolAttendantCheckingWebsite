@@ -1,8 +1,14 @@
+import { urlConfig } from "@/configs/config.url";
 import axiosInstance from ".";
 
-export const getAllStudents = async (page: number, limit: number = 10) => {
+export const getAllStudentsAPI = async (
+  page: number,
+  search = "",
+  sort = "",
+  limit: number = 10
+) => {
   const response = await axiosInstance.get(
-    `/api/student?page=${page}&limit=${limit}`
+    `${urlConfig.CORE}/api/student?page=${page}&limit=${limit}?search=${search}&sort=${sort}`
   );
   return response.data.metadata;
 };
