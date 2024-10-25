@@ -89,7 +89,13 @@ export default function Activities() {
       <main className="flex-1 p-8">
         <div className="flex justify-between items-center mb-4">
           <SearchBar onSearch={handleSearch} />
-          <Button label="Thêm hoạt động" onClick={() => {}} variant="primary" />
+          <Button
+            label="Thêm hoạt động"
+            onClick={() => {
+              router.push("/admin/acitvities/add");
+            }}
+            variant="primary"
+          />
         </div>
         <Table
           headers={headers}
