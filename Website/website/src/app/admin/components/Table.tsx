@@ -1,46 +1,52 @@
-// src/admin/components/Table.tsx
 type TableProps = {
   headers: string[];
   data: any[];
-  actions?: (row: any) => JSX.Element;
+  actions?: (row: any) => JSX.Element; // Cập nhật kiểu của `actions` để nhận tham số `row`
 };
 
 export const Table = ({ headers, data, actions }: TableProps) => {
-  const totalRows = 10; // Số hàng mặc định hiển thị trên mỗi trang
-
-  // Tạo dữ liệu cho các hàng trống
-  const emptyRows = totalRows - data.length > 0 ? totalRows - data.length : 0;
-  const paddedData = [...data, ...Array(emptyRows).fill(null)]; // Sử dụng null cho hàng trống
+  const rowsToRender = [...data];
+  while (rowsToRender.length < 10) {
+    rowsToRender.push(null); // Thêm các dòng trống nếu ít hơn 10 dòng
+  }
 
   return (
-    <table className="min-w-full bg-white border border-gray-300">
+    <table className="w-full border-collapse bg-white text-black">
       <thead>
         <tr>
           {headers.map((header) => (
-            <th
-              key={header}
-              className="py-2 px-4 border-b bg-gray-200 text-left text-sm font-semibold text-gray-700"
-            >
+            <th key={header} className="border-b p-2 text-left bg-gray-200">
               {header}
             </th>
           ))}
-          {actions && <th className="py-2 px-4 border-b bg-gray-200 text-gray-700">Tác vụ</th>}
+          {actions && <th className="border-b p-2 bg-gray-200">Tác vụ</th>}
         </tr>
       </thead>
       <tbody>
-        {paddedData.map((row, index) => (
-          <tr key={index} className="border-b hover:bg-gray-50">
-            {headers.map((header, idx) => {
-              const key = header.toLowerCase().replace(/\s/g, "_"); // Định dạng để khớp tên khóa
-              return (
-                <td key={idx} className="py-2 px-4 text-gray-800">
-                  {row ? row[key] || <span className="text-gray-400">--</span> : <span className="text-gray-400">--</span>}
-                </td>
-              );
-            })}
-            {actions && (
-              <td>
-                {row ? actions(row) : null}
+        {rowsToRender.map((row, index) => (
+          <tr
+            key={index}
+            className="hover:bg-gray-100 transition-colors duration-200"
+          >
+            {row ? (
+              <>
+                {Object.values(row).map((value, idx) => (
+                  <td key={idx} className="p-2 border-b">
+                    {value}
+                  </td>
+                ))}
+                {actions && (
+                  <td className="p-2 border-b">
+                    {actions(row)} {/* Truyền `row` vào `actions` */}
+                  </td>
+                )}
+              </>
+            ) : (
+              <td
+                colSpan={headers.length + (actions ? 1 : 0)}
+                className="p-2 border-b"
+              >
+                {/* Dòng trống */}
               </td>
             )}
           </tr>
