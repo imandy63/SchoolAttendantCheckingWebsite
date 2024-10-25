@@ -6,6 +6,9 @@ import { LoginForm } from "../../components/LoginForm";
 import { Notification } from "../../components/Notification";
 
 export default function LoginPage() {
+
+  
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />

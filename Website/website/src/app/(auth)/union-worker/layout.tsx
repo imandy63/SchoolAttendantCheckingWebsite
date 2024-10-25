@@ -1,9 +1,9 @@
 "use client";
-import { useUnionWorker } from "@/hooks/useAuth";
+import { UseUnionWorker } from "@/hooks/useAuth";
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <useUnionWorker>{children}</useUnionWorker>;
+  return <UseUnionWorker>{children}</UseUnionWorker>;
 }

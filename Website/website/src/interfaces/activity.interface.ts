@@ -1,6 +1,6 @@
 import { ActivityEnum } from "@/enums/activity.enum";
 
-interface ActivityParticipant {
+export interface ActivityParticipant {
   student_id: string;
   student_name: string;
 }

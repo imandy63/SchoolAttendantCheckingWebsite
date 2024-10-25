@@ -4,6 +4,8 @@
   "description": "",
   "main": "server.ts",
   "scripts": {
+    "dev": "npx nodemon --config nodemon.json",
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -13,11 +15,14 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "helmet": "^8.0.0",
+    "lodash": "^4.17.21",
     "mongoose": "^8.6.3",
     "morgan": "^1.10.0"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
+    "@types/lodash": "^4.17.12",
     "@types/morgan": "^1.9.9",
     "nodemon": "^3.1.7",
     "ts-node": "^10.9.2",

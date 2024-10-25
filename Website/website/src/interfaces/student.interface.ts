@@ -3,7 +3,7 @@ interface StudentClass {
   faculty: string;
 }
 
-interface StudentParticipatedActivity {
+export interface StudentParticipatedActivity {
   name: string;
   status: string;
   point: number;

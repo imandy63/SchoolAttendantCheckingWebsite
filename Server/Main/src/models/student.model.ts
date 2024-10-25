@@ -46,5 +46,24 @@ const studentSchema = new Schema(
 
 studentSchema.index({ student_name: "text" });
 
+export interface StudentPayload extends Document {
+  student_id: string;
+  password: string;
+  role: string;
+  student_name: string;
+  student_avatar_url: string;
+  student_address: string;
+  student_class: {
+    class_name: string;
+    faculty: string;
+  };
+  student_activity_point: number;
+  student_participated_activities: {
+    name: string;
+    status: string;
+    point: number;
+  }[];
+  subscribed_categories: string[];
+}
+
 export const students = model(DOCUMENT_NAME, studentSchema);
-export type StudentPayload = InferSchemaType<typeof studentSchema>;

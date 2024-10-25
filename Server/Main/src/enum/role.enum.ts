@@ -6,7 +6,6 @@ export enum Role {
 
 export enum Participation_Status {
   REGISTERED = "registered",
-  ACCEPTED = "accepted",
   REJECTED = "rejected",
   PARTICIPATED = "participated",
 }

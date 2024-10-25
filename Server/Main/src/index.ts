@@ -1,8 +1,12 @@
 import express, { NextFunction, Request, Response, urlencoded } from "express";
 import helmet from "helmet";
 import morgan from "morgan";
-import { Obj } from "./interface";
+import { Obj } from "./interfaces";
 import { MongooseDB } from "./dbs/mongoose.init";
+import { router } from "./router";
+import * as dotenv from "dotenv";
+import cors from "cors";
+dotenv.config();
 
 MongooseDB.getInstance();
 const app = express();
@@ -12,6 +16,16 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use(morgan("dev"));
 app.use(helmet());
+
+app.use(
+  cors({
+    origin: "*", // Allow your frontend origin
+    methods: "GET,POST,PUT,DELETE,OPTIONS",
+    allowedHeaders: "*", // Allow Authorization header
+  })
+);
+
+app.use("", router);
 
 app.use((req, res, next) => {
   const error: Obj = new Error("Not found");

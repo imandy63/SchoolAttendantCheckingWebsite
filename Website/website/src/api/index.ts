@@ -40,13 +40,17 @@ axiosInstance.interceptors.response.use(
 
     originalRequest._retryCount = originalRequest._retryCount || 0;
 
-    if (error.response.status === 401 && !Cookies.get("accessToken")) {
+    if (
+      error.response.status &&
+      error.response.status === 401 &&
+      !Cookies.get("accessToken")
+    ) {
       if (originalRequest._retryCount < MAX_RETRY_ATTEMPTS) {
         originalRequest._retryCount += 1;
 
         try {
           const response = await axiosInstance.post(
-            `${urlConfig.AUTH}/auth/refresh-token`,
+            `${urlConfig.AUTH}/api/auth/refresh-token`,
             {},
             {
               headers: {

@@ -1,11 +1,25 @@
 import { BadRequestError, NotFoundError } from "../core/error.response";
-import { Participation_Status } from "../enum/role.enum";
-import { StudentParticipatedActivity } from "../interface/activity.interface";
+import { Participation_Status, Role } from "../enum/role.enum";
+import { StudentParticipatedActivity } from "../interfaces/activity.interface";
 import { students, StudentPayload } from "../models/student.model";
+import { getUnSelectData } from "../utils";
 
 export class StudentService {
-  static getStudent = async ({ student_id }: StudentPayload) => {
+  static getStudent = async ({ student_id }: { student_id: string }) => {
     return await students.find({ student_id }).lean();
+  };
+
+  static getStudentParticipatedActivities = async ({
+    student_id,
+  }: {
+    student_id: string;
+  }) => {
+    return await students.findOne(
+      {
+        student_id: student_id,
+      },
+      { student_participated_activities: 1 }
+    );
   };
 
   static getStudents = async ({
@@ -14,12 +28,22 @@ export class StudentService {
     sort = "student_id",
     search = "",
   }) => {
-    return await students
-      .find({ student_name: { $regex: search, $options: "i" } })
+    const result = await students
+      .find({
+        student_name: { $regex: search, $options: "i" },
+        role: Role.STUDENT,
+      })
       .sort({ [sort]: 1 })
       .skip((page - 1) * limit)
       .limit(limit)
+      .select(getUnSelectData(["password", "role"]))
       .lean();
+
+    const total = await students.countDocuments({
+      student_name: { $regex: search, $options: "i" },
+      role: Role.STUDENT,
+    });
+    return { data: result, total, page, limit };
   };
 
   static updateStudentsDetails = async ({
