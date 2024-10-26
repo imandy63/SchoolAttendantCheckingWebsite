@@ -1,79 +1,50 @@
 type TableProps = {
   headers: string[];
   data: any[];
-  dataFieldsName: string[];
-  dateFields?: string[];
-  actions?: (row: any) => JSX.Element;
+  dataFieldsName?: string[];
+  actions?: (item: any) => JSX.Element;
 };
 
-export const Table = ({
-  headers,
-  data,
-  dataFieldsName,
-  dateFields,
-  actions,
-}: TableProps) => {
-  const totalRows = 10;
-
-  const emptyRows = totalRows - data.length > 0 ? totalRows - data.length : 0;
-  const paddedData = [...data, ...Array(emptyRows).fill(null)];
+export const Table = ({ headers, data, dataFieldsName, actions }: TableProps) => {
+  const rowsToRender = [...data];
+  while (rowsToRender.length < 10) {
+    rowsToRender.push(null); // Thêm các dòng trống nếu ít hơn 10 dòng
+  }
 
   return (
-    <table className="min-w-full bg-white border border-gray-300">
+    <table className="w-full border-collapse bg-white text-black">
       <thead>
         <tr>
           {headers.map((header) => (
-            <th
-              key={header}
-              className="py-2 px-4 border-b bg-gray-200 text-left text-sm font-semibold text-gray-700"
-            >
+            <th key={header} className="border-b p-2 text-left bg-gray-200">
               {header}
             </th>
           ))}
-          {actions && (
-            <th className="py-2 px-4 border-b bg-gray-200 text-gray-700">
-              Tác vụ
-            </th>
-          )}
+          {actions && <th className="border-b p-2 bg-gray-200">Tác vụ</th>}
         </tr>
       </thead>
       <tbody>
-        {paddedData.map((row, index) => (
+        {rowsToRender.map((row, index) => (
           <tr
-            key={row ? row._id : `empty-row-${index}`}
-            className="border-b hover:bg-gray-50"
+            key={index}
+            className="hover:bg-gray-100 transition-colors duration-200"
           >
-            {dataFieldsName.map((field, idx) => {
-              let value;
-              if (row) {
-                value = field
-                  .split(".")
-                  .reduce((o, i) => (o ? o[i] : undefined), row);
-
-                if (
-                  dateFields &&
-                  dateFields.includes(field) &&
-                  value instanceof Date
-                ) {
-                  value = value.toLocaleDateString("vi-VN");
-                }
-              }
-
-              return (
-                <td key={idx} className="py-2 px-4 text-gray-800">
-                  {value !== null && value !== undefined ? (
-                    value
-                  ) : (
-                    <span className="text-gray-400">--</span>
-                  )}
-                </td>
-              );
-            })}
-            {actions && (
-              <td className="py-2 px-4">
-                {row ? (
-                  <div className="flex space-x-2">{actions(row)}</div>
-                ) : null}
+            {row ? (
+              <>
+                {dataFieldsName?.map((field, idx) => (
+                  <td key={idx} className="p-2 border-b">
+                    {Array.isArray(row[field]) ? row[field].join(", ") : row[field]}
+                  </td>
+                ))}
+                {actions && (
+                  <td className="p-2 border-b">
+                    {actions(row)}
+                  </td>
+                )}
+              </>
+            ) : (
+              <td colSpan={headers.length + (actions ? 1 : 0)} className="p-2 border-b">
+                {/* Dòng trống */}
               </td>
             )}
           </tr>
