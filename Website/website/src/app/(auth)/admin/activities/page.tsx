@@ -92,7 +92,7 @@ export default function Activities() {
           <Button
             label="Thêm hoạt động"
             onClick={() => {
-              router.push("/admin/acitvities/add");
+              router.push("/admin/activities/add");
             }}
             variant="primary"
           />

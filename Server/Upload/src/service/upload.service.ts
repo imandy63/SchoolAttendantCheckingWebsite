@@ -6,10 +6,7 @@ import {
 } from "../interface/upload.interface";
 
 class UploadService {
-  static uploadImageFromLocal = async ({
-    path,
-    folderName = "product/unused_product_thumb",
-  }: UploadInput) => {
+  static uploadImageFromLocal = async ({ buffer }: UploadInput) => {
     try {
       const result = await cloud.uploader.upload(path, {
         public_id: "thumb",

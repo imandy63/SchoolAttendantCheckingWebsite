@@ -2,6 +2,7 @@
 
 import { Sidebar } from "../../components/Sidebar";
 import { AddActivityForm } from "../../components/AddActivityForm";
+import { createActivityAPI } from "@/api/api.activity";
 
 export default function AddActivityPage() {
   return (
@@ -9,7 +10,7 @@ export default function AddActivityPage() {
       <Sidebar />
       <main className="flex-1 p-8">
         <h1 className="text-2xl font-semibold mb-4">Thêm Hoạt Động Mới</h1>
-        <AddActivityForm />
+        <AddActivityForm onSubmit={(data) => createActivityAPI(data)} />
       </main>
     </div>
   );

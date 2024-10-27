@@ -1,7 +1,7 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 import { urlConfig } from "@/configs/config.url";
-import { AXIOS_CONFIG } from "@/configs/axios.config";
+import { AXIOS_CONFIG } from "@/configs/config.axios";
 import { RemoveAuthCookie, SetAuthCookie } from "@/utils/authCookieHandler";
 const axiosInstance = axios.create(AXIOS_CONFIG);
 
@@ -71,10 +71,10 @@ axiosInstance.interceptors.response.use(
           return axiosInstance(originalRequest);
         } catch (refreshError) {
           console.error("Refresh token failed: ", refreshError);
-          RemoveAuthCookie();
-          return Promise.reject(refreshError);
         }
       }
+      RemoveAuthCookie();
+      return Promise.reject(error);
     }
 
     return Promise.reject(error);

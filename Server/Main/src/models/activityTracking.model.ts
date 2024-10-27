@@ -1,23 +1,23 @@
-import mongoose from "mongoose";
+import { model, Schema } from "mongoose";
+import { ActivityTracking_status } from "../enum/activityTracking.enum";
 
 const COLLECTION_NAME = "ActivityTrackings";
 const DOCUMENT_NAME = "ActivityTracking";
 
-const ActivityTrackingSchema = new mongoose.Schema(
+const ActivityTrackingSchema = new Schema(
   {
     activity_id: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "Activity",
       required: true,
     },
     user_id: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "Student",
       required: true,
     },
-    status: { type: String, enum: ["JOINED", "ABSENT"], required: true },
-    participation_date: { type: Date, default: Date.now },
-    activity_score: { type: Number },
+    participation_date: { type: Date, default: new Date().toUTCString() },
+    status: { type: String, enum: ActivityTracking_status, required: true },
     notes: { type: String },
   },
   {
@@ -30,14 +30,11 @@ const ActivityTrackingSchema = new mongoose.Schema(
 );
 
 export interface ActivityTracking extends Document {
-  activity_id: mongoose.Schema.Types.ObjectId;
-  user_id: mongoose.Schema.Types.ObjectId;
-  status: "JOINED" | "ABSENT";
+  activity_id: Schema.Types.ObjectId;
+  user_id: Schema.Types.ObjectId;
+  status: ActivityTracking_status;
   participation_date: Date;
-  activity_score: number;
   notes: string;
 }
-export const activityTrackings = mongoose.model(
-  DOCUMENT_NAME,
-  ActivityTrackingSchema
-);
+
+export const activityTrackings = model(DOCUMENT_NAME, ActivityTrackingSchema);

@@ -8,7 +8,17 @@ const PostSchema = new mongoose.Schema(
     post_title: { type: String, required: true },
     post_author: { type: String, required: true },
     post_contents: [{ type: Object, required: true }],
-    post_date: { type: Date, required: true },
+    post_date: {
+      type: Date,
+      default: new Date().toUTCString(),
+    },
+    post_thumb: {
+      type: String,
+    },
+    post_deleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: {
@@ -19,10 +29,13 @@ const PostSchema = new mongoose.Schema(
   }
 );
 
+PostSchema.index({ post_title: "text" });
+
 export interface Post {
   post_title: string;
   post_author: string;
-  post_contents: string[];
+  post_contents: any[];
+  post_thumb: string | null;
 }
 
-module.exports = mongoose.model(DOCUMENT_NAME, PostSchema);
+export const posts = mongoose.model(DOCUMENT_NAME, PostSchema);

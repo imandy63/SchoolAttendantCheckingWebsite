@@ -16,7 +16,7 @@ class UploadController {
     new CREATED({
       message: "Upload successfully",
       metadata: await UploadService.uploadImageFromLocal({
-        path: file.path,
+        buffer: file.buffer,
       }),
     }).send(res);
   };

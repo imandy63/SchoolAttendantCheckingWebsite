@@ -1,4 +1,3 @@
-
 services:
   final_auth_server:
     container_name: final_auth_server
@@ -19,6 +18,38 @@ services:
         condition: service_healthy
       final_mongo:
         condition: service_started
+
+  final_notification:
+    build: ./Server/Notification
+    image: notification:latest
+    container_name: final_notification_server
+    ports:
+      - "39896:39896"
+    env_file:
+      - "./Server/Notification/.env"
+    environment:
+      - RABBITMQ_HOST=final_rabbitmq
+      - RABBITMQ_PORT=5672
+    depends_on:
+      final_mongo:
+        condition: service_started
+      final_rabbitmq:
+        condition: service_healthy
+    networks:
+      - final-network
+
+  final_rabbitmq:
+    container_name: "rabbitmq"
+    image: rabbitmq:4.0.2
+    ports:
+      - "5672:5672"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - final-network
 
   final_redis:
     container_name: final_redis

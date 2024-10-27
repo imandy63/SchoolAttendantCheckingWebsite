@@ -52,4 +52,16 @@ class CREATED extends SuccessResponse {
   }
 }
 
+export class NO_CONTENT extends SuccessResponse {
+  constructor({
+    options = {},
+    message = "",
+    statusCode = StatusCodes.CREATED,
+    reason = ReasonPhrases.CREATED,
+    metadata = null,
+  }) {
+    super({ options, message, statusCode, reason, metadata });
+  }
+}
+
 export { OK, CREATED, SuccessResponse };

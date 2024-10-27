@@ -7,7 +7,7 @@ export interface Post extends Document {
   post_title: string;
   post_author: string;
   post_contents: string[];
-  post_thumb?: string;
+  post_date: Date;
 }
 
 const PostSchema: Schema = new Schema(
@@ -15,8 +15,7 @@ const PostSchema: Schema = new Schema(
     post_title: { type: String, required: true },
     post_author: { type: String, required: true },
     post_contents: { type: [String], required: true },
-    post_thumb: { type: String },
-    post_date: { type: Date, default: new Date().toUTCString() },
+    post_date: { type: Date, default: Date.now },
   },
   {
     timestamps: {
@@ -26,5 +25,3 @@ const PostSchema: Schema = new Schema(
     collection: COLLECTION_NAME,
   }
 );
-
-export const post = model(DOCUMENT_NAME, PostSchema);

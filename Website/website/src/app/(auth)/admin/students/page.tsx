@@ -82,7 +82,6 @@ export default function Students() {
       <main className="flex-1 p-8">
         <div className="flex justify-between items-center mb-4">
           <SearchBar onSearch={handleSearch} />
-          <Button label="Thêm sinh viên" onClick={() => {}} variant="primary" />
         </div>
         <Table
           headers={headers}

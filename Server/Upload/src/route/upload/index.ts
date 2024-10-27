@@ -1,6 +1,6 @@
 import express from "express";
 import { asyncHandler } from "../../helpers/asyncHandler";
-import { uploadDisk } from "../../config/config.multer";
+import { uploadDisk, uploadMemory } from "../../config/config.multer";
 import UploadController from "../../controller/upload.controller";
 import { authenticationGRPC } from "../../auth/authentication";
 
@@ -10,7 +10,7 @@ router.use(asyncHandler(authenticationGRPC));
 
 router.use(
   "/thumb",
-  uploadDisk.single("file"),
+  uploadMemory.single("file"),
   asyncHandler(UploadController.uploadThumb)
 );
 router.use(
