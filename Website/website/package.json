@@ -20,7 +20,11 @@
     "react-dom": "^18",
     "react-hook-form": "^7.53.1",
     "react-quill": "^2.0.0",
-    "yup": "^1.4.0"
+    "yup": "^1.4.0",
+    "clsx": "^2.1.1",
+    "@fortawesome/fontawesome-svg-core": "^6.5.1",
+    "@fortawesome/free-solid-svg-icons": "^6.5.1",
+    "@fortawesome/react-fontawesome": "^0.2.0"
   },
   "devDependencies": {
     "@types/js-cookie": "^3.0.6",

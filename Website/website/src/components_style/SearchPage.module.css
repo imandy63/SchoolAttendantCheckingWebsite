@@ -1,0 +1,81 @@
+.webContainer {
+    padding: 20px;
+}
+
+.searchTitle {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.filterContainer {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.filterItem label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.filterItem select {
+    padding: 5px;
+    width: 100%;
+}
+
+.eventsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.eventCard {
+    display: flex;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.eventImage {
+    border-radius: 8px;
+}
+
+.eventInfo {
+    flex: 1;
+    padding: 0 15px;
+}
+
+.eventTitle {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.eventActions {
+    display: flex;
+    align-items: center;
+}
+
+.btn {
+    padding: 10px 15px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+}
+
+.btnRegister {
+    background-color: #28a745;
+    color: white;
+}
+
+.btnRegister:hover {
+    background-color: #218838;
+}
+
+.btnRegistered {
+    background-color: #6c757d;
+    color: white;
+    cursor: not-allowed;
+}
