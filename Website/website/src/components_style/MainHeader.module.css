@@ -1,0 +1,26 @@
+.main-header {
+    max-width: 1200px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0px auto;
+    width: 1200px;
+}
+
+.search-bar {
+    border-radius: 20px;
+    background-color: #ffff;
+    padding: 8px 4px;
+    font-size: 16px;
+}
+
+.z-998 {
+    z-index: 998;
+}
+
+.navbar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+}
