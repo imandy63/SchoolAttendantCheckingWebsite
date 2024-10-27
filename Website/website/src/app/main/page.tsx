@@ -34,13 +34,17 @@ export default function HomePage() {
   const changeMonth = (direction: "prev" | "next") => {
     setMonth((prevMonth) => {
       let newMonth = direction === "prev" ? prevMonth - 1 : prevMonth + 1;
+      let newYear = year;
+
       if (newMonth < 0) {
-        setYear((prevYear) => prevYear - 1);
         newMonth = 11;
+        newYear -= 1;
       } else if (newMonth > 11) {
-        setYear((prevYear) => prevYear + 1);
         newMonth = 0;
+        newYear += 1;
       }
+
+      setYear(newYear);
       return newMonth;
     });
   };
