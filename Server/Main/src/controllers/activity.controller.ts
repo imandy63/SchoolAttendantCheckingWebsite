@@ -16,7 +16,6 @@ class ActivityController {
   }
 
   async getActivityParticipants(req: Request, res: Response) {
-    
     new SuccessResponse({
       message: "Get activity participants successfully",
       metadata: await ActivityService.getActivityParticipants({
@@ -25,9 +24,19 @@ class ActivityController {
     }).send(res);
   }
 
+  async updateActivity(req: Request, res: Response) {
+    new SuccessResponse({
+      message: "Update activity successfully",
+      metadata: await ActivityService.updateActivity({
+        ...req.body,
+        activity_id: req.params.id,
+      }),
+    }).send(res);
+  }
+
   async getActivity(req: Request, res: Response) {
     const { id } = req.params;
-    console.log(id);
+
     new SuccessResponse({
       message: "Get activity successfully",
       metadata: await ActivityService.getActivity({

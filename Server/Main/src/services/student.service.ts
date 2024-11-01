@@ -28,16 +28,39 @@ export class StudentService {
     sort = "student_id",
     search = "",
   }) => {
-    const result = await students
-      .find({
-        student_name: { $regex: search, $options: "i" },
-        role: Role.STUDENT,
-      })
-      .sort({ [sort]: 1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .select(getUnSelectData(["password", "role"]))
-      .lean();
+    const result = await students.aggregate([
+      {
+        $match: {
+          student_name: { $regex: search, $options: "i" },
+          role: Role.STUDENT,
+        },
+      },
+      {
+        $sort: { [sort]: 1 },
+      },
+      {
+        $skip: (page - 1) * limit,
+      },
+      {
+        $limit: limit,
+      },
+      {
+        $addFields: {
+          activity_participants_total: {
+            $size: "$student_participated_activities",
+          },
+        },
+      },
+      {
+        $project: {
+          activity_participants_total: 1,
+          student_name: 1,
+          student_id: 1,
+          student_activity_point: 1,
+          student_class: 1,
+        },
+      },
+    ]);
 
     const total = await students.countDocuments({
       student_name: { $regex: search, $options: "i" },

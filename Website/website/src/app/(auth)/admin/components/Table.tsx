@@ -1,14 +1,27 @@
+import React from "react";
+
 type TableProps = {
   headers: string[];
   data: any[];
   dataFieldsName?: string[];
+  dateFields?: string[];
   actions?: (item: any) => JSX.Element;
 };
 
-export const Table = ({ headers, data, dataFieldsName, actions }: TableProps) => {
+const getNestedValue = (obj: any, path: string): any => {
+  return path.split(".").reduce((acc, part) => acc && acc[part], obj);
+};
+
+export const Table = ({
+  headers,
+  data,
+  dataFieldsName,
+  dateFields,
+  actions,
+}: TableProps) => {
   const rowsToRender = [...data];
   while (rowsToRender.length < 10) {
-    rowsToRender.push(null); // Thêm các dòng trống nếu ít hơn 10 dòng
+    rowsToRender.push(null);
   }
 
   return (
@@ -33,19 +46,30 @@ export const Table = ({ headers, data, dataFieldsName, actions }: TableProps) =>
               <>
                 {dataFieldsName?.map((field, idx) => (
                   <td key={idx} className="p-2 border-b">
-                    {Array.isArray(row[field]) ? row[field].join(", ") : row[field]}
+                    {dateFields?.includes(field) && getNestedValue(row, field)
+                      ? new Date(
+                          getNestedValue(row, field)
+                        ).toLocaleDateString() +
+                        " " +
+                        new Date(getNestedValue(row, field)).toLocaleTimeString(
+                          undefined,
+                          {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }
+                        )
+                      : Array.isArray(getNestedValue(row, field))
+                      ? getNestedValue(row, field).join(", ")
+                      : getNestedValue(row, field)}
                   </td>
                 ))}
-                {actions && (
-                  <td className="p-2 border-b">
-                    {actions(row)}
-                  </td>
-                )}
+                {actions && <td className="p-2 border-b">{actions(row)}</td>}
               </>
             ) : (
-              <td colSpan={headers.length + (actions ? 1 : 0)} className="p-2 border-b">
-                {/* Dòng trống */}
-              </td>
+              <td
+                colSpan={headers.length + (actions ? 1 : 0)}
+                className="p-2 border-b"
+              ></td>
             )}
           </tr>
         ))}

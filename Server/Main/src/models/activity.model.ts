@@ -38,7 +38,7 @@ const ActivitySchema = new Schema(
     },
     activity_thumb_url: {
       type: String,
-      required: true,
+      default: null,
     },
     activity_duration: {
       type: Number,
@@ -50,7 +50,8 @@ const ActivitySchema = new Schema(
     },
     created_by: {
       type: String,
-      required: true,
+      default: "",
+      required: false,
     },
     activity_categories: {
       type: [String],
@@ -88,9 +89,9 @@ export interface IActivity extends Document {
   activity_participants: IActivityParticipant[];
   activity_max_participants: number;
   activity_point: number;
-  activity_thumb_url: string;
+  activity_thumb_url?: string;
   activity_duration: number;
-  created_by: string;
+  created_by?: string | null;
   activity_categories: string[];
   activity_status: string;
   activity_host: string;

@@ -1,14 +1,14 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { InputField } from "../../components/InputField";
 import { Button } from "../../components/Button";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import "react-quill/dist/quill.snow.css";
-import { createPostAPI, getAllPostsAPI } from "@/api/api.post";
+import { updatePostAPI, getPostDetailsAPI } from "@/api/api.post";
 import { PostCreate } from "@/interfaces/post.interface";
 import { useToast } from "@/context/ToastContext";
 
@@ -20,24 +20,39 @@ const schema = yup.object().shape({
   post_contents: yup.string().required("Nội dung bài viết là bắt buộc"),
 });
 
-const AddPostPage = () => {
+const UpdatePostPage = () => {
   const methods = useForm({
     resolver: yupResolver(schema),
   });
   const [showPreview, setShowPreview] = useState(false);
   const [previewData, setPreviewData] = useState<any>({});
+  const { id: postId } = useParams();
   const router = useRouter();
 
   const { showToast } = useToast();
 
+  useEffect(() => {
+    const fetchPostData = async () => {
+      try {
+        const postData = await getPostDetailsAPI(postId as string);
+        methods.reset(postData);
+      } catch (err) {
+        console.log(err);
+        showToast("Failed to load post data", "error");
+      }
+    };
+
+    fetchPostData();
+  }, [postId]);
+
   const onSubmit = async (data: PostCreate) => {
     try {
-      await createPostAPI(data);
-      showToast("Post created successfully!", "success");
+      await updatePostAPI({ post_id: postId as string, ...data });
+      showToast("Post updated successfully!", "success");
       router.push("/admin/posts");
     } catch (err) {
       console.log(err);
-      showToast("Failed to create post", "error");
+      showToast("Failed to update post", "error");
     }
   };
 
@@ -52,7 +67,6 @@ const AddPostPage = () => {
   return (
     <FormProvider {...methods}>
       <div className="flex min-h-screen bg-gray-100 p-8">
-        {/* Form bên trái */}
         <div className="w-3/4 p-6 bg-white rounded shadow-md mr-6">
           <div className="flex items-center mb-4">
             <button
@@ -107,7 +121,7 @@ const AddPostPage = () => {
           </form>
         </div>
 
-        {/* Phần phải của form */}
+        {/* Right side of the form */}
         <div className="w-1/4 bg-blue-100 p-6 rounded shadow-md">
           <InputField
             name="post_author"
@@ -124,7 +138,7 @@ const AddPostPage = () => {
               }
             />
             <Button
-              label="Thêm bài viết"
+              label="Cập nhật bài viết"
               type="submit"
               disabled={
                 !methods.formState.isValid || methods.formState.isSubmitting
@@ -165,4 +179,4 @@ const AddPostPage = () => {
   );
 };
 
-export default AddPostPage;
+export default UpdatePostPage;

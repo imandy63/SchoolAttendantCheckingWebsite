@@ -5,5 +5,11 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <UseUnionWorker>{children}</UseUnionWorker>;
+  return (
+    <UseUnionWorker>
+    {
+    <>{children}</>
+    }
+    </UseUnionWorker>;
+  );
 }

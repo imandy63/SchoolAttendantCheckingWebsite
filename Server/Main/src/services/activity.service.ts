@@ -16,12 +16,37 @@ class ActivityService {
     limit: number;
     search: string;
   }) {
-    const result = await activities
-      .find({ activity_name: { $regex: search, $options: "i" } })
-      .sort({ start_date: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .lean();
+    const result = await activities.aggregate([
+      { $match: { activity_name: { $regex: search, $options: "i" } } },
+      {
+        $sort: { activity_start_date: -1 },
+      },
+      {
+        $skip: (page - 1) * limit,
+      },
+      {
+        $limit: limit,
+      },
+      {
+        $addFields: {
+          activity_participants_total: { $size: "$activity_participants" },
+        },
+      },
+      {
+        $project: {
+          activity_participants_total: 1,
+          activity_name: 1,
+          activity_start_date: 1,
+          activity_max_participants: 1,
+          activity_point: 1,
+          activity_thumb_url: 1,
+          activity_duration: 1,
+          activity_categories: 1,
+          activity_status: 1,
+          activity_host: 1,
+        },
+      },
+    ]);
     const total = await activities.countDocuments({
       activity_name: { $regex: search, $options: "i" },
     });
@@ -50,18 +75,17 @@ class ActivityService {
     activity_start_date,
     activity_max_participants,
     activity_point,
-    activity_thumb_url,
     activity_duration,
     created_by,
     activity_categories,
     activity_host,
   }: IActivity) {
+    console.log(activity_start_date);
     return await activities.create({
       activity_name,
       activity_start_date,
       activity_max_participants,
       activity_point,
-      activity_thumb_url,
       activity_duration,
       created_by,
       activity_categories,
@@ -81,7 +105,7 @@ class ActivityService {
     activity_host,
   }: IActivity & { activity_id: string }) {
     return await activities.findOneAndUpdate(
-      { activity_id },
+      { _id: convertToObjectIdMongoose(activity_id) },
       {
         activity_name,
         activity_start_date,

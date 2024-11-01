@@ -40,7 +40,10 @@ axiosInstance.interceptors.response.use(
 
     originalRequest._retryCount = originalRequest._retryCount || 0;
 
+    console.log(error);
+
     if (
+      error.response &&
       error.response.status &&
       error.response.status === 401 &&
       !Cookies.get("accessToken")

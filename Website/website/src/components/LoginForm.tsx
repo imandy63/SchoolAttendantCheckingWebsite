@@ -1,6 +1,6 @@
 "use client";
 
-import { loginUser } from "@/api/api.auth";
+import { isAdmin, loginUser } from "@/api/api.auth";
 import React from "react";
 import { useRouter } from "next/navigation";
 
@@ -20,7 +20,12 @@ export const LoginForm = () => {
       });
 
       if (res) {
-        router.push("/admin/students");
+        const admin = (await isAdmin()).status;
+        if (admin) {
+          router.push("/admin/students");
+        } else {
+          router.push("/main");
+        }
       }
     } catch (error: any) {
       console.log(error);

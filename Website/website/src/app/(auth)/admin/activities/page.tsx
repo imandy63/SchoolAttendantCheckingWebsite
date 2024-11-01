@@ -28,7 +28,7 @@ const dataFields = [
   "activity_duration",
   "activity_point",
   "activity_max_participants",
-  "activity_participants.length",
+  "activity_participants_total",
 ];
 
 export default function Activities() {
@@ -56,7 +56,6 @@ export default function Activities() {
 
   const getAllActivities = async (page: number, search = "") => {
     const data = await getAllActivitiesAPI(page, search);
-    console.log(data);
     setTotalPages(Math.ceil(data.total / 10));
     setActivities(data.data);
   };
@@ -104,9 +103,15 @@ export default function Activities() {
           dateFields={["activity_start_date"]}
           actions={(activity) => (
             <>
-              <Button label="Sửa" onClick={() => {}} variant="secondary" />
               <Button
                 label="Sửa"
+                onClick={() => {
+                  router.push(`/admin/activities/${activity._id}`);
+                }}
+                variant="secondary"
+              />
+              <Button
+                label="Xem sinh viên"
                 onClick={() => {
                   console.log(activity);
                   openPopup(activity._id, activity.activity_name);

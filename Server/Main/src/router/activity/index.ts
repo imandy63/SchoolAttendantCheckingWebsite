@@ -15,4 +15,6 @@ router.get("/", asyncHandler(ActivityController.getActivities));
 
 router.post("/", asyncHandler(ActivityController.createActivity));
 
+router.put("/:id", asyncHandler(ActivityController.updateActivity));
+
 export default router;

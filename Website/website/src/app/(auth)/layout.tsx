@@ -1,5 +1,6 @@
 "use client";
 import { NotificationProvider } from "@/context/FCMContext";
+import { ToastProvider } from "@/context/ToastContext";
 import { UseAuth } from "@/hooks/useAuth";
 export default function RootLayout({
   children,
@@ -8,7 +9,9 @@ export default function RootLayout({
 }>) {
   return (
     <UseAuth>
-      <NotificationProvider>{children}</NotificationProvider>
+      <ToastProvider>
+        <NotificationProvider>{children}</NotificationProvider>
+      </ToastProvider>
     </UseAuth>
   );
 }

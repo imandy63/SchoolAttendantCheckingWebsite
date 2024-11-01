@@ -27,7 +27,7 @@ const dataFields = [
   "student_class.class_name",
   "student_class.faculty",
   "student_activity_point",
-  "student_participated_activities.length",
+  "activity_participants_total",
 ];
 
 export default function Students() {
@@ -42,7 +42,6 @@ export default function Students() {
 
   const getAllStudents = async (page: number, search = "") => {
     const data = await getAllStudentsAPI(page, search);
-    console.log(search);
     setStudents(data.data);
     setTotalPages(Math.ceil(data.total / 10));
   };

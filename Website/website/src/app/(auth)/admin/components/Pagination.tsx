@@ -1,11 +1,19 @@
 // src/admin/components/Pagination.tsx
+import React, { useState } from "react";
+
 type PaginationProps = {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
 };
 
-export const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) => {
+export const Pagination = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: PaginationProps) => {
+  const [inputPage, setInputPage] = useState<string>("");
+
   const getPages = () => {
     const pages = [];
     if (totalPages <= 5) {
@@ -14,22 +22,46 @@ export const Pagination = ({ currentPage, totalPages, onPageChange }: Pagination
       }
     } else {
       if (currentPage <= 3) {
-        pages.push(1, 2, 3, 4, '...', totalPages);
+        pages.push(1, 2, 3, 4, "...", totalPages);
       } else if (currentPage > totalPages - 3) {
-        pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+        pages.push(
+          1,
+          "...",
+          totalPages - 3,
+          totalPages - 2,
+          totalPages - 1,
+          totalPages
+        );
       } else {
-        pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+        pages.push(
+          1,
+          "...",
+          currentPage - 1,
+          currentPage,
+          currentPage + 1,
+          "...",
+          totalPages
+        );
       }
     }
     return pages;
   };
 
-  const handleGoToPage = (e: React.KeyboardEvent<HTMLInputElement>, value: string) => {
-    if (e.key === 'Enter') {
-      const page = Number(value);
+  const handleGoToPage = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      const page = Number(inputPage);
       if (page >= 1 && page <= totalPages) {
         onPageChange(page);
+        setInputPage(""); // Clear input after navigating
       }
+    }
+  };
+
+  const handleButtonClick = () => {
+    const page = Number(inputPage);
+    if (page >= 1 && page <= totalPages) {
+      onPageChange(page);
+      setInputPage(""); // Clear input after navigating
     }
   };
 
@@ -46,9 +78,13 @@ export const Pagination = ({ currentPage, totalPages, onPageChange }: Pagination
         {getPages().map((page, index) => (
           <button
             key={index}
-            onClick={() => typeof page === 'number' && onPageChange(page)}
-            disabled={page === '...'}
-            className={`p-2 border rounded ${currentPage === page ? 'bg-blue-500 text-white' : 'hover:bg-gray-200'}`}
+            onClick={() => typeof page === "number" && onPageChange(page)}
+            disabled={page === "..."}
+            className={`p-2 border rounded ${
+              currentPage === page
+                ? "bg-blue-500 text-white"
+                : "hover:bg-gray-200"
+            }`}
           >
             {page}
           </button>
@@ -67,18 +103,14 @@ export const Pagination = ({ currentPage, totalPages, onPageChange }: Pagination
           type="number"
           min={1}
           max={totalPages}
+          value={inputPage}
+          onChange={(e) => setInputPage(e.target.value)}
           className="border rounded p-1 w-16 text-center"
-          onKeyDown={(e) => handleGoToPage(e, e.currentTarget.value)}
+          onKeyDown={handleGoToPage}
         />
         <button
           className="text-blue-500 underline hover:text-blue-700"
-          onClick={() => {
-            const input = document.querySelector<HTMLInputElement>('.go-to-page-input');
-            const page = Number(input?.value);
-            if (page >= 1 && page <= totalPages) {
-              onPageChange(page);
-            }
-          }}
+          onClick={handleButtonClick}
         >
           Nhấn để di chuyển
         </button>
