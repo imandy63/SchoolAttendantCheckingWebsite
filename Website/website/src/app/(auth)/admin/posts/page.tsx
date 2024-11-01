@@ -26,7 +26,7 @@ export default function Posts() {
     "post_title",
     "post_author",
     "post_date",
-    "updated_at",
+    "modified_at",
   ];
 
   const handleAddPost = () => {
@@ -82,7 +82,7 @@ export default function Posts() {
           headers={headers}
           data={data}
           dataFieldsName={dataFieldsName}
-          dateFields={["post_date"]}
+          dateFields={["post_date", "modified_at"]}
           actions={(item) => (
             <>
               <Button

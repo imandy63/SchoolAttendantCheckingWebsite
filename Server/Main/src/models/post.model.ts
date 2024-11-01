@@ -7,7 +7,7 @@ const PostSchema = new mongoose.Schema(
   {
     post_title: { type: String, required: true },
     post_author: { type: String, required: true },
-    post_contents: [{ type: Object, required: true }],
+    post_contents: { type: String, required: true },
     post_date: {
       type: Date,
       default: new Date().toUTCString(),
@@ -34,7 +34,7 @@ PostSchema.index({ post_title: "text" });
 export interface Post {
   post_title: string;
   post_author: string;
-  post_contents: any[];
+  post_contents: string;
   post_thumb: string | null;
 }
 

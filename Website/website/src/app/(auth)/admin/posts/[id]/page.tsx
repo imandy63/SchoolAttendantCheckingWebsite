@@ -23,6 +23,11 @@ const schema = yup.object().shape({
 const UpdatePostPage = () => {
   const methods = useForm({
     resolver: yupResolver(schema),
+    defaultValues: {
+      post_title: "",
+      post_author: "",
+      post_contents: "",
+    },
   });
   const [showPreview, setShowPreview] = useState(false);
   const [previewData, setPreviewData] = useState<any>({});
@@ -35,7 +40,11 @@ const UpdatePostPage = () => {
     const fetchPostData = async () => {
       try {
         const postData = await getPostDetailsAPI(postId as string);
-        methods.reset(postData);
+        methods.reset({
+          post_title: postData?.post_title || "",
+          post_author: postData?.post_author || "",
+          post_contents: postData?.post_contents || "",
+        });
       } catch (err) {
         console.log(err);
         showToast("Failed to load post data", "error");

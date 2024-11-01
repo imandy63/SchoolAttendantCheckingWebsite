@@ -14,7 +14,7 @@ const PostSchema: Schema = new Schema(
   {
     post_title: { type: String, required: true },
     post_author: { type: String, required: true },
-    post_contents: { type: [String], required: true },
+    post_contents: { type: String, required: true },
     post_thumb: { type: String },
     post_date: { type: Date, default: new Date().toUTCString() },
   },
