@@ -26,6 +26,26 @@ export const getActivityAPI = async (activityId: string) => {
   return response.data.metadata;
 };
 
+export const getUpcomingActivitiesGroupByDateAPI = async (
+  page = 1,
+  search = ""
+) => {
+  const response = await axiosInstance.get(
+    `${urlConfig.CORE}/api/activity/upcoming?page=${page}&search=${search}`
+  );
+  return response.data.metadata;
+};
+
+export const getActivitiesByDateAPI = async (date?: string) => {
+  if (!date) {
+    return null;
+  }
+  const response = await axiosInstance.get(
+    `${urlConfig.CORE}/api/activity/student?date=${date}`
+  );
+  return response.data.metadata;
+};
+
 export const createActivityAPI = async ({
   activity_name,
   activity_start_date,

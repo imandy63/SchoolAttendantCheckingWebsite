@@ -17,8 +17,12 @@ const ActivityTrackingSchema = new Schema(
       required: true,
     },
     participation_date: { type: Date, default: new Date().toUTCString() },
-    status: { type: String, enum: ActivityTracking_status, required: true },
-    notes: { type: String },
+    status: {
+      type: String,
+      enum: ActivityTracking_status,
+      default: ActivityTracking_status.PENDING,
+    },
+    notes: { type: String, default: "" },
   },
   {
     timestamps: {

@@ -1,59 +1,68 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Sidebar } from "../components/Sidebar";
-import { Table } from "../components/Table";
-import { SearchBar } from "../components/SearchBar";
-import { Pagination } from "../components/Pagination";
-import { Button } from "../components/Button";
+import { useState } from "react";
+import { Sidebar } from "../_components/Sidebar";
+import { Table } from "../_components/Table";
+import { SearchBar } from "../_components/SearchBar";
+import { Pagination } from "../_components/Pagination";
+import { Button } from "../_components/Button";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Post } from "@/interfaces/post.interface";
-import { getAllPostsAPI } from "@/api/api.post";
+import { useDeletePost, useGetAllPosts, useRestorePost } from "@/query/usePost";
+import ActionButton from "../_components/ActionButton";
+import { useToast } from "@/context/ToastContext";
 
 export default function Posts() {
   const searchParams = useSearchParams();
-  const page = searchParams.get("page") ? Number(searchParams.get("page")) : 1;
-  const search = searchParams.get("search");
-  const [currentPage, setCurrentPage] = useState(page ?? 1);
   const router = useRouter();
+
+  const page = searchParams.get("page") ? Number(searchParams.get("page")) : 1;
+  const search = searchParams.get("search") || "";
+
+  const [currentPage, setCurrentPage] = useState(page);
   const [searchQuery, setSearchQuery] = useState(search);
-  const [totalPages, setTotalPages] = useState(0);
-  const [data, setData] = useState<Post[]>([]);
 
-  const headers = ["Tiêu đề", "Tác giả", "Ngày đăng", "Chỉnh sửa cuối"];
+  const { data, isLoading } = useGetAllPosts(currentPage, searchQuery);
+  const totalPages = data ? Math.ceil(data.total / 10) : 0;
 
+  const deleteMutation = useDeletePost();
+  const restoreMutation = useRestorePost();
+  const { showToast } = useToast();
+
+  const headers = [
+    "Tiêu đề",
+    "Tác giả",
+    "Ngày đăng",
+    "Chỉnh sửa cuối",
+    "Đã xóa",
+  ];
   const dataFieldsName = [
     "post_title",
     "post_author",
     "post_date",
     "modified_at",
+    "post_deleted",
   ];
 
   const handleAddPost = () => {
     router.push("/admin/posts/add");
   };
 
-  const handleEdit = (postId: string) => {
-    router.push(`/admin/posts/${postId}`);
+  const handleEdit = (postId: string, isDeleted: boolean) => {
+    if (isDeleted) {
+      showToast(
+        "Bài viết đã xóa. Vui lòng khôi phục trước khi sửa.",
+        "warning"
+      );
+    } else {
+      router.push(`/admin/posts/${postId}`);
+    }
   };
-
-  const getAllActivities = async (page: number, search = "") => {
-    const data = await getAllPostsAPI(page, search);
-    console.log(data);
-    setTotalPages(Math.ceil(data.total / 10));
-    setData(data.data);
-  };
-
-  useEffect(() => {
-    getAllActivities(currentPage, searchQuery || "");
-  }, [currentPage, searchQuery]);
 
   const handleSearch = (searchQuery: string) => {
     const newParams = new URLSearchParams(searchParams.toString());
     newParams.set("search", searchQuery);
     newParams.set("page", "1");
     router.push(`?${newParams.toString()}`);
-
     setSearchQuery(searchQuery);
     setCurrentPage(1);
   };
@@ -62,8 +71,29 @@ export default function Posts() {
     const newParams = new URLSearchParams(searchParams.toString());
     newParams.set("page", newPage.toString());
     router.push(`?${newParams.toString()}`);
-
     setCurrentPage(newPage);
+  };
+
+  const handleDelete = (postId: string) => {
+    deleteMutation.mutate(postId, {
+      onSuccess: () => {
+        showToast("Bài viết đã được xóa thành công!", "success");
+      },
+      onError: () => {
+        showToast("Lỗi khi xóa bài viết. Vui lòng thử lại.", "error");
+      },
+    });
+  };
+
+  const handleRestore = (postId: string) => {
+    restoreMutation.mutate(postId, {
+      onSuccess: () => {
+        showToast("Bài viết đã được khôi phục thành công!", "success");
+      },
+      onError: () => {
+        showToast("Lỗi khi khôi phục bài viết. Vui lòng thử lại.", "error");
+      },
+    });
   };
 
   return (
@@ -79,19 +109,55 @@ export default function Posts() {
           />
         </div>
         <Table
+          loading="skeleton"
+          isLoading={isLoading}
           headers={headers}
-          data={data}
+          data={data?.data || []}
           dataFieldsName={dataFieldsName}
           dateFields={["post_date", "modified_at"]}
-          actions={(item) => (
-            <>
-              <Button
-                label="Sửa"
-                onClick={() => handleEdit(item._id)}
-                variant="secondary"
+          specialFields={[
+            {
+              name: "post_deleted",
+              conditions: [
+                {
+                  value: true,
+                  fontColor: "RED",
+                },
+                {
+                  value: false,
+                  fontColor: "GREEN",
+                },
+              ],
+            },
+          ]}
+          actions={(item) => {
+            return (
+              <ActionButton
+                buttonLabel="Action"
+                actions={[
+                  {
+                    label: "Sửa",
+                    onClick: () => {
+                      handleEdit(item._id, item.post_deleted);
+                    },
+                  },
+                  item.post_deleted
+                    ? {
+                        label: "Khôi phục",
+                        onClick: () => {
+                          handleRestore(item._id);
+                        },
+                      }
+                    : {
+                        label: "Xóa",
+                        onClick: () => {
+                          handleDelete(item._id);
+                        },
+                      },
+                ]}
               />
-            </>
-          )}
+            );
+          }}
         />
         <Pagination
           currentPage={currentPage}

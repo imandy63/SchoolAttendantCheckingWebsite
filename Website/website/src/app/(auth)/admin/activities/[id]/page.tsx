@@ -1,7 +1,7 @@
 "use client";
 
-import { Sidebar } from "../../components/Sidebar";
-import { EditActivityForm } from "../../components/EditActivityForm";
+import { Sidebar } from "../../_components/Sidebar";
+import { EditActivityForm } from "../../_components/EditActivityForm";
 import { updateActivityAPI } from "@/api/api.activity"; // Assuming an API update function
 import { useToast } from "@/context/ToastContext";
 import { useRouter, useSearchParams } from "next/navigation";

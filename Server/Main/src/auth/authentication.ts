@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import { validateTokenGRPC } from "../grpc/auth.grpc";
 import { AuthFailureError, BadRequestError } from "../core/error.response";
+import axios from "axios";
+import { URL_CONFIG } from "../configs/url.config";
 
 const HEADER = {
   API_KEY: "x-api-key",
@@ -8,8 +9,7 @@ const HEADER = {
   AUTHORIZATION: "authorization",
   REFRESHTOKEN: "x-rtoken-id",
 };
-
-const authenticationGRPC = async (
+export const authentication = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -23,21 +23,59 @@ const authenticationGRPC = async (
   if (!accessToken) {
     throw new AuthFailureError("Invalid Request!");
   }
+
   try {
-    const validation = await validateTokenGRPC(
-      accessToken as string,
-      userId as string
+    const { data } = await axios.get(
+      `${URL_CONFIG.AUTH}/api/auth/authenticate`,
+      {
+        headers: { Authorization: accessToken, "x-client-id": userId },
+      }
     );
 
-    if (validation.status) {
-      req.body.userId = userId;
-      return next();
-    } else {
-      throw new BadRequestError(validation.message);
+    if (!data || !data.metadata || !data.metadata.status) {
+      throw new AuthFailureError("Invalid authentication response");
     }
+
+    req.body.userId = userId;
+
+    next();
   } catch (err) {
-    throw new BadRequestError(err?.toString());
+    throw new AuthFailureError("Unauthorized");
   }
 };
 
-export { authenticationGRPC };
+export const adminPriviledge = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const userId = req.headers[HEADER.CLIENT_ID];
+  if (!userId) {
+    throw new AuthFailureError("Invalid Request!");
+  }
+
+  const accessToken = req.headers[HEADER.AUTHORIZATION];
+  if (!accessToken) {
+    throw new AuthFailureError("Invalid Request!");
+  }
+
+  try {
+    const { data } = await axios.get(
+      `${URL_CONFIG.AUTH}/api/auth/authenticate`,
+      {
+        headers: { Authorization: accessToken, "x-client-id": userId },
+      }
+    );
+
+    if (!data || !data.metadata || !data.metadata.status) {
+      throw new AuthFailureError("Invalid authentication response");
+    }
+
+    req.body.userId = userId;
+
+    next();
+  } catch (err) {
+    console.log(err);
+    throw new AuthFailureError("Un authorized");
+  }
+};

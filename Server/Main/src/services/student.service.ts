@@ -2,9 +2,11 @@ import { BadRequestError, NotFoundError } from "../core/error.response";
 import { Participation_Status, Role } from "../enum/role.enum";
 import { StudentParticipatedActivity } from "../interfaces/activity.interface";
 import { students, StudentPayload } from "../models/student.model";
-import { getUnSelectData } from "../utils";
-
+import { ActivityService } from "./activity.service";
+import { RedisService } from "./redis.service";
 export class StudentService {
+  static redisService = RedisService.getInstance();
+
   static getStudent = async ({ student_id }: { student_id: string }) => {
     return await students.find({ student_id }).lean();
   };
@@ -100,16 +102,46 @@ export class StudentService {
     return updatedStudent;
   };
 
-  static studentJoinActivity = async (
-    student_id: string,
-    activity: StudentParticipatedActivity
-  ) => {
+  static studentJoinActivity = async ({
+    student_id,
+    activity_id,
+  }: {
+    student_id: string;
+    activity_id: string;
+  }) => {
+    const foundActivity = await ActivityService.getParticipatableActivity({
+      activity_id,
+    });
+
+    if (!foundActivity) {
+      throw new NotFoundError("Activity not found");
+    }
+
+    const participated = this.redisService.acquireLock({
+      id: activity_id,
+      callback: async () => {
+        return await ActivityService.participateInActivity({
+          activity_id,
+          student_id,
+          student_name: foundActivity.activity_name,
+        });
+      },
+    });
+
+    if (participated === null) {
+      throw new BadRequestError(
+        "Can't participated in the activity at the moment"
+      );
+    }
+
     return await students.findByIdAndUpdate(
       {
         student_id: student_id,
         $and: [
           {
-            "student_participated_activities.name": { $ne: activity.name },
+            "student_participated_activities.name": {
+              $ne: foundActivity.activity_name,
+            },
           },
           {
             "student_participated_activities.status":
@@ -117,7 +149,14 @@ export class StudentService {
           },
         ],
       },
-      { $addToSet: { student_participated_activities: activity } },
+      {
+        $addToSet: {
+          student_participated_activities: {
+            name: foundActivity.activity_name,
+            status: Participation_Status.REGISTERED,
+          },
+        },
+      },
       { new: true }
     );
   };

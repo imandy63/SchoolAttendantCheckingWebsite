@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
-import Pagination from "../components/Pagination";
-import Table from "../components/Table";
+import Pagination from "../_components/Pagination";
+import Table from "../_components/Table";
 import { useRouter } from "next/navigation";
 
 const AttendancePage = () => {

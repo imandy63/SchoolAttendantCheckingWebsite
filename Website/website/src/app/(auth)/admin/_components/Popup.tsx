@@ -1,10 +1,8 @@
 import { ReactNode } from "react";
-import { Button } from "../components/Button";
-import { StudentParticipatedActivity } from "@/interfaces/student.interface"; // Assuming there's an interface for activities
-import { useEffect, useState } from "react";
-import { getStudentActivitiesAPI } from "@/api/api.student";
-import { getActivityParticipantsAPI } from "@/api/api.activity";
-import { ActivityParticipant } from "@/interfaces/activity.interface";
+import { Button } from "./Button";
+import { useGetActivityParticipants } from "@/query/useActivity";
+import { useStudentActivities } from "@/query/useStudent";
+import { Skeleton } from "./SkeletonField";
 
 interface PopupProps {
   isOpen: boolean;
@@ -38,34 +36,29 @@ interface StudentActivitiesProps {
   studentId: string;
 }
 
+interface StudentActivitiesProps {
+  studentId: string;
+}
+
 export const StudentActivities: React.FC<StudentActivitiesProps> = ({
   studentId,
 }) => {
-  const [activities, setActivities] = useState<StudentParticipatedActivity[]>(
-    []
-  );
+  const { data, error, isLoading } = useStudentActivities(studentId);
 
-  const fetchStudentActivities = async (studentId: string) => {
-    const data = await getStudentActivitiesAPI(studentId);
-    console.log(data);
-    setActivities(data.student_participated_activities);
-  };
-
-  useEffect(() => {
-    fetchStudentActivities(studentId);
-  }, [studentId]);
+  if (isLoading) return <Skeleton count={5} />;
+  if (error) return <p>Error loading activities: {error.message}</p>;
 
   return (
     <ul className="space-y-2">
-      {activities.length > 0 ? (
-        activities.map((activity, index) => (
+      {data && data.length > 0 ? (
+        data.map((activity, index) => (
           <li key={index} className="mb-2">
             <strong>{activity.name}</strong> - {activity.point} -{" "}
             {activity.status}
           </li>
         ))
       ) : (
-        <p>No activities found</p>
+        <p>Không có hoạt động</p>
       )}
     </ul>
   );
@@ -78,29 +71,22 @@ interface ActivityParticipantsProps {
 export const ActivityParticipants: React.FC<ActivityParticipantsProps> = ({
   activityId,
 }) => {
-  const [participants, setParticipants] = useState<ActivityParticipant[]>([]);
+  const { data, error, isLoading } = useGetActivityParticipants(activityId);
 
-  const fetchActivityParticipants = async (activityId: string) => {
-    const data = await getActivityParticipantsAPI(activityId);
-    console.log(data);
-    setParticipants(data.activity_participants);
-  };
-
-  useEffect(() => {
-    fetchActivityParticipants(activityId);
-  }, [activityId]);
+  if (isLoading) return <Skeleton count={5} />;
+  if (error) return <p>Error loading participants: {error.message}</p>;
 
   return (
     <ul className="space-y-2">
-      {participants.length > 0 ? (
-        participants.map((participant, index) => (
+      {data && data.length > 0 ? (
+        data.map((participant, index) => (
           <li key={index} className="mb-2">
             <strong>{participant.student_id}</strong> -{" "}
             {participant.student_name}
           </li>
         ))
       ) : (
-        <p>No participants found</p>
+        <p>Không có sinh viên</p>
       )}
     </ul>
   );

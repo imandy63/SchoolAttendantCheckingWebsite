@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
-type ToastType = "success" | "error";
-
+type ToastType = "success" | "error" | "warning" | "info";
 interface Toast {
   message: string;
   type: ToastType;
@@ -51,10 +50,16 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
           transition: opacity 0.3s ease;
         }
         .toast.success {
-          background-color: #4caf50; /* Green */
+          background-color: #4caf50;
         }
         .toast.error {
-          background-color: #f44336; /* Red */
+          background-color: #f44336;
+        }
+        .toast.warning {
+          background-color: #ff9800;
+        }
+        .toast.info {
+          background-color: #2196f3;
         }
       `}</style>
     </ToastContext.Provider>
