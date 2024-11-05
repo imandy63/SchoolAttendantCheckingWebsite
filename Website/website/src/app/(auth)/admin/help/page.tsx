@@ -2,11 +2,11 @@
 "use client";
 
 import { useState } from "react";
-import { Sidebar } from "../components/Sidebar";
-import { Table } from "../components/Table";
-import { SearchBar } from "../components/SearchBar";
-import { Pagination } from "../components/Pagination";
-import { Button } from "../components/Button";
+import { Sidebar } from "../_components/Sidebar";
+import { Table } from "../_components/Table";
+import { SearchBar } from "../_components/SearchBar";
+import { Pagination } from "../_components/Pagination";
+import { Button } from "../_components/Button";
 
 const helpData = [
   {
@@ -36,9 +36,17 @@ export default function Help() {
           <SearchBar onSearch={() => {}} />
           <Button label="Thêm hướng dẫn" onClick={() => {}} variant="primary" />
         </div>
-        <Table headers={headers} data={helpData} actions={(row) => (
-          <Button label="Xem chi tiết" onClick={() => {}} variant="secondary" />
-        )} />
+        <Table
+          headers={headers}
+          data={helpData}
+          actions={(row) => (
+            <Button
+              label="Xem chi tiết"
+              onClick={() => {}}
+              variant="secondary"
+            />
+          )}
+        />
         <Pagination
           currentPage={currentPage}
           totalPages={10}

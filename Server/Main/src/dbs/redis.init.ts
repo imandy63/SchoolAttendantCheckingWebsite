@@ -1,5 +1,5 @@
 import * as redis from "redis";
-import { RedisConfig } from "../config/config.redis";
+import { RedisConfig } from "../configs/redis.config";
 
 type RedisClient = ReturnType<typeof redis.createClient>;
 
@@ -7,11 +7,26 @@ class Redis {
   private client: { instanceConnect: RedisClient | null } = {
     instanceConnect: null,
   };
+  private static instance: Redis | null = null;
   private connectionStatus = {
     CONNECT: "connect",
     END: "end",
     RECONNECT: "reconnecting",
     ERROR: "error",
+  };
+
+  connectionAttempts = 0;
+  maxAttempts = 10;
+
+  constructor() {
+    this.initRedis();
+  }
+
+  static getInstance = () => {
+    if (Redis.instance === null) {
+      Redis.instance = new Redis();
+    }
+    return Redis.instance;
   };
 
   handleEventConnect = (redisConnection: RedisClient) => {
@@ -25,12 +40,46 @@ class Redis {
 
     redisConnection.on(this.connectionStatus.RECONNECT, () => {
       console.log("Redis connection status::Reconnect");
+      this.connectionAttempts += 1;
+
+      if (this.connectionAttempts > this.maxAttempts) {
+        console.error("Max reconnection attempts reached. Stopping.");
+        redisConnection.quit();
+      }
     });
 
     redisConnection.on(this.connectionStatus.ERROR, (err: Error) => {
       console.log("Redis connection status::Error:", err);
     });
   };
+
+  async set(key: string, value: string, time = 3600000) {
+    if (!!this.client.instanceConnect) {
+      await this.client.instanceConnect.set(key, value, {
+        PX: time,
+      });
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  async get(key: string): Promise<string | null> {
+    if (!!this.client.instanceConnect) {
+      return await this.client.instanceConnect.get(key);
+    } else {
+      return null;
+    }
+  }
+
+  async delete(key: string) {
+    if (!!this.client.instanceConnect) {
+      await this.client.instanceConnect.del(key);
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   initRedis = () => {
     const { host, port } = RedisConfig;
@@ -46,6 +95,9 @@ class Redis {
   };
 
   getRedis = () => {
+    if (this.client.instanceConnect === null) {
+      this.initRedis();
+    }
     return this.client.instanceConnect;
   };
 
@@ -54,6 +106,6 @@ class Redis {
   };
 }
 
-const redisInstance = new Redis();
+const redisInstance = Redis.getInstance();
 
 export { redisInstance };

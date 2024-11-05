@@ -15,7 +15,11 @@ class ActivityController {
     }).send(res);
   }
 
-  async getActivityParticipants(req: Request, res: Response) {
+  async getActivityParticipants(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
     new SuccessResponse({
       message: "Get activity participants successfully",
       metadata: await ActivityService.getActivityParticipants({
@@ -24,7 +28,33 @@ class ActivityController {
     }).send(res);
   }
 
-  async updateActivity(req: Request, res: Response) {
+  async getUpcomingActivitiesGroupByDate(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    const { page = 1, limit = 10, search = "" } = req.query;
+    new SuccessResponse({
+      message: "Get activities group by date successfully",
+      metadata: await ActivityService.getUpcomingActivitiesGroupByDate({
+        page: page as number,
+        limit: limit as number,
+        search: search as string,
+      }),
+    }).send(res);
+  }
+
+  async getActivitiesByDate(req: Request, res: Response, next: NextFunction) {
+    new SuccessResponse({
+      message: "Get activities by date successfully",
+      metadata: await ActivityService.getActivitiesByDate({
+        date: req.query.date as string,
+        userId: req.body.userId,
+      }),
+    }).send(res);
+  }
+
+  async updateActivity(req: Request, res: Response, next: NextFunction) {
     new SuccessResponse({
       message: "Update activity successfully",
       metadata: await ActivityService.updateActivity({

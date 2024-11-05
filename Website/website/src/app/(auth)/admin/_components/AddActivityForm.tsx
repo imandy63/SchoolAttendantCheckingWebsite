@@ -1,12 +1,16 @@
 import React from "react";
 import { Button } from "./Button";
-import { useForm, Controller, SubmitHandler } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { CreateActivityPayload } from "@/interfaces/activity.interface";
+import {
+  CreateActivityPagePayload,
+  CreateActivityPayload,
+} from "@/interfaces/activity.interface";
 import FormInputText from "@/components/TextField";
 import FormInputDate from "@/components/DateField";
-import FormSelect from "@/components/SelectField";
+import FormMultiSelect from "@/components/MultiSelectField";
+import dayjs from "dayjs";
 
 type AddActivityFormProps = {
   onSubmit: (activityData: CreateActivityPayload) => void;
@@ -14,7 +18,7 @@ type AddActivityFormProps = {
 
 const validationSchema = yup.object({
   activity_name: yup.string().required("Tên hoạt động là bắt buộc"),
-  activity_start_date: yup.date().required("Ngày bắt đầu là bắt buộc"),
+  activity_start_date: yup.string().required("Ngày bắt đầu là bắt buộc"),
   activity_start_time: yup.string().required("Giờ bắt đầu là bắt buộc"),
   activity_max_participants: yup
     .number()
@@ -30,7 +34,7 @@ const validationSchema = yup.object({
     .required("Thời gian hoạt động là bắt buộc")
     .positive("Thời gian hoạt động phải là số dương"),
   activity_host: yup.string().required("Người tổ chức là bắt buộc"),
-  activity_categories: yup.string().required("Danh mục là bắt buộc"),
+  activity_categories: yup.array().required("Danh mục là bắt buộc"),
 });
 
 export const AddActivityForm: React.FC<AddActivityFormProps> = ({
@@ -40,7 +44,8 @@ export const AddActivityForm: React.FC<AddActivityFormProps> = ({
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm<CreateActivityPayload & { activity_start_time: string }>({
+    getValues,
+  } = useForm<CreateActivityPagePayload>({
     resolver: yupResolver(validationSchema),
   });
 
@@ -51,16 +56,27 @@ export const AddActivityForm: React.FC<AddActivityFormProps> = ({
     }
   };
 
-  const onSubmitForm: SubmitHandler<CreateActivityPayload> = (data) => {
-    const date = new Date(data.activity_start_date).toISOString().split("T")[0];
+  const onSubmitForm: SubmitHandler<CreateActivityPagePayload> = (data) => {
+    const parsedDate = dayjs(data.activity_start_date, "DD/MM/YYYY");
 
-    const startDateTime = `${date}T${data.activity_start_time}:00`;
+    if (!parsedDate.isValid()) {
+      console.error("Invalid date format");
+      return;
+    }
 
-    const formData = {
-      ...data,
+    const startDateTime = `${parsedDate.format("YYYY-MM-DD")}T${
+      data.activity_start_time
+    }:00`;
+
+    const formData: CreateActivityPayload = {
+      activity_duration: data.activity_duration,
+      activity_host: data.activity_host,
+      activity_max_participants: data.activity_max_participants,
+      activity_name: data.activity_name,
+      activity_point: data.activity_point,
       activity_start_date: startDateTime,
+      activity_categories: data.activity_categories || [],
     };
-
     console.log(formData);
 
     onSubmit(formData);
@@ -80,6 +96,9 @@ export const AddActivityForm: React.FC<AddActivityFormProps> = ({
           label="Tên hoạt động"
           required
         />
+        {errors.activity_name && (
+          <p className="text-red-500 text-sm">{errors.activity_name.message}</p>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-2">
@@ -89,12 +108,22 @@ export const AddActivityForm: React.FC<AddActivityFormProps> = ({
           label="Ngày bắt đầu"
           required
         />
+        {errors.activity_start_date && (
+          <p className="text-red-500 text-sm">
+            {errors.activity_start_date.message}
+          </p>
+        )}
         <FormInputText
           name="activity_start_time"
           control={control}
           label="Giờ bắt đầu"
           required
         />
+        {errors.activity_start_time && (
+          <p className="text-red-500 text-sm">
+            {errors.activity_start_time.message}
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-2">
@@ -105,7 +134,11 @@ export const AddActivityForm: React.FC<AddActivityFormProps> = ({
           type="number"
           required
         />
-
+        {errors.activity_max_participants && (
+          <p className="text-red-500 text-sm">
+            {errors.activity_max_participants.message}
+          </p>
+        )}
         <FormInputText
           name="activity_point"
           control={control}
@@ -113,6 +146,11 @@ export const AddActivityForm: React.FC<AddActivityFormProps> = ({
           type="number"
           required
         />
+        {errors.activity_point && (
+          <p className="text-red-500 text-sm">
+            {errors.activity_point.message}
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-2">
@@ -123,8 +161,12 @@ export const AddActivityForm: React.FC<AddActivityFormProps> = ({
           type="number"
           required
         />
-
-        <FormSelect
+        {errors.activity_duration && (
+          <p className="text-red-500 text-sm">
+            {errors.activity_duration.message}
+          </p>
+        )}
+        <FormMultiSelect
           name="activity_categories"
           control={control}
           label="Danh mục"
@@ -135,6 +177,11 @@ export const AddActivityForm: React.FC<AddActivityFormProps> = ({
             { value: "Lễ hội", label: "Lễ hội" },
           ]}
         />
+        {errors.activity_categories && (
+          <p className="text-red-500 text-sm">
+            {errors.activity_categories.message}
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-2">
@@ -144,7 +191,9 @@ export const AddActivityForm: React.FC<AddActivityFormProps> = ({
           label="Người tổ chức"
           required
         />
-
+        {errors.activity_host && (
+          <p className="text-red-500 text-sm">{errors.activity_host.message}</p>
+        )}
         <div>
           <label className="block text-gray-700 text-sm">
             Tải lên hình ảnh
@@ -159,7 +208,6 @@ export const AddActivityForm: React.FC<AddActivityFormProps> = ({
       </div>
 
       <Button
-        onClick={handleSubmit(onSubmitForm)}
         type="submit"
         label="Thêm hoạt động"
         variant="primary"

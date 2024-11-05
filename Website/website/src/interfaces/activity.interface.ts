@@ -14,15 +14,30 @@ export interface Activity {
   activity_point: number;
   activity_thumb_url: string;
   activity_duration: number;
-  created_by: string;
   activity_categories: string[];
   activity_status: ActivityEnum;
   activity_host: string;
 }
 
+export interface ActivitiesByDate {
+  _id: string;
+}
+
 export interface CreateActivityPayload {
   activity_name: string;
   activity_start_date: string;
+  activity_max_participants: number;
+  activity_point: number;
+  activity_thumb_url?: string;
+  activity_duration: number;
+  activity_categories: string[];
+  activity_host: string;
+}
+
+export interface CreateActivityPagePayload {
+  activity_name: string;
+  activity_start_date: string;
+  activity_start_time: string;
   activity_max_participants: number;
   activity_point: number;
   activity_thumb_url: string;

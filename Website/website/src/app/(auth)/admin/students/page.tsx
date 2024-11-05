@@ -1,16 +1,14 @@
-// src/app/admin/students/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Sidebar } from "../components/Sidebar";
-import { Table } from "../components/Table";
-import { SearchBar } from "../components/SearchBar";
-import { Pagination } from "../components/Pagination";
-import { Button } from "../components/Button";
-import { getAllStudentsAPI } from "@/api/api.student";
-import { Student } from "@/interfaces/student.interface";
-import { Popup, StudentActivities } from "../components/Popup";
+import { Sidebar } from "../_components/Sidebar";
+import { Table } from "../_components/Table";
+import { SearchBar } from "../_components/SearchBar";
+import { Pagination } from "../_components/Pagination";
+import { Button } from "../_components/Button";
+import { Popup, StudentActivities } from "../_components/Popup";
+import { useStudents } from "@/query/useStudent";
 
 const headers = [
   "MSSV",
@@ -33,32 +31,26 @@ const dataFields = [
 export default function Students() {
   const searchParams = useSearchParams();
   const page = searchParams.get("page") ? Number(searchParams.get("page")) : 1;
-  const search = searchParams.get("search");
+  const search = searchParams.get("search") || "";
   const [currentPage, setCurrentPage] = useState(page);
-  const [students, setStudents] = useState<Student[]>([]);
   const [searchQuery, setSearchQuery] = useState(search);
-  const [totalPages, setTotalPages] = useState(1);
   const router = useRouter();
 
-  const getAllStudents = async (page: number, search = "") => {
-    const data = await getAllStudentsAPI(page, search);
-    setStudents(data.data);
-    setTotalPages(Math.ceil(data.total / 10));
-  };
-
-  useEffect(() => {
-    getAllStudents(currentPage, searchQuery || "");
-  }, [currentPage, searchQuery]);
+  const { data, isLoading, error } = useStudents(currentPage, searchQuery);
 
   const handleSearch = (searchQuery: string) => {
     const newParams = new URLSearchParams(searchParams.toString());
     newParams.set("search", searchQuery);
     newParams.set("page", "1");
     router.push(`?${newParams.toString()}`);
-
     setSearchQuery(searchQuery);
     setCurrentPage(1);
   };
+
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
+    null
+  );
 
   const openPopup = (studentId: string) => {
     setSelectedStudentId(studentId);
@@ -70,10 +62,11 @@ export default function Students() {
     setSelectedStudentId(null);
   };
 
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
-    null
-  );
+  if (isLoading) return <p>Loading students...</p>;
+  if (error) return <p>Error loading students: {error.message}</p>;
+
+  const students = data?.data || [];
+  const totalPages = Math.ceil(data?.total / 10) || 1;
 
   return (
     <div className="flex">
@@ -86,17 +79,14 @@ export default function Students() {
           headers={headers}
           dataFieldsName={dataFields}
           data={students}
+          loading={"skeleton"}
+          isLoading={isLoading}
           actions={(student) => (
-            <>
-              <Button
-                label="Xem"
-                onClick={() => {
-                  console.log(student);
-                  openPopup(student.student_id);
-                }}
-                variant="secondary"
-              />
-            </>
+            <Button
+              label="Xem"
+              onClick={() => openPopup(student.student_id)}
+              variant="secondary"
+            />
           )}
         />
         <Pagination

@@ -10,6 +10,20 @@ class PostController {
     }).send(res);
   };
 
+  getAllPosts = async (req: Request, res: Response, next: NextFunction) => {
+    new SuccessResponse({
+      message: "Get all posts successfully",
+      metadata: await PostService.getAllPosts({ ...req.query }),
+    }).send(res);
+  };
+
+  restorePost = async (req: Request, res: Response, next: NextFunction) => {
+    await PostService.restorePost({ id: req.params.id });
+    new NO_CONTENT({
+      message: "Redo delete post successfully",
+    }).send(res);
+  };
+
   getPostDetails = async (req: Request, res: Response, next: NextFunction) => {
     new SuccessResponse({
       message: "Get post details successfully",
