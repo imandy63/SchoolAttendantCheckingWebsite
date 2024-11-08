@@ -6,6 +6,7 @@ import clsx from 'clsx';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faBell, faBars, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { useRouter } from 'next/navigation';
+/*import Image from 'next/image';*/
 
 const MainHeader = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -27,11 +28,11 @@ const MainHeader = () => {
         <header className="bg-white border">
             <nav className="flex justify-between items-center w-[92%] mx-auto p-4">
                 <div>
-                    <img
+                    {/* <Image
                         className="w-16 cursor-pointer"
                         src="https://cdn-icons-png.flaticon.com/512/5968/5968204.png"
                         alt="Logo"
-                    />
+                    /> */}
                 </div>
 
                 <div className={clsx(

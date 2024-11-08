@@ -6,7 +6,7 @@ import {
   useGetActivitiesByDate,
   useGetUpcomingActivitiesGroupByDate,
 } from "@/query/useActivity";
-import CalendarComponent from "../_components/calendar";
+import CalendarComponent from "../_components/Calendar";
 import UpcomingActivities from "../_components/UpcomingActivities";
 import EventDetails from "../_components/ActivitiesByDate";
 

@@ -6,10 +6,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <UseUnionWorker>
-    {
-    <>{children}</>
-    }
-    </UseUnionWorker>;
+      <UseUnionWorker>
+          {children}
+      </UseUnionWorker>
   );
 }
+
+
