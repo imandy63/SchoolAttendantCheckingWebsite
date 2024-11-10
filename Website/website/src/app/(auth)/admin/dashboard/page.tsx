@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { Sidebar } from "../_components/Sidebar";
-import { Table } from "../_components/Table";
+import { Table } from "../../../../components/Table";
 import { SearchBar } from "../_components/SearchBar";
-import { Pagination } from "../_components/Pagination";
+import { Pagination } from "../../../../components/Pagination";
 import { Button } from "../_components/Button";
 
 const dashboardData = [

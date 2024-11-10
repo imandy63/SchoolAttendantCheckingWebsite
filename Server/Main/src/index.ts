@@ -19,9 +19,9 @@ app.use(helmet());
 
 app.use(
   cors({
-    origin: "*", // Allow your frontend origin
+    origin: "*",
     methods: "GET,POST,PUT,DELETE,OPTIONS",
-    allowedHeaders: "*", // Allow Authorization header
+    allowedHeaders: "*",
   })
 );
 

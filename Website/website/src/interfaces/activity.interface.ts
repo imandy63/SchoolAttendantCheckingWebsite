@@ -17,6 +17,7 @@ export interface Activity {
   activity_categories: string[];
   activity_status: ActivityEnum;
   activity_host: string;
+  activity_location: string;
 }
 
 export interface ActivitiesByDate {
@@ -32,16 +33,29 @@ export interface CreateActivityPayload {
   activity_duration: number;
   activity_categories: string[];
   activity_host: string;
+  activity_location: string;
 }
 
-export interface CreateActivityPagePayload {
+export interface CreateAndEditActivityPagePayload {
+  activity_name: string;
+  activity_start_datetime: string;
+  activity_max_participants: number;
+  activity_point: number;
+  activity_file?: File | null;
+  activity_duration: number;
+  activity_categories: string[];
+  activity_host: string;
+  activity_location: string;
+}
+
+export interface CreateAndEditActivitySchema {
   activity_name: string;
   activity_start_date: string;
   activity_start_time: string;
   activity_max_participants: number;
   activity_point: number;
-  activity_thumb_url: string;
   activity_duration: number;
   activity_categories: string[];
   activity_host: string;
+  activity_location: string;
 }

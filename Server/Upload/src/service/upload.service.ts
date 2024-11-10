@@ -1,59 +1,39 @@
-import { cloud } from "../config/config.cloudinary";
+import { cloud } from "../configs/config.cloudinary";
 import { BadRequestError } from "../core/error.response";
-import {
-  UploadInput,
-  UploadInputMultiple,
-} from "../interface/upload.interface";
+import { UploadInput } from "../interfaces/upload.interface";
 
 class UploadService {
-  static uploadImageFromLocal = async ({ buffer }: UploadInput) => {
+  static uploadImageFromLocal = async ({
+    buffer,
+    folderName = "datn",
+  }: UploadInput) => {
+    const publicId = `image_${Date.now()}_${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
+
     try {
-      const result = await cloud.uploader.upload(path, {
-        public_id: "thumb",
-        folder: folderName,
+      const uploadPromise = new Promise((resolve, reject) => {
+        const stream = cloud.uploader.upload_stream(
+          { public_id: publicId, folder: folderName },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(buffer);
       });
+
+      const result: any = await uploadPromise;
+
       return {
         image_url: result.secure_url,
-        shopId: 1111,
         thumb_url: cloud.url(result.public_id, {
-          height: 200,
-          width: 200,
           format: "jpg",
         }),
       };
     } catch (err) {
       console.log("Error::", err);
       throw new BadRequestError("Can't upload thumb");
-    }
-  };
-
-  static uploadImageFromLocalFiles = async ({
-    files,
-    folderName = "product/unused_product_image",
-  }: UploadInputMultiple) => {
-    try {
-      if (!files.length) {
-        return;
-      }
-
-      const uploads = [];
-
-      for (const file of files) {
-        const result = await cloud.uploader.upload(file.path, {
-          folder: folderName,
-        });
-
-        uploads.push({
-          image_url: result.secure_url,
-          shopId: 1111,
-          thumb_url: cloud.url(result.public_id),
-        });
-      }
-
-      return uploads;
-    } catch (err) {
-      console.log("Error::", err);
-      throw new BadRequestError("Can't upload images");
     }
   };
 }

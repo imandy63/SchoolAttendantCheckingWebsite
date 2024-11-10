@@ -95,3 +95,10 @@ export const updateActivityAPI = async ({
   );
   return response.data.metadata;
 };
+
+export const participateActivityAPI = async (activityId: string) => {
+  const response = await axiosInstance.post(
+    `${urlConfig.CORE}/api/activity/participate/${activityId}`
+  );
+  return response.data.metadata;
+};

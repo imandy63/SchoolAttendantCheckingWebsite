@@ -31,7 +31,7 @@ class RedisService {
           const modifiedCount = await callback();
           if (modifiedCount) {
             await this.releaseLock(id);
-            return key;
+            return modifiedCount.modifiedCount;
           }
           return null;
         } else {

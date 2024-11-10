@@ -23,6 +23,8 @@ router.get("/", asyncHandler(ActivityController.getActivities));
 
 router.post("/", asyncHandler(ActivityController.createActivity));
 
+router.post("/participate/:id", asyncHandler(ActivityController.participate));
+
 router.get("/:id", asyncHandler(ActivityController.getActivity));
 
 router.put("/:id", asyncHandler(ActivityController.updateActivity));

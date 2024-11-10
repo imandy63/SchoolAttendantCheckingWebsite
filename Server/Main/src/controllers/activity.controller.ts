@@ -40,6 +40,7 @@ class ActivityController {
         page: page as number,
         limit: limit as number,
         search: search as string,
+        userId: req.body.userId,
       }),
     }).send(res);
   }
@@ -79,6 +80,16 @@ class ActivityController {
     new CREATED({
       message: "Create activity successfully",
       metadata: await ActivityService.createActivity({ ...req.body }),
+    }).send(res);
+  }
+
+  async participate(req: Request, res: Response, next: NextFunction) {
+    new SuccessResponse({
+      message: "Participate activity successfully",
+      metadata: await ActivityService.participateInActivity({
+        ...req.body,
+        activity_id: req.params.id,
+      }),
     }).send(res);
   }
 }

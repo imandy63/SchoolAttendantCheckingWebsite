@@ -4,6 +4,7 @@ import {
   faShareAlt,
   faCopy,
 } from "@fortawesome/free-solid-svg-icons";
+import ActivityCard from "./ActivityCard";
 
 interface UpcomingActivitiesProps {
   upcomingActivities: any;
@@ -28,52 +29,21 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({
                 {eventGroup._id}
               </h3>
               {eventGroup.activities.map((activity, activityIndex) => (
-                <div
-                  key={activityIndex}
-                  className="border-b border-gray-300 pb-6 mb-6 flex items-start gap-4"
-                >
-                  <img
-                    src={
-                      activity.activity_thumb_url ||
-                      "/path/to/default-image.jpg"
-                    }
-                    alt={activity.activity_name}
-                    className="w-20 h-20 rounded"
-                  />
-                  <div className="flex-1">
-                    <h4 className="text-xl font-semibold">
-                      {activity.activity_name}
-                    </h4>
-                    <p className="text-gray-500">
-                      {activity.activity_host} -{" "}
-                      {new Date(
-                        activity.activity_start_date
-                      ).toLocaleTimeString("vi-VN", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
-                    <p className="text-gray-500">
-                      {activity.activity_description}
-                    </p>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    {activity.is_registered ? (
-                      <span className="text-green-600">
-                        <FontAwesomeIcon icon={faCheckCircle} /> Đã đăng ký
-                      </span>
-                    ) : (
-                      <>
-                        <button className="text-gray-500 hover:text-gray-700">
-                          <FontAwesomeIcon icon={faShareAlt} />
-                        </button>
-                        <button className="text-gray-500 hover:text-gray-700">
-                          <FontAwesomeIcon icon={faCopy} />
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
+                <ActivityCard
+                  activity_location={activity.activity_location}
+                  key={activity._id}
+                  activity_id={activity._id}
+                  activity_categories={activity.activity_categories}
+                  activity_max_participants={activity.activity_max_participants}
+                  activity_name={activity.activity_name}
+                  activity_start_date={activity.activity_start_date}
+                  activity_thumb_url={activity.activity_thumb_url}
+                  activity_host={activity.activity_host}
+                  activity_total_participants={
+                    activity.activity_total_participants
+                  }
+                  participation_status={activity.participation_status}
+                />
               ))}
               {eventGroup.activities.length >= 10 && <div ref={loadMoreRef} />}
             </div>

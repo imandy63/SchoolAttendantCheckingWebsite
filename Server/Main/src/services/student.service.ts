@@ -2,6 +2,7 @@ import { BadRequestError, NotFoundError } from "../core/error.response";
 import { Participation_Status, Role } from "../enum/role.enum";
 import { StudentParticipatedActivity } from "../interfaces/activity.interface";
 import { students, StudentPayload } from "../models/student.model";
+import { convertToObjectIdMongoose } from "../utils";
 import { ActivityService } from "./activity.service";
 import { RedisService } from "./redis.service";
 export class StudentService {
@@ -102,65 +103,6 @@ export class StudentService {
     return updatedStudent;
   };
 
-  static studentJoinActivity = async ({
-    student_id,
-    activity_id,
-  }: {
-    student_id: string;
-    activity_id: string;
-  }) => {
-    const foundActivity = await ActivityService.getParticipatableActivity({
-      activity_id,
-    });
-
-    if (!foundActivity) {
-      throw new NotFoundError("Activity not found");
-    }
-
-    const participated = this.redisService.acquireLock({
-      id: activity_id,
-      callback: async () => {
-        return await ActivityService.participateInActivity({
-          activity_id,
-          student_id,
-          student_name: foundActivity.activity_name,
-        });
-      },
-    });
-
-    if (participated === null) {
-      throw new BadRequestError(
-        "Can't participated in the activity at the moment"
-      );
-    }
-
-    return await students.findByIdAndUpdate(
-      {
-        student_id: student_id,
-        $and: [
-          {
-            "student_participated_activities.name": {
-              $ne: foundActivity.activity_name,
-            },
-          },
-          {
-            "student_participated_activities.status":
-              Participation_Status.REGISTERED,
-          },
-        ],
-      },
-      {
-        $addToSet: {
-          student_participated_activities: {
-            name: foundActivity.activity_name,
-            status: Participation_Status.REGISTERED,
-          },
-        },
-      },
-      { new: true }
-    );
-  };
-
   static studentLeaveActivity = async (
     student_id: string,
     activity_name: string
@@ -175,15 +117,44 @@ export class StudentService {
   };
 
   static studentAddActivityPoint = async ({
-    student_id,
+    student_ids,
     point,
+    activity_id,
   }: {
-    student_id: string;
+    student_ids: string[];
     point: Number;
+    activity_id: string;
   }) => {
-    return await students.findOneAndUpdate(
-      { student_id: student_id },
-      { $inc: { student_activity_point: point } },
+    await students.updateMany(
+      {
+        student_id: { $nin: student_ids },
+        "student_participated_activities._id":
+          convertToObjectIdMongoose(activity_id),
+      },
+      {
+        $set: {
+          "student_participated_activities.$.status":
+            Participation_Status.REJECTED,
+          "student_participated_activities.$.point": 0,
+        },
+      },
+      { new: true }
+    );
+
+    return await students.updateMany(
+      {
+        student_id: { $in: student_ids },
+        "student_participated_activities._id":
+          convertToObjectIdMongoose(activity_id),
+      },
+      {
+        $inc: { student_activity_point: point },
+        $set: {
+          "student_participated_activities.$.status":
+            Participation_Status.PARTICIPATED,
+          "student_participated_activities.$.point": point,
+        },
+      },
       { new: true }
     );
   };

@@ -1,19 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "./Button";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import {
-  CreateActivityPagePayload,
-  CreateActivityPayload,
+  CreateAndEditActivityPagePayload,
+  CreateAndEditActivitySchema,
 } from "@/interfaces/activity.interface";
 import FormInputText from "@/components/TextField";
 import FormInputDate from "@/components/DateField";
 import FormMultiSelect from "@/components/MultiSelectField";
 import dayjs from "dayjs";
+import { useToast } from "@/context/ToastContext";
+import ImageInput from "./ImageField";
 
 type AddActivityFormProps = {
-  onSubmit: (activityData: CreateActivityPayload) => void;
+  onSubmit: (activityData: CreateAndEditActivityPagePayload) => void;
 };
 
 const validationSchema = yup.object({
@@ -25,10 +27,12 @@ const validationSchema = yup.object({
     .required("Số lượng tối đa là bắt buộc")
     .positive("Số lượng tối đa phải là số dương")
     .integer("Số lượng tối đa phải là số nguyên"),
+  activity_file: yup.string(),
   activity_point: yup
     .number()
     .required("Điểm là bắt buộc")
     .min(0, "Điểm phải từ 0 trở lên"),
+  activity_location: yup.string().required("Địa điểm tổ chức là bắt buộc"),
   activity_duration: yup
     .number()
     .required("Thời gian hoạt động là bắt buộc")
@@ -40,27 +44,29 @@ const validationSchema = yup.object({
 export const AddActivityForm: React.FC<AddActivityFormProps> = ({
   onSubmit,
 }) => {
+  const [file, setFile] = useState<File | null>(null);
+
   const {
     handleSubmit,
     control,
     formState: { errors },
-    getValues,
-  } = useForm<CreateActivityPagePayload>({
+  } = useForm<CreateAndEditActivitySchema>({
     resolver: yupResolver(validationSchema),
   });
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      console.log(file);
-    }
+  const { showToast } = useToast();
+
+  const handleImageSelect = async (selectedFile: File | null) => {
+    setFile(selectedFile);
   };
 
-  const onSubmitForm: SubmitHandler<CreateActivityPagePayload> = (data) => {
+  const onSubmitForm: SubmitHandler<CreateAndEditActivitySchema> = (
+    data: CreateAndEditActivitySchema
+  ) => {
     const parsedDate = dayjs(data.activity_start_date, "DD/MM/YYYY");
 
     if (!parsedDate.isValid()) {
-      console.error("Invalid date format");
+      showToast("Invalid date format", "error");
       return;
     }
 
@@ -68,16 +74,17 @@ export const AddActivityForm: React.FC<AddActivityFormProps> = ({
       data.activity_start_time
     }:00`;
 
-    const formData: CreateActivityPayload = {
+    const formData: CreateAndEditActivityPagePayload = {
+      activity_location: data.activity_location,
       activity_duration: data.activity_duration,
       activity_host: data.activity_host,
       activity_max_participants: data.activity_max_participants,
       activity_name: data.activity_name,
       activity_point: data.activity_point,
-      activity_start_date: startDateTime,
+      activity_start_datetime: startDateTime,
       activity_categories: data.activity_categories || [],
+      activity_file: file,
     };
-    console.log(formData);
 
     onSubmit(formData);
   };
@@ -88,6 +95,10 @@ export const AddActivityForm: React.FC<AddActivityFormProps> = ({
       onSubmit={handleSubmit(onSubmitForm)}
     >
       <h2 className="text-lg font-semibold mb-3">Thêm Hoạt Động</h2>
+
+      <div className="gap-2">
+        <ImageInput onImageSelect={handleImageSelect} />
+      </div>
 
       <div className="grid grid-cols-2 gap-2">
         <FormInputText
@@ -194,17 +205,17 @@ export const AddActivityForm: React.FC<AddActivityFormProps> = ({
         {errors.activity_host && (
           <p className="text-red-500 text-sm">{errors.activity_host.message}</p>
         )}
-        <div>
-          <label className="block text-gray-700 text-sm">
-            Tải lên hình ảnh
-          </label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            className="border p-1 w-full rounded border-gray-300 text-sm"
-          />
-        </div>
+        <FormInputText
+          name="activity_location"
+          control={control}
+          label="Địa điểm tổ chức"
+          required
+        />
+        {errors.activity_location && (
+          <p className="text-red-500 text-sm">
+            {errors.activity_location.message}
+          </p>
+        )}
       </div>
 
       <Button

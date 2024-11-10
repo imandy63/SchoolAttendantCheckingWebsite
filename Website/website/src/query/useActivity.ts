@@ -12,6 +12,7 @@ import {
   updateActivityAPI,
   getActivitiesByDateAPI,
   getUpcomingActivitiesGroupByDateAPI,
+  participateActivityAPI,
 } from "@/api/api.activity";
 import {
   ACTIVITIES,
@@ -76,6 +77,16 @@ export const useUpdateActivity = () => {
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: [ACTIVITIES] });
       queryClient.invalidateQueries({ queryKey: [ACTIVITY, variables.id] });
+    },
+  });
+};
+
+export const useParticipateActivity = (activityId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => participateActivityAPI(activityId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [ACTIVITY, activityId] });
     },
   });
 };

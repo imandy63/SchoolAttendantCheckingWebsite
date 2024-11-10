@@ -88,7 +88,7 @@ class AccessService {
       throw new AuthFailureError("User is not registered!");
     }
 
-    return { status: foundUser.role === Role.UNION_WORKER };
+    return { status: !(foundUser.role === Role.STUDENT) };
   };
 
   static handleRefreshToken = async ({

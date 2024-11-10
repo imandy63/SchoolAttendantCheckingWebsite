@@ -6,10 +6,16 @@ import {
   IActivity,
   IActivityParticipant,
 } from "../models/activity.model";
+import {
+  findStudentById,
+  participateInActivity,
+} from "../models/repositories/student.repo";
 import { students } from "../models/student.model";
 import { convertToObjectIdMongoose } from "../utils";
+import { RedisService } from "./redis.service";
 
 class ActivityService {
+  static redisService = RedisService.getInstance();
   static redis = redisInstance.getRedis();
   static async getActivities({
     page = 1,
@@ -100,6 +106,9 @@ class ActivityService {
         },
       },
       {
+        $sort: { activity_start_date: -1 },
+      },
+      {
         $addFields: {
           participation_status: {
             $cond: {
@@ -109,9 +118,6 @@ class ActivityService {
             },
           },
         },
-      },
-      {
-        $sort: { activity_start_date: -1 },
       },
     ]);
     return result;
@@ -133,11 +139,14 @@ class ActivityService {
     page = 1,
     limit = 10,
     search = "",
+    userId,
   }: {
     page: number;
     limit: number;
     search: string;
+    userId: string;
   }) {
+    const foundStudent = await findStudentById(userId);
     return activities.aggregate([
       {
         $match: {
@@ -147,6 +156,17 @@ class ActivityService {
       },
       {
         $sort: { activity_start_date: -1 },
+      },
+      {
+        $addFields: {
+          participation_status: {
+            $cond: {
+              if: { $in: [foundStudent?.student_id, "$activity_participants"] },
+              then: true,
+              else: false,
+            },
+          },
+        },
       },
       {
         $group: {
@@ -191,8 +211,10 @@ class ActivityService {
     activity_max_participants,
     activity_point,
     activity_duration,
+    activity_thumb_url,
     created_by,
     activity_categories,
+    activity_location,
     activity_host,
   }: IActivity) {
     console.log(activity_start_date);
@@ -202,7 +224,9 @@ class ActivityService {
       activity_max_participants,
       activity_point,
       activity_duration,
+      activity_thumb_url,
       created_by,
+      activity_location,
       activity_categories,
       activity_host,
     });
@@ -215,6 +239,7 @@ class ActivityService {
     activity_max_participants,
     activity_point,
     activity_thumb_url,
+    activity_location,
     activity_duration,
     activity_categories,
     activity_host,
@@ -226,6 +251,7 @@ class ActivityService {
         activity_start_date,
         activity_max_participants,
         activity_point,
+        activity_location,
         activity_thumb_url,
         activity_duration,
         activity_categories,
@@ -243,31 +269,67 @@ class ActivityService {
 
   static async participateInActivity({
     activity_id,
-    student_id,
-    student_name,
-  }: IActivityParticipant & { activity_id: string }) {
-    const modifiedCount = await activities.updateOne(
-      { activity_id },
-      {
-        $inc: { activity_total_participants: 1 },
-        $push: { activity_participants: { student_id, student_name } },
-        $set: {
-          status: {
-            $cond: {
-              if: {
-                $eq: [
-                  "$activity_total_participants",
-                  "$activity_max_participants",
-                ],
+    userId,
+  }: {
+    activity_id: string;
+    userId: string;
+  }) {
+    const foundStudent = await findStudentById(userId);
+    if (!foundStudent) {
+      throw new NotFoundError("Student not found");
+    }
+    const foundActivity = await ActivityService.getParticipatableActivity({
+      activity_id,
+    });
+
+    if (!foundActivity) {
+      throw new NotFoundError("Activity not found");
+    }
+
+    const participated = await this.redisService.acquireLock({
+      id: activity_id,
+      callback: async () => {
+        return await activities.updateOne(
+          { _id: convertToObjectIdMongoose(activity_id) },
+          {
+            $inc: { activity_total_participants: 1 },
+            $push: {
+              activity_participants: {
+                student_id: foundStudent.student_id,
+                student_name: foundStudent.student_name,
               },
-              then: Activity_status.FULL,
-              else: "$status",
             },
-          },
-        },
-      }
-    );
-    return modifiedCount;
+            $set: {
+              status: {
+                $cond: {
+                  if: {
+                    $eq: [
+                      "$activity_total_participants",
+                      "$activity_max_participants",
+                    ],
+                  },
+                  then: Activity_status.FULL,
+                  else: "$status",
+                },
+              },
+            },
+          }
+        );
+      },
+    });
+
+    if (!participated || participated == 0) {
+      throw new BadRequestError("Failed to participate in activity");
+    }
+
+    return {
+      activity_id,
+      student: await participateInActivity({
+        activity_id: foundActivity._id.toString(),
+        student_id: foundStudent.student_id,
+        activity_name: foundActivity.activity_name,
+      }),
+    };
   }
 
   static async leaveActivity({
@@ -297,6 +359,16 @@ class ActivityService {
       );
     }
     return result;
+  }
+
+  static async closeActivity({ activity_id }: { activity_id: string }) {
+    return await activities.findOneAndUpdate(
+      {
+        _id: convertToObjectIdMongoose(activity_id),
+        activity_status: { $ne: Activity_status.CLOSED },
+      },
+      { activity_status: Activity_status.CLOSED }
+    );
   }
 }
 

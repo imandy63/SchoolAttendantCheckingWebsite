@@ -20,23 +20,6 @@ class UploadController {
       }),
     }).send(res);
   };
-
-  static uploadFiles = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    const { files } = req;
-    if (!files || !files.length) {
-      throw new BadRequestError("Missing file");
-    }
-    new CREATED({
-      message: "Upload successfully",
-      metadata: await UploadService.uploadImageFromLocalFiles({
-        ...req.body,
-      }),
-    }).send(res);
-  };
 }
 
 export default UploadController;

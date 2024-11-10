@@ -8,7 +8,7 @@ import {
 } from "@/query/useActivity";
 import CalendarComponent from "../_components/calendar";
 import UpcomingActivities from "../_components/UpcomingActivities";
-import EventDetails from "../_components/ActivitiesByDate";
+import ActivitiesByDate from "../_components/ActivitiesByDate";
 
 // Hàm tạo các ngày trong tháng
 const getDaysInMonth = (month: number, year: number): (Date | null)[] => {
@@ -83,33 +83,30 @@ export default function HomePage() {
   };
 
   return (
-    <div className="web-container">
-      <MainHeader />
-      <div className="flex justify-center p-8 bg-gray-100 min-h-screen">
-        <div className="bg-white rounded-lg shadow-md flex flex-col lg:flex-row p-6 w-full max-w-5xl">
-          {/* CalendarComponent Section */}
-          <CalendarComponent
-            month={month}
-            year={year}
-            daysInMonth={daysInMonth}
-            setSelectedDate={setSelectedDate}
-            changeMonth={changeMonth}
-            selectedDate={selectedDate}
-          />
+    <div className="flex justify-center p-8 bg-gray-100 min-h-screen">
+      <div className="bg-white rounded-lg shadow-md flex flex-col lg:flex-row p-6 w-full max-w-5xl">
+        {/* CalendarComponent Section */}
+        <CalendarComponent
+          month={month}
+          year={year}
+          daysInMonth={daysInMonth}
+          setSelectedDate={setSelectedDate}
+          changeMonth={changeMonth}
+          selectedDate={selectedDate}
+        />
 
-          {/* Upcoming Events && Event By Date Section */}
-          {selectedDate ? (
-            <EventDetails
-              selectedDate={selectedDate}
-              activitiesByDate={activitiesByDate}
-            />
-          ) : (
-            <UpcomingActivities
-              upcomingActivities={upcomingActivities}
-              loadMoreRef={loadMoreRef}
-            />
-          )}
-        </div>
+        {/* Upcoming Events && Event By Date Section */}
+        {selectedDate ? (
+          <ActivitiesByDate
+            selectedDate={selectedDate}
+            activitiesByDate={activitiesByDate}
+          />
+        ) : (
+          <UpcomingActivities
+            upcomingActivities={upcomingActivities}
+            loadMoreRef={loadMoreRef}
+          />
+        )}
       </div>
     </div>
   );

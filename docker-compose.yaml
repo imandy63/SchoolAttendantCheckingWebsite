@@ -38,6 +38,20 @@ services:
     networks:
       - final-network
 
+  final_upload:
+    build: ./Server/Upload
+    image: upload:latest
+    container_name: final_upload_server
+    ports:
+      - "39897:39897"
+    env_file:
+      - "./Server/Upload/.env"
+    depends_on:
+      final_auth_server:
+        condition: service_started
+    networks:
+      - final-network
+
   final_rabbitmq:
     container_name: "rabbitmq"
     image: rabbitmq:4.0.2

@@ -7,6 +7,10 @@ const router = express.Router();
 
 router.use(asyncHandler(authentication));
 
+router.get("/detail/:id", asyncHandler(TrackingController.getTracking));
+
 router.get("/:id", asyncHandler(TrackingController.getStudentActivityTracking));
+
+router.put("/:id", asyncHandler(TrackingController.updateTracking));
 
 export default router;
