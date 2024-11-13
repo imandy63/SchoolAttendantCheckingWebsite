@@ -41,7 +41,12 @@ export const useGetUpcomingActivitiesGroupByDate = (searchParam = "") => {
     queryKey: [UPCOMING_ACTIVITIES, searchParam],
     queryFn: ({ pageParam = 1 }: { pageParam: number }) =>
       getUpcomingActivitiesGroupByDateAPI(pageParam, searchParam),
-    getNextPageParam: (lastPage) => lastPage.nextPage ?? false,
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.length < 10) {
+        return undefined;
+      }
+      return pages.length + 1;
+    },
     initialPageParam: 1,
   });
 };

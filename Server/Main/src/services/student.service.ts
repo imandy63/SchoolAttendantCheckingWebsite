@@ -158,4 +158,18 @@ export class StudentService {
       { new: true }
     );
   };
+
+  static changeSubscribeCategories = async ({
+    userId,
+    categories,
+  }: {
+    userId: string;
+    categories: string[];
+  }) => {
+    return await students.findOneAndUpdate(
+      { _id: convertToObjectIdMongoose(userId) },
+      { $set: { subscribed_categories: categories } },
+      { new: true }
+    );
+  };
 }

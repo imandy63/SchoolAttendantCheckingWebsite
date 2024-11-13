@@ -75,7 +75,7 @@ const UpdatePostPage = () => {
 
   return (
     <FormProvider {...methods}>
-      <div className="flex min-h-screen bg-gray-100 p-8">
+      <div className="flex w-full bg-gray-100 p-8">
         <div className="w-3/4 p-6 bg-white rounded shadow-md mr-6">
           <div className="flex items-center mb-4">
             <button

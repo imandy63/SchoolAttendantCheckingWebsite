@@ -112,10 +112,8 @@ export const ActivityParticipants: React.FC<ActivityParticipantsProps> = ({
 }) => {
   const { data, error, isLoading } = useGetActivityParticipants(activityId);
 
-  console.log(data);
-
   if (isLoading) return <Skeleton count={5} />;
-  if (error) return <p>Error loading participants: {error.message}</p>;
+  if (error) return <p>Lỗi: {error.message}</p>;
 
   return (
     <ul className="space-y-2">

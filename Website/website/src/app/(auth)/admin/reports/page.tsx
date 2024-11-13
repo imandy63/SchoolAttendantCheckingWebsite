@@ -29,8 +29,7 @@ export default function Reports() {
   const headers = ["ID", "Báo cáo", "Số trang", "Ngày xuất"];
 
   return (
-    <div className="flex">
-      <Sidebar />
+    <>
       <main className="flex-1 p-8">
         <div className="flex justify-between items-center mb-4">
           <SearchBar onSearch={() => {}} />
@@ -53,6 +52,6 @@ export default function Reports() {
           onPageChange={setCurrentPage}
         />
       </main>
-    </div>
+    </>
   );
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import { Sidebar } from "../../_components/Sidebar";
 import { AddActivityForm } from "../../_components/AddActivityForm";
 import { useToast } from "@/context/ToastContext";
 import { useRouter } from "next/navigation";
@@ -18,6 +17,7 @@ export default function AddActivityPage() {
   const { mutate: uploadImage } = useUploadImage();
 
   const handleCreateActivity = (data: CreateActivityPayload) => {
+    console.log(data);
     createActivity(data, {
       onSuccess: () => {
         showToast("Activity created successfully!", "success");
@@ -68,12 +68,9 @@ export default function AddActivityPage() {
   };
 
   return (
-    <div className="flex">
-      <Sidebar />
-      <main className="flex-1 p-8 w-full h-[100vh] overflow-y-auto">
-        <h1 className="text-2xl font-semibold mb-4">Thêm Hoạt Động Mới</h1>
-        <AddActivityForm onSubmit={handleSubmit} />
-      </main>
-    </div>
+    <main className="flex-1 p-8 w-full h-[100vh] overflow-y-auto">
+      <h1 className="text-2xl font-semibold mb-4">Thêm Hoạt Động Mới</h1>
+      <AddActivityForm onSubmit={handleSubmit} />
+    </main>
   );
 }

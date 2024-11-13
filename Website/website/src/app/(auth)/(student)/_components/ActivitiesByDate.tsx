@@ -1,25 +1,24 @@
 import { useEffect } from "react";
 import ActivityCard from "./ActivityCard";
+import { useGetActivitiesByDate } from "@/query/useActivity";
+import { useNotification } from "@/context/FCMContext";
 
 interface EventDetailsProps {
-  selectedDate: Date;
-  activitiesByDate: any;
+  selectedDate: string;
 }
 
-const EventDetails: React.FC<EventDetailsProps> = ({
-  selectedDate,
-  activitiesByDate,
-}) => {
+const EventDetails: React.FC<EventDetailsProps> = ({ selectedDate }) => {
+  const activitiesByDate = useGetActivitiesByDate(selectedDate);
+  const { payload } = useNotification();
+
   useEffect(() => {
-    if (activitiesByDate.isLoading) {
-      // Handle loading state
-    }
-  }, [activitiesByDate.isLoading]);
+    activitiesByDate.refetch();
+  }, [payload]);
 
   return (
     <div className="w-full lg:w-2/3 p-4">
       <h2 className="text-2xl font-semibold mb-4">
-        Hoạt động vào ngày {selectedDate.toLocaleDateString("vi-VN")}
+        Hoạt động vào ngày {selectedDate}
       </h2>
       {activitiesByDate.isLoading ? (
         <p>Đang tải...</p>

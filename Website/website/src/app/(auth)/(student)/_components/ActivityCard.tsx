@@ -57,7 +57,7 @@ const ActivityCard = ({
           <p className="text-gray-500 text-sm">
             Host: {activity_host} | Categories: {activity_categories.join(", ")}
           </p>
-          <p className="text-gray-500 text-sm">{activity_location}</p>
+          <p className="text-gray-500 text-sm">Địa điểm: {activity_location}</p>
         </div>
       </div>
 

@@ -1,0 +1,4 @@
+export const RABBITMQ_CONFIG = {
+  URL: process.env.RABBITMQ_URL,
+  QUEUE_NAME: process.env.RABBITMQ_NOTIFICATION_QUEUE_NAME,
+};

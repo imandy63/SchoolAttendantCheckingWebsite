@@ -2,7 +2,6 @@
 "use client";
 
 import { useState } from "react";
-import { Sidebar } from "../_components/Sidebar";
 import { Table } from "../../../../components/Table";
 import { SearchBar } from "../_components/SearchBar";
 import { Pagination } from "../../../../components/Pagination";
@@ -29,30 +28,23 @@ export default function Help() {
   const headers = ["ID", "Tiêu đề", "Mô tả", "Ngày cập nhật"];
 
   return (
-    <div className="flex">
-      <Sidebar />
-      <main className="flex-1 p-8">
-        <div className="flex justify-between items-center mb-4">
-          <SearchBar onSearch={() => {}} />
-          <Button label="Thêm hướng dẫn" onClick={() => {}} variant="primary" />
-        </div>
-        <Table
-          headers={headers}
-          data={helpData}
-          actions={(row) => (
-            <Button
-              label="Xem chi tiết"
-              onClick={() => {}}
-              variant="secondary"
-            />
-          )}
-        />
-        <Pagination
-          currentPage={currentPage}
-          totalPages={10}
-          onPageChange={setCurrentPage}
-        />
-      </main>
-    </div>
+    <main className="flex-1 p-8">
+      <div className="flex justify-between items-center mb-4">
+        <SearchBar onSearch={() => {}} />
+        <Button label="Thêm hướng dẫn" onClick={() => {}} variant="primary" />
+      </div>
+      <Table
+        headers={headers}
+        data={helpData}
+        actions={(row) => (
+          <Button label="Xem chi tiết" onClick={() => {}} variant="secondary" />
+        )}
+      />
+      <Pagination
+        currentPage={currentPage}
+        totalPages={10}
+        onPageChange={setCurrentPage}
+      />
+    </main>
   );
 }

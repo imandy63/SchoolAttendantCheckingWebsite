@@ -97,8 +97,7 @@ export default function Posts() {
   };
 
   return (
-    <div className="flex">
-      <Sidebar />
+    <>
       <main className="flex-1 p-8">
         <div className="flex justify-between items-center mb-4">
           <SearchBar onSearch={handleSearch} />
@@ -165,6 +164,6 @@ export default function Posts() {
           onPageChange={handlePageChange}
         />
       </main>
-    </div>
+    </>
   );
 }

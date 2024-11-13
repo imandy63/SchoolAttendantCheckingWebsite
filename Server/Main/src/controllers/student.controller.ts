@@ -39,6 +39,19 @@ class StudentController {
       metadata: await StudentService.updateStudentsDetails({ ...req.body }),
     }).send(res);
   }
+
+  async changeSubscribeCategories(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    new SuccessResponse({
+      message: "Change subscribe categories successfully",
+      metadata: await StudentService.changeSubscribeCategories({
+        ...req.body,
+      }),
+    }).send(res);
+  }
 }
 
 export default new StudentController();

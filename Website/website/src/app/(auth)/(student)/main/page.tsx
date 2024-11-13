@@ -1,12 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import MainHeader from "@/components/MainHeader";
-import {
-  useGetActivitiesByDate,
-  useGetUpcomingActivitiesGroupByDate,
-} from "@/query/useActivity";
-import CalendarComponent from "../_components/calendar";
+import { useState } from "react";
+import CalendarComponent from "../_components/Calendar";
 import UpcomingActivities from "../_components/UpcomingActivities";
 import ActivitiesByDate from "../_components/ActivitiesByDate";
 
@@ -40,29 +35,7 @@ export default function HomePage() {
   const [month, setMonth] = useState(today.getMonth());
   const [year, setYear] = useState(today.getFullYear());
 
-  const upcomingActivities = useGetUpcomingActivitiesGroupByDate();
-  const activitiesByDate = useGetActivitiesByDate(
-    selectedDate ? formatDate(selectedDate) : ""
-  );
-
   const daysInMonth = getDaysInMonth(month, year);
-  const loadMoreRef = useRef<HTMLDivElement | null>(null);
-
-  // Infinite scroll setup
-  useEffect(() => {
-    if (!loadMoreRef.current || upcomingActivities.isFetchingNextPage) return;
-
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && !selectedDate) {
-        upcomingActivities.fetchNextPage();
-      }
-    });
-
-    observer.observe(loadMoreRef.current);
-    return () => {
-      if (loadMoreRef.current) observer.unobserve(loadMoreRef.current);
-    };
-  }, [upcomingActivities, selectedDate]);
 
   const changeMonth = (direction: "prev" | "next") => {
     setMonth((prevMonth) => {
@@ -97,15 +70,9 @@ export default function HomePage() {
 
         {/* Upcoming Events && Event By Date Section */}
         {selectedDate ? (
-          <ActivitiesByDate
-            selectedDate={selectedDate}
-            activitiesByDate={activitiesByDate}
-          />
+          <ActivitiesByDate selectedDate={formatDate(selectedDate)} />
         ) : (
-          <UpcomingActivities
-            upcomingActivities={upcomingActivities}
-            loadMoreRef={loadMoreRef}
-          />
+          <UpcomingActivities />
         )}
       </div>
     </div>

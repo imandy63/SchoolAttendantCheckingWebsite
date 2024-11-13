@@ -1,14 +1,11 @@
 "use client";
 
-import { Sidebar } from "../../_components/Sidebar";
 import { EditActivityForm } from "../../_components/EditActivityForm";
-import { updateActivityAPI } from "@/api/api.activity"; // Assuming an API update function
 import { useToast } from "@/context/ToastContext";
 import { useRouter, useParams } from "next/navigation";
 import {
   CreateActivityPayload,
   CreateAndEditActivityPagePayload,
-  CreateAndEditActivitySchema,
 } from "@/interfaces/activity.interface";
 import { useUploadImage } from "@/query/useUpload";
 import { useUpdateActivity } from "@/query/useActivity";
@@ -50,6 +47,7 @@ export default function EditActivityPage() {
             activity_name: formData.activity_name,
             activity_point: formData.activity_point,
             activity_location: formData.activity_location,
+            id: id as string,
           });
         },
         onError(error) {
@@ -58,7 +56,8 @@ export default function EditActivityPage() {
         },
       });
     } else {
-      handleCreateActivity({
+      handleUpdateActivity({
+        id: id as string,
         activity_thumb_url: "",
         activity_start_date: formData.activity_start_datetime,
         activity_categories: formData.activity_categories,
@@ -73,12 +72,9 @@ export default function EditActivityPage() {
   };
 
   return (
-    <div className="flex">
-      <Sidebar />
-      <main className="flex-1 p-8">
-        <h1 className="text-2xl font-semibold mb-4">Chỉnh sửa Hoạt Động</h1>
-        <EditActivityForm activityId={id as string} onSubmit={handleSubmit} />
-      </main>
-    </div>
+    <main className="flex-1 p-8">
+      <h1 className="text-2xl font-semibold mb-4">Chỉnh sửa Hoạt Động</h1>
+      <EditActivityForm onSubmit={handleSubmit} />
+    </main>
   );
 }

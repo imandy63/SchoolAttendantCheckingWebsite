@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Sidebar } from "../_components/Sidebar";
 import { Table } from "../../../../components/Table";
 import { SearchBar } from "../_components/SearchBar";
 import { Pagination } from "../../../../components/Pagination";
@@ -69,8 +68,7 @@ export default function Students() {
   const totalPages = Math.ceil(data?.total / 10) || 1;
 
   return (
-    <div className="flex">
-      <Sidebar />
+    <>
       <main className="flex-1 p-8">
         <div className="flex justify-between items-center mb-4">
           <SearchBar onSearch={handleSearch} />
@@ -98,12 +96,12 @@ export default function Students() {
       {selectedStudentId && (
         <Popup
           isOpen={isPopupOpen}
-          title="Student Participated Activities"
+          title={`Chi tiết tham gia của sinh viên mã: ${selectedStudentId}`}
           onClose={closePopup}
         >
           <StudentActivities studentId={selectedStudentId} />
         </Popup>
       )}
-    </div>
+    </>
   );
 }

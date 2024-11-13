@@ -17,10 +17,34 @@ export const deleteNotificationTokenAPI = async (fcmToken: string) => {
   ).data;
 };
 
+export const getUnreadCountAPI = async () => {
+  return (
+    await axiosInstance.get(
+      `${urlConfig.NOTIFICATION}/api/notification/unread-count`
+    )
+  ).data;
+};
+
 export const pullNotificationAPI = async (page: number = 1) => {
   return (
     await axiosInstance.get(
       `${urlConfig.NOTIFICATION}/api/notification?page=${page}`
+    )
+  ).data;
+};
+
+export const readNotification = async (id: string) => {
+  return (
+    await axiosInstance.put(`${urlConfig.NOTIFICATION}/api/notification/read`, {
+      notification_id: id,
+    })
+  ).data;
+};
+
+export const readAllNotification = async () => {
+  return (
+    await axiosInstance.put(
+      `${urlConfig.NOTIFICATION}/api/notification/read-all`
     )
   ).data;
 };

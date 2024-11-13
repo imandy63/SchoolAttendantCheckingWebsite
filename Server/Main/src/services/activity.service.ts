@@ -1,6 +1,8 @@
+import { ObjectId } from "mongoose";
 import { BadRequestError, NotFoundError } from "../core/error.response";
 import { redisInstance } from "../dbs/redis.init";
 import { Activity_status } from "../enum/activity.enum";
+import { Notification_type } from "../enum/notificationType.enum";
 import {
   activities,
   IActivity,
@@ -12,6 +14,7 @@ import {
 } from "../models/repositories/student.repo";
 import { students } from "../models/student.model";
 import { convertToObjectIdMongoose } from "../utils";
+import { NotificationService } from "./notification.service";
 import { RedisService } from "./redis.service";
 
 class ActivityService {
@@ -185,6 +188,9 @@ class ActivityService {
       {
         $limit: limit,
       },
+      {
+        $sort: { "activities.activity_start_date": -1 },
+      },
     ]);
   }
 
@@ -217,8 +223,7 @@ class ActivityService {
     activity_location,
     activity_host,
   }: IActivity) {
-    console.log(activity_start_date);
-    return await activities.create({
+    const result = await activities.create({
       activity_name,
       activity_start_date,
       activity_max_participants,
@@ -230,6 +235,38 @@ class ActivityService {
       activity_categories,
       activity_host,
     });
+
+    const users = await students.aggregate([
+      {
+        $match: {
+          subscribed_categories: { $in: activity_categories },
+        },
+      },
+      {
+        $group: {
+          _id: 1,
+          userIds: { $addToSet: "$_id" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+        },
+      },
+    ]);
+
+    const userIds = users[0].userIds.map((oid: ObjectId) => oid.toString());
+
+    if (users.length > 0) {
+      await NotificationService.sendNotification({
+        userIds: userIds,
+        title: `Hoạt động mới: ${activity_name}`,
+        message: `Có hoạt động mới trùng với danh mục bạn đăng ký`,
+        type: Notification_type.ANNOUNCEMENT,
+      });
+    }
+
+    return result;
   }
 
   static async updateActivity({
