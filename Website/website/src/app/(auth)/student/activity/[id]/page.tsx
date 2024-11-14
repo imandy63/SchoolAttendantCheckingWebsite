@@ -2,7 +2,11 @@
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { format } from "date-fns";
-import { useGetActivity, useParticipateActivity } from "@/query/useActivity";
+import {
+  useGetActivity,
+  useGetActivityForStudent,
+  useParticipateActivity,
+} from "@/query/useActivity";
 
 interface ActivityData {
   activity_categories: string[];
@@ -29,7 +33,7 @@ const ActivityPage: React.FC = () => {
     data: activityData,
     isLoading,
     error,
-  } = useGetActivity(activity_id as string);
+  } = useGetActivityForStudent(activity_id as string);
   const { mutate, isSuccess, isError } = useParticipateActivity(
     activity_id as string
   );
@@ -52,8 +56,10 @@ const ActivityPage: React.FC = () => {
     activity_thumb_url,
     activity_total_participants,
     activity_location,
-    participation_status,
+    participatable,
   } = activityData;
+
+  console.log(participatable);
 
   const remainingSeats =
     activity_max_participants - activity_total_participants;
@@ -100,10 +106,10 @@ const ActivityPage: React.FC = () => {
             className="bg-red-500 text-white font-semibold py-2 px-4 rounded-lg"
             onClick={handleParticipation}
             disabled={
-              participation_status || isSuccess || activity_status === "CLOSED"
+              !participatable || isSuccess || activity_status === "CLOSED"
             }
           >
-            {isSuccess ? "Đã đăng ký" : "Đăng ký tham gia"}
+            {isSuccess || !participatable ? "Đã đăng ký" : "Đăng ký tham gia"}
           </button>
           <button className="bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg">
             Chia sẻ với bạn

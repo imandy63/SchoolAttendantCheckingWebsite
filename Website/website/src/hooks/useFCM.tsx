@@ -1,4 +1,5 @@
 import { FIREBASE_CONFIG } from "@/configs/config.firebase";
+import { useRegisterNotificationToken } from "@/query/useNotification";
 import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { useEffect, useMemo, useState } from "react";
@@ -16,17 +17,25 @@ const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
 const useFCM = () => {
-  return { messaging };
+  return { messaging, getToken };
 };
 export { useFCM };
 
 export const useFCMMessages = ({ messaging }) => {
+  const { mutate: registerToken } = useRegisterNotificationToken();
+
   const [payload, setPayload] = useState<any>([]);
 
   useEffect(() => {
     if (!messaging) {
       return;
     }
+
+    getToken(messaging, {
+      vapidKey: FIREBASE_CONFIG.vapidKey,
+    }).then((token) => {
+      registerToken(token);
+    });
 
     let unsubscribe: () => void = () => {};
     if (typeof window !== "undefined" && "serviceWorker" in navigator) {

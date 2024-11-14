@@ -9,6 +9,9 @@ router.post(
   "/refresh-token",
   asyncHandler(AccessController.handleRefreshToken)
 );
+
+router.get("/me", asyncHandler(AccessController.getMe));
+
 router.get("/authenticate", asyncHandler(AccessController.authentication));
 
 router.post("/login", asyncHandler(AccessController.login));

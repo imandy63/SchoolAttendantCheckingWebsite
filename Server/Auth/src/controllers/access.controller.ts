@@ -76,6 +76,14 @@ class AccessController {
       metadata: await AccessService.isUnionWorker({ userId }),
     }).send(res);
   };
+
+  getMe = async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.headers["x-client-id"]?.toString() as string;
+    new SuccessResponse({
+      message: "Get me successfully",
+      metadata: await AccessService.getMe({ userId }),
+    }).send(res);
+  };
 }
 
 export default new AccessController();

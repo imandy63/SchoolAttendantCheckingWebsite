@@ -26,6 +26,13 @@ export const getActivityAPI = async (activityId: string) => {
   return response.data.metadata;
 };
 
+export const getActivityForStudent = async (activityId: string) => {
+  const response = await axiosInstance.get(
+    `${urlConfig.CORE}/api/activity/student/${activityId}`
+  );
+  return response.data.metadata;
+};
+
 export const getUpcomingActivitiesGroupByDateAPI = async (
   page = 1,
   search = ""

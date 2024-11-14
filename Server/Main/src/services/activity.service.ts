@@ -126,6 +126,42 @@ class ActivityService {
     return result;
   }
 
+  static async userGetActivity({
+    activity_id,
+    userId,
+  }: {
+    activity_id: string;
+    userId: string;
+  }) {
+    const foundStudent = await students.findById(userId).lean();
+    if (!foundStudent) throw new NotFoundError("Student not found");
+    const foundActivity = await activities.aggregate([
+      { $match: { _id: convertToObjectIdMongoose(activity_id) } },
+      {
+        $addFields: {
+          participatable: {
+            $not: {
+              $in: [
+                foundStudent.student_id,
+                {
+                  $map: {
+                    input: "$activity_participants",
+                    as: "participant",
+                    in: "$$participant.student_id",
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+    ]);
+    if (foundActivity.length > 0) {
+      return foundActivity[0];
+    }
+    throw new NotFoundError("Activity not found");
+  }
+
   static async getParticipatableActivity({
     activity_id,
   }: {
@@ -150,7 +186,8 @@ class ActivityService {
     userId: string;
   }) {
     const foundStudent = await findStudentById(userId);
-    return activities.aggregate([
+
+    const result = await activities.aggregate([
       {
         $match: {
           activity_start_date: { $gte: new Date() },
@@ -192,6 +229,7 @@ class ActivityService {
         $sort: { "activities.activity_start_date": -1 },
       },
     ]);
+    return result;
   }
 
   static async getActivityParticipants({
