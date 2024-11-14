@@ -1,4 +1,4 @@
-import express, { NextFunction, Request, Response, urlencoded } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import helmet from "helmet";
 import morgan from "morgan";
 import { Obj } from "./interfaces";
@@ -6,9 +6,10 @@ import { MongooseDB } from "./dbs/mongoose.init";
 import { router } from "./router";
 import * as dotenv from "dotenv";
 import cors from "cors";
+import { RabbitMQ } from "./rabbitmq";
 dotenv.config();
-
 MongooseDB.getInstance();
+RabbitMQ.getInstance().connect();
 const app = express();
 
 app.use(express.json());
@@ -19,9 +20,9 @@ app.use(helmet());
 
 app.use(
   cors({
-    origin: "*", // Allow your frontend origin
+    origin: "*",
     methods: "GET,POST,PUT,DELETE,OPTIONS",
-    allowedHeaders: "*", // Allow Authorization header
+    allowedHeaders: "*",
   })
 );
 

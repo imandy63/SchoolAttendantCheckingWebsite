@@ -53,6 +53,10 @@ const ActivitySchema = new Schema(
       default: "",
       required: false,
     },
+    activity_location: {
+      type: String,
+      required: true,
+    },
     activity_categories: {
       type: [String],
       required: true,
@@ -93,6 +97,7 @@ export interface IActivity extends Document {
   activity_duration: number;
   created_by?: string | null;
   activity_categories: string[];
+  activity_location: string;
   activity_status: string;
   activity_host: string;
 }

@@ -1,14 +1,18 @@
 "use client";
 
+<<<<<<< HEAD:Website/website/src/app/(auth)/student/main/page.tsx
 import { useEffect, useRef, useState } from "react";
 import MainHeader from "@/components/MainHeader";
 import {
   useGetActivitiesByDate,
   useGetUpcomingActivitiesGroupByDate,
 } from "@/query/useActivity";
+=======
+import { useState } from "react";
+>>>>>>> 048045414570bb941a4e46c66cfb452629a41a06:Website/website/src/app/(auth)/(student)/main/page.tsx
 import CalendarComponent from "../_components/Calendar";
 import UpcomingActivities from "../_components/UpcomingActivities";
-import EventDetails from "../_components/ActivitiesByDate";
+import ActivitiesByDate from "../_components/ActivitiesByDate";
 
 // Hàm tạo các ngày trong tháng
 const getDaysInMonth = (month: number, year: number): (Date | null)[] => {
@@ -40,29 +44,7 @@ export default function HomePage() {
   const [month, setMonth] = useState(today.getMonth());
   const [year, setYear] = useState(today.getFullYear());
 
-  const upcomingActivities = useGetUpcomingActivitiesGroupByDate();
-  const activitiesByDate = useGetActivitiesByDate(
-    selectedDate ? formatDate(selectedDate) : ""
-  );
-
   const daysInMonth = getDaysInMonth(month, year);
-  const loadMoreRef = useRef<HTMLDivElement | null>(null);
-
-  // Infinite scroll setup
-  useEffect(() => {
-    if (!loadMoreRef.current || upcomingActivities.isFetchingNextPage) return;
-
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && !selectedDate) {
-        upcomingActivities.fetchNextPage();
-      }
-    });
-
-    observer.observe(loadMoreRef.current);
-    return () => {
-      if (loadMoreRef.current) observer.unobserve(loadMoreRef.current);
-    };
-  }, [upcomingActivities, selectedDate]);
 
   const changeMonth = (direction: "prev" | "next") => {
     setMonth((prevMonth) => {
@@ -83,33 +65,24 @@ export default function HomePage() {
   };
 
   return (
-    <div className="web-container">
-      <MainHeader />
-      <div className="flex justify-center p-8 bg-gray-100 min-h-screen">
-        <div className="bg-white rounded-lg shadow-md flex flex-col lg:flex-row p-6 w-full max-w-5xl">
-          {/* CalendarComponent Section */}
-          <CalendarComponent
-            month={month}
-            year={year}
-            daysInMonth={daysInMonth}
-            setSelectedDate={setSelectedDate}
-            changeMonth={changeMonth}
-            selectedDate={selectedDate}
-          />
+    <div className="flex justify-center p-8 bg-gray-100 min-h-screen">
+      <div className="bg-white rounded-lg shadow-md flex flex-col lg:flex-row p-6 w-full max-w-5xl">
+        {/* CalendarComponent Section */}
+        <CalendarComponent
+          month={month}
+          year={year}
+          daysInMonth={daysInMonth}
+          setSelectedDate={setSelectedDate}
+          changeMonth={changeMonth}
+          selectedDate={selectedDate}
+        />
 
-          {/* Upcoming Events && Event By Date Section */}
-          {selectedDate ? (
-            <EventDetails
-              selectedDate={selectedDate}
-              activitiesByDate={activitiesByDate}
-            />
-          ) : (
-            <UpcomingActivities
-              upcomingActivities={upcomingActivities}
-              loadMoreRef={loadMoreRef}
-            />
-          )}
-        </div>
+        {/* Upcoming Events && Event By Date Section */}
+        {selectedDate ? (
+          <ActivitiesByDate selectedDate={formatDate(selectedDate)} />
+        ) : (
+          <UpcomingActivities />
+        )}
       </div>
     </div>
   );

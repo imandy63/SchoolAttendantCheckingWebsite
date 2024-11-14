@@ -55,6 +55,7 @@ export const createActivityAPI = async ({
   activity_duration,
   activity_categories,
   activity_host,
+  activity_location,
 }: CreateActivityPayload) => {
   const response = await axiosInstance.post(`${urlConfig.CORE}/api/activity`, {
     activity_name,
@@ -65,6 +66,7 @@ export const createActivityAPI = async ({
     activity_duration,
     activity_categories,
     activity_host,
+    activity_location,
   });
   return response.data.metadata;
 };
@@ -92,6 +94,13 @@ export const updateActivityAPI = async ({
       activity_categories,
       activity_host,
     }
+  );
+  return response.data.metadata;
+};
+
+export const participateActivityAPI = async (activityId: string) => {
+  const response = await axiosInstance.post(
+    `${urlConfig.CORE}/api/activity/participate/${activityId}`
   );
   return response.data.metadata;
 };

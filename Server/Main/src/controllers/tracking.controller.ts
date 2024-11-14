@@ -15,6 +15,25 @@ class ActivityTrackingController {
       }),
     }).send(res);
   }
+
+  async getTracking(req: Request, res: Response, next: NextFunction) {
+    new SuccessResponse({
+      message: "Get tracking successfully",
+      metadata: await ActivityTrackingService.getTracking({
+        activity_id: req.params.id as string,
+      }),
+    }).send(res);
+  }
+
+  async updateTracking(req: Request, res: Response, next: NextFunction) {
+    new SuccessResponse({
+      message: "Update tracking successfully",
+      metadata: await ActivityTrackingService.updateTracking({
+        activity_id: req.params.id as string,
+        student_ids: req.body.student_ids as string[],
+      }),
+    }).send(res);
+  }
 }
 
 export default new ActivityTrackingController();

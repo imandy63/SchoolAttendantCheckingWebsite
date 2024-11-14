@@ -13,3 +13,8 @@ export const STUDENT_ACTIVITIES = "student-activities";
 
 export const POSTS = "posts";
 export const POST = "post";
+
+export const TRACKING = "tracking";
+
+export const NOTIFICATION = "notification";
+export const NOTIFICATIONS = "notifications";

@@ -1,13 +1,16 @@
 "use client";
 import { useState } from "react";
-import { Sidebar } from "../_components/Sidebar";
-import { Table } from "../_components/Table";
+import { Table } from "../../../../components/Table";
 import { SearchBar } from "../_components/SearchBar";
-import { Pagination } from "../_components/Pagination";
+import { Pagination } from "../../../../components/Pagination";
 import { Button } from "../_components/Button";
 import { useGetAllActivities } from "@/query/useActivity";
 import { useSearchParams, useRouter } from "next/navigation";
-import { ActivityParticipants, Popup } from "../_components/Popup";
+import {
+  ActivityAttendance,
+  ActivityParticipants,
+  Popup,
+} from "../_components/Popup";
 import ActionButton from "../_components/ActionButton";
 
 const headers = [
@@ -40,6 +43,7 @@ export default function Activities() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [selectedActivityId, setSelectedActivityId] = useState("");
   const [selectedActivityName, setSelectedActivityName] = useState("");
+  const [isAttendancePopupOpen, setIsAttendancePopupOpen] = useState(false);
 
   const { data, isLoading } = useGetAllActivities(currentPage, searchQuery);
 
@@ -59,6 +63,16 @@ export default function Activities() {
     setCurrentPage(newPage);
   };
 
+  const openAttendancePopup = (activityId: string, activityName: string) => {
+    setSelectedActivityName(activityName);
+    setSelectedActivityId(activityId);
+    setIsAttendancePopupOpen(true);
+  };
+
+  const closeAttendancePopup = () => {
+    setIsAttendancePopupOpen(false);
+  };
+
   const openPopup = (activityId: string, activityName: string) => {
     setSelectedActivityName(activityName);
     setSelectedActivityId(activityId);
@@ -70,8 +84,7 @@ export default function Activities() {
   };
 
   return (
-    <div className="flex">
-      <Sidebar />
+    <>
       <main className="flex-1 p-8">
         <div className="flex justify-between items-center mb-4">
           <SearchBar onSearch={handleSearch} />
@@ -104,7 +117,9 @@ export default function Activities() {
                 },
                 {
                   label: "Xem điểm danh",
-                  onClick: () => {},
+                  onClick: () => {
+                    openAttendancePopup(activity._id, activity.activity_name);
+                  },
                 },
               ]}
             />
@@ -112,10 +127,19 @@ export default function Activities() {
         />
         <Pagination
           currentPage={currentPage}
-          totalPages={data?.totalPages || 1}
+          totalPages={Math.ceil(data?.total / 10 || 1)}
           onPageChange={handlePageChange}
         />
       </main>
+      {isAttendancePopupOpen && (
+        <Popup
+          isOpen={isAttendancePopupOpen}
+          title={selectedActivityName}
+          onClose={closeAttendancePopup}
+        >
+          <ActivityAttendance activityId={selectedActivityId} />
+        </Popup>
+      )}
       {isPopupOpen && (
         <Popup
           isOpen={isPopupOpen}
@@ -125,6 +149,6 @@ export default function Activities() {
           <ActivityParticipants activityId={selectedActivityId} />
         </Popup>
       )}
-    </div>
+    </>
   );
 }

@@ -53,4 +53,5 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload) => {
   const channel = new BroadcastChannel("sw-messages");
   channel.postMessage(payload.data);
+  console.log("Received background message:", payload.data);
 });

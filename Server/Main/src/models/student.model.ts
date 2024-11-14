@@ -22,6 +22,11 @@ const studentSchema = new Schema(
     student_participated_activities: {
       type: [
         {
+          _id: {
+            type: Schema.Types.ObjectId,
+            ref: "Activity",
+            required: true,
+          },
           name: { type: String },
           status: {
             type: String,

@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { Sidebar } from "../_components/Sidebar";
-import { Table } from "../_components/Table";
+import { Table } from "../../../../components/Table";
 import { SearchBar } from "../_components/SearchBar";
-import { Pagination } from "../_components/Pagination";
+import { Pagination } from "../../../../components/Pagination";
 import { Button } from "../_components/Button";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useDeletePost, useGetAllPosts, useRestorePost } from "@/query/usePost";
@@ -97,8 +97,7 @@ export default function Posts() {
   };
 
   return (
-    <div className="flex">
-      <Sidebar />
+    <>
       <main className="flex-1 p-8">
         <div className="flex justify-between items-center mb-4">
           <SearchBar onSearch={handleSearch} />
@@ -165,6 +164,6 @@ export default function Posts() {
           onPageChange={handlePageChange}
         />
       </main>
-    </div>
+    </>
   );
 }

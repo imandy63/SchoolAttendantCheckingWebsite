@@ -1,12 +1,12 @@
 "use client";
 import React, { createContext, useEffect, useState, ReactNode } from "react";
-import { useFCM } from "../hooks/useFCM";
+import { useFCM, useFCMMessages } from "../hooks/useFCM";
 import { FIREBASE_CONFIG } from "@/configs/config.firebase";
 import { NotificationPayload } from "firebase/messaging";
 import { registerNotificationTokenAPI } from "@/api/api.notification";
 
 interface NotificationContextType {
-  notification: NotificationPayload | null;
+  payload: any;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(
@@ -20,43 +20,11 @@ interface NotificationProviderProps {
 export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   children,
 }) => {
-  const { messaging, getToken, onMessage } = useFCM();
-
-  const [notification, setNotification] = useState<NotificationPayload | null>(
-    null
-  );
-
-  useEffect(() => {
-    const requestPermission = async () => {
-      const permission = await Notification.requestPermission();
-      if (permission === "granted") {
-        if ("serviceWorker" in navigator) {
-          await navigator.serviceWorker.register("/firebase-messaging-sw.js");
-          const token = await getToken(messaging, {
-            vapidKey: FIREBASE_CONFIG.vapidKey,
-          });
-          await registerNotificationTokenAPI(token);
-        }
-      }
-    };
-
-    requestPermission();
-
-    onMessage(messaging, (payload) => {
-      console.log("Message received: ", payload);
-      setNotification(payload.data || null);
-    });
-
-    const channel = new BroadcastChannel("sw-message");
-    channel.onmessage = (event) => {
-      setNotification(event.data || null);
-    };
-
-    return () => channel.close();
-  }, []);
+  const { messaging } = useFCM();
+  const { payload } = useFCMMessages({ messaging });
 
   return (
-    <NotificationContext.Provider value={{ notification }}>
+    <NotificationContext.Provider value={{ payload }}>
       {children}
     </NotificationContext.Provider>
   );

@@ -8,7 +8,7 @@ import { Button } from "../../_components/Button";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import "react-quill/dist/quill.snow.css";
-import { createPostAPI, getAllPostsAPI } from "@/api/api.post";
+import { createPostAPI } from "@/api/api.post";
 import { PostCreate } from "@/interfaces/post.interface";
 import { useToast } from "@/context/ToastContext";
 
@@ -51,7 +51,7 @@ const AddPostPage = () => {
 
   return (
     <FormProvider {...methods}>
-      <div className="flex min-h-screen bg-gray-100 p-8">
+      <div className="flex w-full bg-gray-100 p-8">
         {/* Form bên trái */}
         <div className="w-3/4 p-6 bg-white rounded shadow-md mr-6">
           <div className="flex items-center mb-4">

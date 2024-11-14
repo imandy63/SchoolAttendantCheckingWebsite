@@ -14,6 +14,7 @@ type FormInputTextProps = {
   rows?: number;
   multiline?: boolean;
   autofocus?: boolean;
+  errorMessage?: string;
 };
 
 const FormInputText: React.FC<FormInputTextProps> = ({

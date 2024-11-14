@@ -1,22 +1,18 @@
 import express from "express";
 import { asyncHandler } from "../../helpers/asyncHandler";
-import { uploadDisk, uploadMemory } from "../../config/config.multer";
+import { uploadDisk, uploadMemory } from "../../configs/config.multer";
 import UploadController from "../../controller/upload.controller";
-import { authenticationGRPC } from "../../auth/authentication";
+import { adminPriviledge, authentication } from "../../auth/authentication";
 
 const router = express.Router();
 
-router.use(asyncHandler(authenticationGRPC));
+router.use(asyncHandler(authentication));
+// router.use(asyncHandler(adminPriviledge));
 
-router.use(
-  "/thumb",
+router.post(
+  "",
   uploadMemory.single("file"),
   asyncHandler(UploadController.uploadThumb)
-);
-router.use(
-  "/multiple",
-  uploadDisk.array("files", 10),
-  asyncHandler(UploadController.uploadFiles)
 );
 
 export default router;

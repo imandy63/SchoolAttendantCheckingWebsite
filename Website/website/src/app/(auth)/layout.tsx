@@ -1,5 +1,4 @@
 "use client";
-import { NotificationProvider } from "@/context/FCMContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { UseAuth } from "@/hooks/useAuth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -14,9 +13,7 @@ export default function RootLayout({
   return (
     <UseAuth>
       <QueryClientProvider client={queryClient}>
-        <ToastProvider>
-          <NotificationProvider>{children}</NotificationProvider>
-        </ToastProvider>
+        <ToastProvider>{children}</ToastProvider>
       </QueryClientProvider>
     </UseAuth>
   );

@@ -3,9 +3,9 @@
 
 import { useState } from "react";
 import { Sidebar } from "../_components/Sidebar";
-import { Table } from "../_components/Table";
+import { Table } from "../../../../components/Table";
 import { SearchBar } from "../_components/SearchBar";
-import { Pagination } from "../_components/Pagination";
+import { Pagination } from "../../../../components/Pagination";
 import { Button } from "../_components/Button";
 
 const reportsData = [
@@ -29,8 +29,7 @@ export default function Reports() {
   const headers = ["ID", "Báo cáo", "Số trang", "Ngày xuất"];
 
   return (
-    <div className="flex">
-      <Sidebar />
+    <>
       <main className="flex-1 p-8">
         <div className="flex justify-between items-center mb-4">
           <SearchBar onSearch={() => {}} />
@@ -53,6 +52,6 @@ export default function Reports() {
           onPageChange={setCurrentPage}
         />
       </main>
-    </div>
+    </>
   );
 }

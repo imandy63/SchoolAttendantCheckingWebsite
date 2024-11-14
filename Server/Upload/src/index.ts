@@ -1,19 +1,26 @@
 import express, { Response, Request, NextFunction } from "express";
 import morgan from "morgan";
 import helmet from "helmet";
-import { Obj } from "./interface";
-import compression from "compression";
+import { Obj } from "./interfaces";
 import * as dotenv from "dotenv";
 import Router from "./route";
+import cors from "cors";
 dotenv.config();
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(compression());
 app.use(helmet());
 app.use(morgan("dev"));
+
+app.use(
+  cors({
+    origin: "*",
+    methods: "GET,POST,PUT,DELETE,OPTIONS",
+    allowedHeaders: "*",
+  })
+);
 
 app.use("", Router);
 

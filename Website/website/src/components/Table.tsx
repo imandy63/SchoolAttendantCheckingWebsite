@@ -15,6 +15,12 @@ type TableProps = {
       fontColor: "RED" | "GREEN";
     }[];
   }[];
+  showCheckbox?: boolean;
+  onCheckboxChange?: (
+    isChecked: boolean,
+    rowData: any,
+    rowIndex: number
+  ) => void; // New prop for checkbox callback
 };
 
 enum FontColorEnum {
@@ -29,7 +35,7 @@ const getNestedValue = (obj: any, path: string): any => {
 const formatDate = (date: string | Date) => {
   const d = new Date(date);
   const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+  const month = String(d.getMonth() + 1).padStart(2, "0");
   const year = d.getFullYear();
   const hours = String(d.getHours()).padStart(2, "0");
   const minutes = String(d.getMinutes()).padStart(2, "0");
@@ -54,6 +60,8 @@ export const Table = ({
   loading = "skeleton",
   isLoading,
   specialFields,
+  showCheckbox = false,
+  onCheckboxChange, // Callback function for checkbox change
 }: TableProps) => {
   const rowsToRender = [...data];
 
@@ -81,13 +89,17 @@ export const Table = ({
             Array.from({ length: 10 }).map((_, idx) => (
               <SkeletonRow
                 key={idx}
-                colSpan={headers.length + (actions ? 1 : 0)}
+                colSpan={
+                  headers.length + (actions ? 1 : 0) + (showCheckbox ? 1 : 0)
+                }
               />
             ))
           ) : (
             <tr>
               <td
-                colSpan={headers.length + (actions ? 1 : 0)}
+                colSpan={
+                  headers.length + (actions ? 1 : 0) + (showCheckbox ? 1 : 0)
+                }
                 className="p-2 text-center"
               >
                 Loading...
@@ -133,10 +145,23 @@ export const Table = ({
                   {actions && (
                     <td className="p-2 border-b text-right">{actions(row)}</td>
                   )}
+                  {showCheckbox && (
+                    <td className="p-2 border-b text-right">
+                      <input
+                        type="checkbox"
+                        onChange={(e) =>
+                          onCheckboxChange &&
+                          onCheckboxChange(e.target.checked, row, index)
+                        }
+                      />
+                    </td>
+                  )}
                 </>
               ) : (
                 <td
-                  colSpan={headers.length + (actions ? 1 : 0)}
+                  colSpan={
+                    headers.length + (actions ? 1 : 0) + (showCheckbox ? 1 : 0)
+                  }
                   className="p-2 border-b text-right py-5"
                 ></td>
               )}
