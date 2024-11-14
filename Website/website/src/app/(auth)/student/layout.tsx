@@ -2,7 +2,7 @@
 
 import styles from "../../../components_style/MainHeader.module.css";
 import { NotificationProvider } from "@/context/FCMContext";
-import Navbar from "@/app/(auth)/student/_components/Navbar";
+import Navbar from "@/components/Navbar";
 import Sidebar from "../student/_components/SidebarUser";
 export default function RootLayout({
   children,

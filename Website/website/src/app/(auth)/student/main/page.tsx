@@ -1,15 +1,6 @@
 "use client";
 
-<<<<<<< HEAD:Website/website/src/app/(auth)/student/main/page.tsx
-import { useEffect, useRef, useState } from "react";
-import MainHeader from "@/components/MainHeader";
-import {
-  useGetActivitiesByDate,
-  useGetUpcomingActivitiesGroupByDate,
-} from "@/query/useActivity";
-=======
-import { useState } from "react";
->>>>>>> 048045414570bb941a4e46c66cfb452629a41a06:Website/website/src/app/(auth)/(student)/main/page.tsx
+import {useState } from "react";
 import CalendarComponent from "../_components/Calendar";
 import UpcomingActivities from "../_components/UpcomingActivities";
 import ActivitiesByDate from "../_components/ActivitiesByDate";

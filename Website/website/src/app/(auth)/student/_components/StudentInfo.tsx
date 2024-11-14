@@ -2,26 +2,22 @@ import React from 'react';
 
 const StudentInfo: React.FC = () => {
     return (
-        <div className="flex p-8 bg-white shadow-md rounded-lg space-x-12">
-            {/* Phần Avatar và Thông tin cơ bản */}
-            <div className="flex flex-col items-center space-y-4">
+        <div className="flex items-start p-6 ml-10 bg-white rounded-lg shadow-lg">
+            <div className="flex-shrink-0 mr-10">
                 {/* Avatar */}
-                <div className="w-24 h-24 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden">
-                    <span>Avatar</span> {/* Thay bằng <img src="URL của ảnh" alt="Avatar" /> nếu có URL ảnh */}
+                <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center">
+                    <span className="text-gray-500">Avatar</span>
                 </div>
-
-                {/* Thông tin cơ bản */}
-                <div className="text-left">
-                    <p><strong>MSSV:</strong> <span className="font-semibold">2001215828</span></p>
-                    <p><strong>Họ tên:</strong> <span className="font-semibold">Phạm Hồ Đăng Huy</span></p>
-                    <p><strong>Giới tính:</strong> <span className="font-semibold">Nam</span></p>
+                <div className="mt-4">
+                    <p><strong>MSSV:</strong> 2001215828</p>
+                    <p><strong>Họ tên:</strong> Phạm Hồ Đăng Huy</p>
+                    <p><strong>Giới tính:</strong> Nam</p>
                 </div>
             </div>
-
-            {/* Thông tin học vấn */}
-            <div className="flex flex-col space-y-2 text-gray-700">
+            <div className="flex-grow ml-10"> {/* Thêm ml-10 để tạo khoảng cách */}
                 <h2 className="text-xl font-bold mb-4">Thông tin học vấn</h2>
-                <div className="grid grid-cols-2 gap-x-16 gap-y-2">
+                <hr className="border-t border-gray-300 mb-4"/> {/* Dấu gạch ngang phân chia */}
+                <div className="grid grid-cols-2 gap-x-8 gap-y-2">
                     <p><strong>Trạng thái:</strong> Đang học</p>
                     <p><strong>Mã hồ sơ:</strong> 2001215828</p>
                     <p><strong>Lớp học:</strong> 12DHTH01</p>
@@ -31,7 +27,6 @@ const StudentInfo: React.FC = () => {
                     <p><strong>Khoa:</strong> Khoa Công nghệ Thông tin</p>
                     <p><strong>Loại hình đào tạo:</strong> Chính quy</p>
                     <p><strong>Chuyên ngành:</strong> Công nghệ phần mềm</p>
-                    <p><strong>Ngành:</strong> Công nghệ thông tin</p>
                     <p><strong>Khóa học:</strong> 2021</p>
                 </div>
             </div>

@@ -20,7 +20,7 @@ type TableProps = {
     isChecked: boolean,
     rowData: any,
     rowIndex: number
-  ) => void; // New prop for checkbox callback
+  ) => void;
 };
 
 enum FontColorEnum {
@@ -45,7 +45,7 @@ const formatDate = (date: string | Date) => {
 
 const SkeletonRow = ({ colSpan }: { colSpan: number }) => (
   <tr className="animate-pulse">
-    <td colSpan={colSpan} className="p-2 border-b text-right">
+    <td colSpan={colSpan} className="p-4 border-b text-center">
       <div className="h-4 bg-gray-300 rounded w-full"></div>
     </td>
   </tr>
@@ -61,7 +61,7 @@ export const Table = ({
   isLoading,
   specialFields,
   showCheckbox = false,
-  onCheckboxChange, // Callback function for checkbox change
+  onCheckboxChange,
 }: TableProps) => {
   const rowsToRender = [...data];
 
@@ -74,12 +74,12 @@ export const Table = ({
       <thead>
         <tr>
           {headers.map((header) => (
-            <th key={header} className="border-b p-2 text-right bg-gray-200">
+            <th key={header} className="border-b p-4 text-center bg-gray-200">
               {header}
             </th>
           ))}
           {actions && (
-            <th className="border-b p-2 bg-gray-200 text-right">Tác vụ</th>
+            <th className="border-b p-4 bg-gray-200 text-center">Tác vụ</th>
           )}
         </tr>
       </thead>
@@ -100,7 +100,7 @@ export const Table = ({
                 colSpan={
                   headers.length + (actions ? 1 : 0) + (showCheckbox ? 1 : 0)
                 }
-                className="p-2 text-center"
+                className="p-4 text-center"
               >
                 Loading...
               </td>
@@ -132,7 +132,7 @@ export const Table = ({
                     return (
                       <td
                         key={idx}
-                        className={`p-2 border-b text-right ${className}`}
+                        className={`p-4 border-b text-left ${className}`}
                       >
                         {dateFields?.includes(field) && value
                           ? formatDate(value)
@@ -143,10 +143,10 @@ export const Table = ({
                     );
                   })}
                   {actions && (
-                    <td className="p-2 border-b text-right">{actions(row)}</td>
+                    <td className="p-4 border-b text-center">{actions(row)}</td>
                   )}
                   {showCheckbox && (
-                    <td className="p-2 border-b text-right">
+                    <td className="p-4 border-b text-center">
                       <input
                         type="checkbox"
                         onChange={(e) =>
@@ -162,7 +162,7 @@ export const Table = ({
                   colSpan={
                     headers.length + (actions ? 1 : 0) + (showCheckbox ? 1 : 0)
                   }
-                  className="p-2 border-b text-right py-5"
+                  className="p-4 border-b text-center py-5"
                 ></td>
               )}
             </tr>

@@ -1,5 +1,5 @@
 'use client';
-import MainHeader from '@/components/MainHeader';
+import MainHeader from '@/components/Navbar';
 import { useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { events, events as mockEvents } from '../mock-data';

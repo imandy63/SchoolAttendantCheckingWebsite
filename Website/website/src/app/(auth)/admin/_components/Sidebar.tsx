@@ -11,6 +11,7 @@ export const Sidebar = () => {
     { name: "Bài viết", icon: "📝", href: "/admin/posts" },
     { name: "Thống kê & Báo cáo", icon: "📈", href: "/admin/reports" },
     { name: "Trợ giúp", icon: "❓", href: "/admin/help" },
+    { name: "Công tác đoàn", icon: "👥", href: "/admin/union-worker" } // Thêm mục Công tác đoàn
   ];
 
   return (

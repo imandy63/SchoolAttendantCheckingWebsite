@@ -76,7 +76,7 @@ const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({
                   <h3 className="font-semibold pb-3 break-words text-black">
                     {notification.notification_title}
                   </h3>
-                  <p className="text-base">
+                  <p className="text-base text-black">
                     {notification.notification_details}
                   </p>
                   <div className="flex flex-col items-end gap-3">

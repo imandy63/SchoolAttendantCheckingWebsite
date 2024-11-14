@@ -1,42 +1,22 @@
 "use client";
+
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { format } from "date-fns";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMapMarkerAlt, faCalendarAlt, faClock, faUsers, faUser, faStar, faTag, faShareAlt } from "@fortawesome/free-solid-svg-icons";
 import {
-  useGetActivity,
   useGetActivityForStudent,
   useParticipateActivity,
 } from "@/query/useActivity";
-
-interface ActivityData {
-  activity_categories: string[];
-  activity_duration: number;
-  activity_host: string;
-  activity_max_participants: number;
-  activity_name: string;
-  activity_participants: any[];
-  activity_point: number;
-  activity_start_date: string;
-  activity_status: string;
-  activity_thumb_url: string | null;
-  activity_total_participants: number;
-  activity_location: string;
-  participation_status: boolean;
-}
 
 const ActivityPage: React.FC = () => {
   const params = useParams();
   const router = useRouter();
   const { id: activity_id } = params;
 
-  const {
-    data: activityData,
-    isLoading,
-    error,
-  } = useGetActivityForStudent(activity_id as string);
-  const { mutate, isSuccess, isError } = useParticipateActivity(
-    activity_id as string
-  );
+  const { data: activityData, isLoading, error } = useGetActivityForStudent(activity_id as string);
+  const { mutate, isSuccess, isError } = useParticipateActivity(activity_id as string);
 
   if (isLoading) return <p>Loading...</p>;
   if (error) {
@@ -59,14 +39,8 @@ const ActivityPage: React.FC = () => {
     participatable,
   } = activityData;
 
-  console.log(participatable);
-
-  const remainingSeats =
-    activity_max_participants - activity_total_participants;
-  const formattedDate = format(
-    new Date(activity_start_date),
-    "EEEE, dd/MM/yyyy"
-  );
+  const remainingSeats = activity_max_participants - activity_total_participants;
+  const formattedDate = format(new Date(activity_start_date), "EEEE, dd/MM/yyyy");
   const formattedTime = format(new Date(activity_start_date), "h:mm a");
 
   const handleParticipation = () => {
@@ -74,68 +48,85 @@ const ActivityPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row gap-6 p-8 max-w-6xl mx-auto">
+    <div className="flex flex-col md:flex-row gap-8 p-8 max-w-6xl mx-auto bg-white shadow-lg rounded-lg mt-6">
       {/* Image Section */}
       <div className="flex-1">
         <img
           src={activity_thumb_url || "/images/placeholder-image.jpg"}
           alt={activity_name}
-          className="w-full h-auto rounded-lg shadow-md"
+          className="w-full h-96 object-cover rounded-lg shadow-md"
         />
       </div>
 
       {/* Details Section */}
-      <div className="flex-1 space-y-4">
-        <h1 className="text-2xl font-bold">{activity_name}</h1>
+      <div className="flex-1 space-y-6">
+        <h1 className="text-4xl font-bold text-gray-800 mb-4">{activity_name}</h1>
 
-        {/* Date & Location */}
-        <div className="bg-gray-100 rounded-lg p-4 space-y-1">
-          <p className="text-gray-700 font-semibold">{formattedDate}</p>
-          <p className="text-gray-500">{formattedTime}</p>
-          <p className="text-gray-500">{activity_location}</p>
+        {/* Date, Time & Location */}
+        <div className="bg-blue-100 rounded-lg p-6 space-y-2 shadow-md">
+          <div className="flex items-center text-blue-800 space-x-2 text-lg">
+            <FontAwesomeIcon icon={faCalendarAlt} className="text-blue-500" />
+            <span className="font-semibold">{formattedDate}</span>
+          </div>
+          <div className="flex items-center text-blue-600 space-x-2 text-lg">
+            <FontAwesomeIcon icon={faClock} className="text-blue-500" />
+            <span>{formattedTime}</span>
+          </div>
+          <div className="flex items-center text-blue-600 space-x-2 text-lg">
+            <FontAwesomeIcon icon={faMapMarkerAlt} className="text-blue-500" />
+            <span>{activity_location}</span>
+          </div>
         </div>
 
         {/* Seats Info */}
-        <p className="text-gray-700 font-semibold">
-          Còn lại: {remainingSeats} ghế trống
-        </p>
+        <div className="flex items-center text-blue-700 font-semibold space-x-2 text-lg">
+          <FontAwesomeIcon icon={faUsers} className="text-blue-500" />
+          <span>Còn lại: {remainingSeats} ghế trống</span>
+        </div>
 
         {/* Actions */}
         <div className="flex space-x-4">
           <button
-            className="bg-red-500 text-white font-semibold py-2 px-4 rounded-lg"
-            onClick={handleParticipation}
-            disabled={
+            className={`${
               !participatable || isSuccess || activity_status === "CLOSED"
-            }
+                ? "bg-gray-400 text-gray-700 cursor-not-allowed"
+                : "bg-blue-600 text-white hover:bg-blue-700"
+            } font-semibold py-3 px-8 rounded-full transition duration-300 shadow-md text-lg`}
+            onClick={handleParticipation}
+            disabled={!participatable || isSuccess || activity_status === "CLOSED"}
           >
             {isSuccess || !participatable ? "Đã đăng ký" : "Đăng ký tham gia"}
           </button>
-          <button className="bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg">
-            Chia sẻ với bạn
+          <button className="bg-gray-200 text-gray-800 font-semibold py-3 px-8 rounded-full hover:bg-gray-300 transition duration-300 shadow-md flex items-center space-x-2 text-lg">
+            <FontAwesomeIcon icon={faShareAlt} />
+            <span>Chia sẻ với bạn</span>
           </button>
         </div>
 
         {/* Display Success/Error Messages */}
-        {isSuccess && <p className="text-green-500">Đăng ký thành công!</p>}
+        {isSuccess && <p className="text-green-500 font-semibold">Đăng ký thành công!</p>}
         {isError && (
-          <p className="text-red-500">Đăng ký thất bại. Vui lòng thử lại.</p>
+          <p className="text-red-500 font-semibold">Đăng ký thất bại. Vui lòng thử lại.</p>
         )}
 
         {/* Activity Details */}
-        <div className="mt-4 space-y-2">
-          <p>
-            <strong>Host:</strong> {activity_host}
-          </p>
-          <p>
-            <strong>Duration:</strong> {activity_duration} minutes
-          </p>
-          <p>
-            <strong>Points:</strong> {activity_point}
-          </p>
-          <p>
-            <strong>Categories:</strong> {activity_categories.join(", ")}
-          </p>
+        <div className="bg-gray-50 rounded-lg p-6 shadow-sm space-y-4">
+          <div className="flex items-center text-gray-700 space-x-3 text-lg">
+            <FontAwesomeIcon icon={faUser} className="text-blue-500" />
+            <span><strong>Người tổ chức:</strong> {activity_host}</span>
+          </div>
+          <div className="flex items-center text-gray-700 space-x-3 text-lg">
+            <FontAwesomeIcon icon={faClock} className="text-blue-500" />
+            <span><strong>Thời gian:</strong> {activity_duration} phút</span>
+          </div>
+          <div className="flex items-center text-gray-700 space-x-3 text-lg">
+            <FontAwesomeIcon icon={faStar} className="text-blue-500" />
+            <span><strong>Điểm tích lũy:</strong> {activity_point}</span>
+          </div>
+          <div className="flex items-center text-gray-700 space-x-3 text-lg">
+            <FontAwesomeIcon icon={faTag} className="text-blue-500" />
+            <span><strong>Danh mục:</strong> {activity_categories.join(", ")}</span>
+          </div>
         </div>
       </div>
     </div>
