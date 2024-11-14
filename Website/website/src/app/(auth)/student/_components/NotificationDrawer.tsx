@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
   useGetNotifications,
   useReadAllNotification,
@@ -46,7 +46,7 @@ const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({
   return (
     <div className="absolute right-0 top-5 bg-white shadow-lg rounded-lg w-[400px] p-4 z-50">
       <div className="flex justify-between items-center mb-2">
-        <h2 className="text-lg font-semibold">Thông báo</h2>
+        <h2 className="text-lg font-semibold text-black">Thông báo</h2>
         {readAllAvailagble && (
           <button
             onClick={() => {
@@ -73,7 +73,7 @@ const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({
                       : ""
                   }`}
                 >
-                  <h3 className="font-semibold pb-3 break-words">
+                  <h3 className="font-semibold pb-3 break-words text-black">
                     {notification.notification_title}
                   </h3>
                   <p className="text-base">
