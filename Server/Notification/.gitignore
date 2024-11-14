@@ -1,0 +1,8 @@
+__pycache__/
+/env
+./src/configs/json
+/.vscode
+/venv
+.venv
+venv
+app.log
