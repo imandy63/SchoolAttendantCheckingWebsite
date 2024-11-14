@@ -13,6 +13,7 @@ import {
   getActivitiesByDateAPI,
   getUpcomingActivitiesGroupByDateAPI,
   participateActivityAPI,
+  getActivityForStudent,
 } from "@/api/api.activity";
 import {
   ACTIVITIES,
@@ -83,6 +84,14 @@ export const useUpdateActivity = () => {
       queryClient.invalidateQueries({ queryKey: [ACTIVITIES] });
       queryClient.invalidateQueries({ queryKey: [ACTIVITY, variables.id] });
     },
+  });
+};
+
+export const useGetActivityForStudent = (id: string) => {
+  return useQuery({
+    queryKey: [ACTIVITY, id],
+    queryFn: () => getActivityForStudent(id),
+    enabled: !!id,
   });
 };
 

@@ -67,6 +67,23 @@ class AccessService {
     }
   }
 
+  static async getMe({ userId }: { userId: string }) {
+    const foundUser = await students.find(
+      { _id: convertToObjectIdMongoose(userId) },
+      {
+        student_id: 1,
+        student_name: 1,
+        student_avatar_url: 1,
+      }
+    );
+
+    if (!foundUser) {
+      throw new AuthFailureError("User is not registered!");
+    }
+
+    return { user: foundUser };
+  }
+
   static isAdmin = async ({ userId }: { userId: string }) => {
     const foundUser = await students.findById(
       convertToObjectIdMongoose(userId)

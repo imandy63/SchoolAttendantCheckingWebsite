@@ -76,6 +76,18 @@ class ActivityController {
     }).send(res);
   }
 
+  async userGetActivity(req: Request, res: Response) {
+    const { id } = req.params;
+
+    new SuccessResponse({
+      message: "Get activity successfully",
+      metadata: await ActivityService.userGetActivity({
+        activity_id: id,
+        userId: req.body.userId,
+      }),
+    }).send(res);
+  }
+
   async createActivity(req: Request, res: Response) {
     new CREATED({
       message: "Create activity successfully",
