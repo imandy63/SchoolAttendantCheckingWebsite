@@ -1,6 +1,6 @@
 "use client";
 
-import MainHeader from "@/app/(auth)/(student)/_components/MainHeader";
+import MainHeader from "../student/_components/Header";
 import styles from "../../../components_style/MainHeader.module.css";
 import { NotificationProvider } from "@/context/FCMContext";
 

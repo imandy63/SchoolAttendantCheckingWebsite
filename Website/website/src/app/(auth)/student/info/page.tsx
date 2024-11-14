@@ -1,13 +1,10 @@
 import React from 'react';
-import MainHeader from '@/components/MainHeader';
 import AccordionMenu from '../_components/AccordionMenu';
 import StudentInfo from '../_components/StudentInfo';
 
 const InfoPage: React.FC = () => {
     return (
         <div className="flex flex-col min-h-screen">
-            {/* Header */}
-            <MainHeader />
 
             <div className="flex flex-1">
                 {/* Sidebar (Accordion Menu) */}
