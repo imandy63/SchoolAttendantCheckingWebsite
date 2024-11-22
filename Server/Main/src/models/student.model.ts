@@ -13,10 +13,10 @@ const studentSchema = new Schema(
 
     student_name: { type: String, required: true },
     student_avatar_url: { type: String, default: "" },
-    student_address: { type: String, required: true },
+    student_address: { type: String },
     student_class: {
-      class_name: { type: String, required: true },
-      faculty: { type: String, required: true },
+      class_name: { type: String },
+      faculty: { type: String },
     },
     student_activity_point: { type: Number, default: 0 },
     student_participated_activities: {
@@ -38,6 +38,7 @@ const studentSchema = new Schema(
       ],
       default: [],
     },
+    is_active: { type: Boolean, default: true },
     subscribed_categories: { type: [{ type: String }], default: [] },
   },
   {

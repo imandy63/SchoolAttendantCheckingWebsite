@@ -12,5 +12,8 @@ export const findByStudentId = async ({
   student_id: string;
   select?: NumObj;
 }) => {
-  return await students.findOne({ student_id }).select(select).lean();
+  return await students
+    .findOne({ student_id, is_active: true })
+    .select(select)
+    .lean();
 };

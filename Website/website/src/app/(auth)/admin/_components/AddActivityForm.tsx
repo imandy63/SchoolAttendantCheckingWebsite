@@ -13,6 +13,7 @@ import FormMultiSelect from "@/components/MultiSelectField";
 import dayjs from "dayjs";
 import { useToast } from "@/context/ToastContext";
 import ImageInput from "./ImageField";
+import { useGetActivityCategories } from "@/query/useActivity";
 
 type AddActivityFormProps = {
   onSubmit: (activityData: CreateAndEditActivityPagePayload) => void;
@@ -55,6 +56,8 @@ export const AddActivityForm: React.FC<AddActivityFormProps> = ({
   });
 
   const { showToast } = useToast();
+
+  const { data: categories, isLoading } = useGetActivityCategories();
 
   const handleImageSelect = async (selectedFile: File | null) => {
     setFile(selectedFile);
@@ -181,12 +184,19 @@ export const AddActivityForm: React.FC<AddActivityFormProps> = ({
           name="activity_categories"
           control={control}
           label="Danh mục"
+          add_value={true}
           required
-          options={[
-            { value: "Hội thảo", label: "Hội thảo" },
-            { value: "Việc làm", label: "Việc làm" },
-            { value: "Lễ hội", label: "Lễ hội" },
-          ]}
+          options={
+            isLoading
+              ? []
+              : categories.map((category: string) => {
+                  console.log(category);
+                  return {
+                    value: category,
+                    label: category,
+                  };
+                })
+          }
         />
         {errors.activity_categories && (
           <p className="text-red-500 text-sm">

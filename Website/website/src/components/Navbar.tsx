@@ -1,10 +1,18 @@
 "use client";
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch,faTimes, faBars, faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import {
+  faSearch,
+  faTimes,
+  faBars,
+  faChevronDown,
+} from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import NotificationBell from "@/app/(auth)/student/_components/NotificationBell";
+import Image from "next/image";
+import { useStudentInfoContext } from "@/context/StudentAuthContext";
+import { logoutUser } from "@/api/api.auth";
 
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -19,6 +27,8 @@ const Navbar = () => {
     }
   };
 
+  const { data, isLoading } = useStudentInfoContext();
+
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
@@ -30,7 +40,6 @@ const Navbar = () => {
   return (
     <header className="bg-[#0066B3] text-white py-3">
       <nav className="flex justify-between items-center w-[90%] mx-auto">
-        
         {/* Logo */}
         <div className="flex items-center mr-6">
           <img
@@ -42,17 +51,24 @@ const Navbar = () => {
         </div>
 
         {/* Navigation Links */}
-        <div className={`hidden md:flex space-x-8 mr-8 ${isMenuOpen ? "flex" : "hidden"} md:flex`}>
-          <Link href="/main" className="hover:text-gray-200">
+        <div
+          className={`hidden md:flex space-x-8 mr-8 ${
+            isMenuOpen ? "flex" : "hidden"
+          } md:flex`}
+        >
+          <Link href="/student/main" className="hover:text-gray-200">
             Trang chủ
           </Link>
-          <Link href="/posts" className="hover:text-gray-200">
+          <Link href="/student/posts" className="hover:text-gray-200">
             Bài viết
           </Link>
         </div>
 
         {/* Search Bar */}
-        <form onSubmit={handleSearch} className="relative hidden md:flex items-center mr-8">
+        <form
+          onSubmit={handleSearch}
+          className="relative hidden md:flex items-center mr-8"
+        >
           <input
             type="text"
             value={searchQuery}
@@ -60,37 +76,63 @@ const Navbar = () => {
             placeholder="Tìm kiếm..."
             className="p-2 pl-4 rounded-full bg-white text-black focus:outline-none w-64 border border-gray-300"
           />
-          <button
-            type="submit"
-            className="absolute right-3 text-black"
-          >
+          <button type="submit" className="absolute right-3 text-black">
             <FontAwesomeIcon icon={faSearch} />
           </button>
         </form>
 
         {/* User Actions */}
         <div className="relative flex items-center space-x-4">
-          <Link href="/activities" className="hover:text-gray-200">
+          <Link href="/student/past-activities" className="hover:text-gray-200">
             Hoạt động của bạn
           </Link>
-          <NotificationBell/>
+          <NotificationBell />
 
           {/* User Profile Dropdown */}
           <div className="relative">
-            <div className="flex items-center space-x-2 cursor-pointer" onClick={toggleDropdown}>
-              <div className="bg-white w-8 h-8 rounded-full border border-white overflow-hidden"></div>
-              <span className="hidden md:inline">Phạm Hồ Đăng Huy</span>
+            <div
+              className="flex items-center space-x-2 cursor-pointer"
+              onClick={toggleDropdown}
+            >
+              {isLoading ? (
+                <>
+                  <div className="w-10 h-10 rounded-full bg-gray-300"></div>
+                  <div className="hidden md:inline w-24 h-5 bg-gray-300 rounded-md"></div>
+                </>
+              ) : (
+                <>
+                  <Image
+                    src={
+                      data.student_avatar_url
+                        ? data.student_avatar_url
+                        : "/default-avatar.jpg"
+                    }
+                    alt="User Avatar"
+                    className="rounded-full"
+                    width={40}
+                    height={40}
+                  />
+                  <span className="hidden md:inline">{data?.student_name}</span>
+                </>
+              )}
+
               <FontAwesomeIcon icon={faChevronDown} />
             </div>
 
             {/* Dropdown Menu */}
             {isDropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-10 text-black">
-                <Link href="/profile" className="block px-4 py-2 hover:bg-gray-100">
+                <Link
+                  href="/student/info"
+                  className="block px-4 py-2 hover:bg-gray-100"
+                >
                   Thông tin tài khoản
                 </Link>
                 <button
-                  onClick={() => console.log("Logged out")}
+                  onClick={async () => {
+                    await logoutUser();
+                    router.push("/login");
+                  }}
                   className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                 >
                   Đăng xuất
@@ -101,7 +143,10 @@ const Navbar = () => {
         </div>
 
         {/* Mobile Menu Toggle Button */}
-        <button onClick={toggleMenu} className="text-3xl cursor-pointer md:hidden ml-4">
+        <button
+          onClick={toggleMenu}
+          className="text-3xl cursor-pointer md:hidden ml-4"
+        >
           <FontAwesomeIcon icon={isMenuOpen ? faTimes : faBars} />
         </button>
       </nav>
@@ -118,8 +163,14 @@ const Navbar = () => {
               placeholder="Tìm kiếm..."
               className="w-full p-2 pl-4 focus:outline-none"
             />
-            <button onClick={handleSearch} className="absolute right-2 text-black">
-              <FontAwesomeIcon icon={faSearch} className="bg-white rounded-full p-1" />
+            <button
+              onClick={handleSearch}
+              className="absolute right-2 text-black"
+            >
+              <FontAwesomeIcon
+                icon={faSearch}
+                className="bg-white rounded-full p-1"
+              />
             </button>
           </div>
         </div>

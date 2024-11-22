@@ -104,6 +104,67 @@ class ActivityController {
       }),
     }).send(res);
   }
+
+  async getActivityCategories(req: Request, res: Response, next: NextFunction) {
+    new SuccessResponse({
+      message: "Get activity categories successfully",
+      metadata: await ActivityService.getActivityCategories(),
+    }).send(res);
+  }
+
+  async assignAttendantChecking(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    new SuccessResponse({
+      message: "Assign attendant checking successfully",
+      metadata: await ActivityService.assignAttendantChecking({
+        ...req.body,
+        activity_id: req.params.id,
+      }),
+    }).send(res);
+  }
+
+  async removeCheckingAssignment(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    new SuccessResponse({
+      message: "Remove checking assignment successfully",
+      metadata: await ActivityService.removeCheckingAssignment({
+        ...req.body,
+        activity_id: req.params.id,
+      }),
+    }).send(res);
+  }
+
+  async getAssignableActivities(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    new SuccessResponse({
+      message: "Get assignable attendants successfully",
+      metadata: await ActivityService.getAssignableActivities({
+        id: req.query.id as string,
+      }),
+    }).send(res);
+  }
+
+  async getAssignedActivitiesByWorker(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    new SuccessResponse({
+      message: "Get assigned activities by worker successfully",
+      metadata: await ActivityService.getAssignedActivitiesByWorker({
+        id: req.query.id as string,
+      }),
+    }).send(res);
+  }
 }
 
 export default new ActivityController();

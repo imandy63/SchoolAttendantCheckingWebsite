@@ -53,6 +53,13 @@ export const getActivitiesByDateAPI = async (date?: string) => {
   return response.data.metadata;
 };
 
+export const getActivityCategoriesAPI = async () => {
+  const response = await axiosInstance.get(
+    `${urlConfig.CORE}/api/activity/category`
+  );
+  return response.data.metadata;
+};
+
 export const createActivityAPI = async ({
   activity_name,
   activity_start_date,
@@ -108,6 +115,52 @@ export const updateActivityAPI = async ({
 export const participateActivityAPI = async (activityId: string) => {
   const response = await axiosInstance.post(
     `${urlConfig.CORE}/api/activity/participate/${activityId}`
+  );
+  return response.data.metadata;
+};
+
+export const getAssignableActivitiesAPI = async (id: string) => {
+  const response = await axiosInstance.get(
+    `${urlConfig.CORE}/api/activity/assignable?id=${id}`
+  );
+  return response.data.metadata;
+};
+
+export const assignCheckingAPI = async ({
+  activity_id,
+  student_id,
+}: {
+  activity_id: string;
+  student_id: string;
+}) => {
+  const response = await axiosInstance.put(
+    `${urlConfig.CORE}/api/activity/assign/${activity_id}`,
+    {
+      student_id,
+    }
+  );
+  return response.data.metadata;
+};
+
+export const getAssignedActivitiesByWorkerAPI = async (id: string) => {
+  const response = await axiosInstance.get(
+    `${urlConfig.CORE}/api/activity/assigned?id=${id}`
+  );
+  return response.data.metadata;
+};
+
+export const removeCheckingAssignmentAPI = async ({
+  activity_id,
+  student_id,
+}: {
+  activity_id: string;
+  student_id: string;
+}) => {
+  const response = await axiosInstance.put(
+    `${urlConfig.CORE}/api/activity/remove-assignment/${activity_id}`,
+    {
+      student_id,
+    }
   );
   return response.data.metadata;
 };

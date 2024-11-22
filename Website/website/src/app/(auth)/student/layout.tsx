@@ -4,6 +4,7 @@ import styles from "../../../components_style/MainHeader.module.css";
 import { NotificationProvider } from "@/context/FCMContext";
 import Navbar from "@/components/Navbar";
 import Sidebar from "../student/_components/SidebarUser";
+import { StudentInfoProvider } from "@/context/StudentAuthContext";
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -12,9 +13,11 @@ export default function RootLayout({
   return (
     <div className={styles.webContainer}>
       <NotificationProvider>
-        <Navbar/>
-        <Sidebar />
-        {children}
+        <StudentInfoProvider>
+          <Navbar />
+          <Sidebar />
+          {children}
+        </StudentInfoProvider>
       </NotificationProvider>
     </div>
   );

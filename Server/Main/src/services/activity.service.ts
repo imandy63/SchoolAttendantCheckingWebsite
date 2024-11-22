@@ -16,6 +16,7 @@ import { students } from "../models/student.model";
 import { convertToObjectIdMongoose } from "../utils";
 import { NotificationService } from "./notification.service";
 import { RedisService } from "./redis.service";
+import { Role } from "../enum/role.enum";
 
 class ActivityService {
   static redisService = RedisService.getInstance();
@@ -124,6 +125,10 @@ class ActivityService {
       },
     ]);
     return result;
+  }
+
+  static async getActivityCategories() {
+    return await activities.find({}).distinct("activity_categories");
   }
 
   static async userGetActivity({
@@ -261,6 +266,14 @@ class ActivityService {
     activity_location,
     activity_host,
   }: IActivity) {
+    const foundActivity = await activities
+      .findOne({ activity_name: activity_name })
+      .lean();
+
+    if (foundActivity) {
+      throw new BadRequestError("Activity name already exists");
+    }
+
     const result = await activities.create({
       activity_name,
       activity_start_date,
@@ -292,6 +305,8 @@ class ActivityService {
         },
       },
     ]);
+
+    console.log(users);
 
     const userIds = users[0].userIds.map((oid: ObjectId) => oid.toString());
 
@@ -444,6 +459,127 @@ class ActivityService {
       },
       { activity_status: Activity_status.CLOSED }
     );
+  }
+
+  static async assignAttendantChecking({
+    activity_id,
+    student_id,
+  }: {
+    activity_id: string;
+    student_id: string;
+  }) {
+    const foundWorker = await students
+      .findOne({
+        _id: convertToObjectIdMongoose(student_id),
+        role: Role.UNION_WORKER,
+        is_active: true,
+      })
+      .lean();
+
+    if (!foundWorker) {
+      throw new NotFoundError("Worker not found");
+    }
+    return await activities.findOneAndUpdate(
+      { _id: convertToObjectIdMongoose(activity_id) },
+      { assigned_to: convertToObjectIdMongoose(student_id) },
+      {
+        new: true,
+      }
+    );
+  }
+
+  static async removeCheckingAssignment({
+    student_id,
+    activity_id,
+  }: {
+    student_id: string;
+    activity_id: string;
+  }) {
+    const foundWorker = await students
+      .findOne({
+        _id: convertToObjectIdMongoose(student_id),
+        role: Role.UNION_WORKER,
+      })
+      .lean();
+
+    if (!foundWorker) {
+      throw new NotFoundError("Worker not found");
+    }
+    return await activities.findOneAndUpdate(
+      {
+        assigned_to: convertToObjectIdMongoose(student_id),
+        _id: convertToObjectIdMongoose(activity_id),
+      },
+      { assigned_to: null },
+      {
+        new: true,
+      }
+    );
+  }
+
+  static async getAssignedActivitiesByWorker({ id }: { id?: string }) {
+    if (!id) {
+      throw new BadRequestError("Id not found");
+    }
+    const foundWorker = await students
+      .findOne({
+        _id: convertToObjectIdMongoose(id),
+        role: Role.UNION_WORKER,
+      })
+      .lean();
+
+    if (!foundWorker) {
+      throw new NotFoundError("Worker not found");
+    }
+
+    return await activities.aggregate([
+      {
+        $match: {
+          assigned_to: convertToObjectIdMongoose(id),
+          activity_status: { $ne: Activity_status.REMOVED },
+        },
+      },
+      {
+        $sort: { activity_start_date: -1 },
+      },
+      {
+        $addFields: {
+          removable: {
+            $cond: {
+              if: { $gte: ["$activity_start_date", new Date()] },
+              then: true,
+              else: false,
+            },
+          },
+        },
+      },
+    ]);
+  }
+
+  static async getAssignableActivities({ id }: { id?: string }) {
+    if (!id) {
+      throw new BadRequestError("Id not found");
+    }
+    const foundWorker = await students
+      .findOne({
+        _id: convertToObjectIdMongoose(id),
+        role: Role.UNION_WORKER,
+      })
+      .lean();
+
+    if (!foundWorker) {
+      throw new NotFoundError("Worker not found");
+    }
+
+    return await activities
+      .find({
+        activity_status: {
+          $not: { $in: [Activity_status.REMOVED, Activity_status.CLOSED] },
+        },
+        assigned_to: null,
+        activity_start_date: { $gte: new Date().toUTCString() },
+      })
+      .lean();
   }
 }
 

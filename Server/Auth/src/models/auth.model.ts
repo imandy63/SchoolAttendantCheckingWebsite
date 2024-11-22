@@ -17,6 +17,7 @@ const studentSchema = new Schema(
       class_name: { type: String, required: true },
       faculty: { type: String, required: true },
     },
+    is_active: { type: Boolean, default: true },
     student_activity_point: { type: Number, default: 0 },
     student_participated_activities: {
       type: [

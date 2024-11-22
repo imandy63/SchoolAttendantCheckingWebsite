@@ -50,4 +50,9 @@ const isUnionWorker = async () => {
   return response.data.metadata;
 };
 
-export { loginUser, logoutUser, verifyUser, isAdmin, isUnionWorker };
+const getMe = async () => {
+  const response = await axiosInstance.get(`${urlConfig.AUTH}/api/auth/me`);
+  return response.data.metadata;
+};
+
+export { loginUser, logoutUser, verifyUser, isAdmin, isUnionWorker, getMe };

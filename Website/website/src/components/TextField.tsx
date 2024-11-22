@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { Control, Controller } from "react-hook-form";
-import { TextField } from "@mui/material";
+import { TextField, InputAdornment, IconButton } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 type FormInputTextProps = {
   disabled?: boolean;
@@ -15,6 +16,7 @@ type FormInputTextProps = {
   multiline?: boolean;
   autofocus?: boolean;
   errorMessage?: string;
+  password_field?: boolean;
 };
 
 const FormInputText: React.FC<FormInputTextProps> = ({
@@ -29,7 +31,14 @@ const FormInputText: React.FC<FormInputTextProps> = ({
   rows = 1,
   multiline = false,
   autofocus = false,
+  password_field = false,
 }) => {
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleTogglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
+  };
+
   return (
     <Controller
       name={name}
@@ -47,13 +56,30 @@ const FormInputText: React.FC<FormInputTextProps> = ({
           fullWidth
           label={label}
           disabled={disabled}
-          type={type}
+          type={password_field && !showPassword ? "password" : type}
           rows={rows}
           multiline={multiline}
           autoFocus={autofocus}
           onChange={onChange}
           value={value}
           variant={variant}
+          InputProps={
+            password_field
+              ? {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={handleTogglePasswordVisibility}
+                        edge="end"
+                        aria-label="toggle password visibility"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }
+              : undefined
+          }
         />
       )}
     />

@@ -1,6 +1,7 @@
 import { BadRequestError, NotFoundError } from "../core/error.response";
 import { Participation_Status, Role } from "../enum/role.enum";
 import { StudentParticipatedActivity } from "../interfaces/activity.interface";
+import { activities } from "../models/activity.model";
 import { students, StudentPayload } from "../models/student.model";
 import { convertToObjectIdMongoose } from "../utils";
 import { ActivityService } from "./activity.service";
@@ -171,5 +172,93 @@ export class StudentService {
       { $set: { subscribed_categories: categories } },
       { new: true }
     );
+  };
+
+  static createUnionWorker = async ({
+    student_id,
+    password,
+    student_name,
+  }: {
+    student_id: string;
+    password: string;
+    student_name: string;
+  }) => {
+    const foundUnionWorker = await students.findOne({ student_id });
+    if (foundUnionWorker) {
+      throw new BadRequestError("Union worker already exists");
+    }
+
+    const result = await students.create({
+      student_id,
+      password,
+      role: Role.UNION_WORKER,
+      student_name,
+    });
+
+    return result;
+  };
+
+  static enableWorker = async (id: string) => {
+    return await students.findOneAndUpdate(
+      { _id: convertToObjectIdMongoose(id), role: Role.UNION_WORKER },
+      { $set: { is_active: true } },
+      { new: true }
+    );
+  };
+
+  static disableWorker = async (id: string) => {
+    return await students.findOneAndUpdate(
+      { _id: convertToObjectIdMongoose(id), role: Role.UNION_WORKER },
+      { $set: { is_active: false } },
+      { new: true }
+    );
+  };
+
+  static getUnionWorkers = async ({ page = 1, limit = 10, search = "" }) => {
+    const result = await students
+      .find(
+        {
+          role: Role.UNION_WORKER,
+          student_name: { $regex: search, $options: "i" },
+        },
+        { student_name: 1, student_id: 1, is_active: 1 }
+      )
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean();
+
+    const total = await students.countDocuments({
+      student_name: { $regex: search, $options: "i" },
+      role: Role.UNION_WORKER,
+    });
+    return { data: result, total, page, limit };
+  };
+
+  static resetUnionWorkerPassword = async ({
+    id,
+    password,
+  }: {
+    id: string;
+    password: string;
+  }) => {
+    return await students.findOneAndUpdate(
+      { _id: convertToObjectIdMongoose(id), role: Role.UNION_WORKER },
+      { $set: { password } },
+      { new: true }
+    );
+  };
+
+  static getUnionWorkerAssignedActivities = async ({ id }: { id: string }) => {
+    const foundUnionWorker = await students
+      .findOne({ _id: convertToObjectIdMongoose(id), role: Role.UNION_WORKER })
+      .lean();
+
+    if (!foundUnionWorker) {
+      throw new NotFoundError("Union worker not found");
+    }
+
+    return await activities
+      .find({ assigned_to: convertToObjectIdMongoose(id) })
+      .lean();
   };
 }

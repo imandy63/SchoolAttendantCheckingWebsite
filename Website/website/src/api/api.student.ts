@@ -15,3 +15,12 @@ export const getStudentActivitiesAPI = async (studentId: string) => {
 
   return response.data.metadata;
 };
+
+export const changeSubscribeCategoriesAPI = async ({
+  categories,
+}: {
+  categories: string[];
+}) =>
+  axiosInstance.put(`${urlConfig.CORE}/api/student/categories`, {
+    categories,
+  });

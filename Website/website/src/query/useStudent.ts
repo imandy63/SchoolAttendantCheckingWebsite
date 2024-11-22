@@ -1,5 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
-import { getAllStudentsAPI, getStudentActivitiesAPI } from "@/api/api.student";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  changeSubscribeCategoriesAPI,
+  getAllStudentsAPI,
+  getStudentActivitiesAPI,
+} from "@/api/api.student";
 import { STUDENT_ACTIVITIES, STUDENTS } from "@/constants/query";
 
 export const useStudents = (page: number, search = "") => {
@@ -15,5 +19,16 @@ export const useStudentActivities = (studentId: string) => {
     queryKey: [STUDENT_ACTIVITIES, studentId],
     queryFn: () => getStudentActivitiesAPI(studentId),
     enabled: !!studentId,
+  });
+};
+
+export const useChangeSubscribedCategories = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (categories: string[]) =>
+      changeSubscribeCategoriesAPI({ categories }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [STUDENT_ACTIVITIES] });
+    },
   });
 };

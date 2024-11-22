@@ -21,6 +21,28 @@ router.get(
 
 router.get("/", asyncHandler(ActivityController.getActivities));
 
+router.get(
+  "/assigned",
+  asyncHandler(ActivityController.getAssignedActivitiesByWorker)
+);
+
+router.put(
+  "/remove-assignment/:id",
+  asyncHandler(ActivityController.removeCheckingAssignment)
+);
+
+router.get(
+  "/assignable",
+  asyncHandler(ActivityController.getAssignableActivities)
+);
+
+router.put(
+  "/assign/:id",
+  asyncHandler(ActivityController.assignAttendantChecking)
+);
+
+router.get("/category", asyncHandler(ActivityController.getActivityCategories));
+
 router.post("/", asyncHandler(ActivityController.createActivity));
 
 router.post("/participate/:id", asyncHandler(ActivityController.participate));

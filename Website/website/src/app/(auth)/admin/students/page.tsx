@@ -69,7 +69,7 @@ export default function Students() {
 
   return (
     <>
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-8 h-screen overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <SearchBar onSearch={handleSearch} />
         </div>

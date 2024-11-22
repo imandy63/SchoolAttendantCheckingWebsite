@@ -15,6 +15,7 @@ import { getActivityAPI } from "@/api/api.activity";
 import dayjs from "dayjs";
 import { useToast } from "@/context/ToastContext";
 import ImageInput from "./ImageField";
+import { useGetActivityCategories } from "@/query/useActivity";
 
 const validationSchema = yup.object({
   activity_name: yup.string().required("Tên hoạt động là bắt buộc"),
@@ -53,6 +54,7 @@ export const EditActivityForm: React.FC<EditActivityFormProps> = ({
   const [file, setFile] = useState<File | null>(null);
   const { showToast } = useToast();
   const [defaultImage, setDefaultImage] = useState<string | null>(null);
+  const { data: categories, isLoading } = useGetActivityCategories();
 
   const {
     handleSubmit,
@@ -80,6 +82,7 @@ export const EditActivityForm: React.FC<EditActivityFormProps> = ({
         setValue("activity_duration", activity.activity_duration);
         setValue("activity_host", activity.activity_host);
         setValue("activity_categories", activity.activity_categories);
+        setValue("activity_location", activity.activity_location);
         setLoading(false);
       } catch (error) {
         console.error("Failed to load activity details", error);
@@ -142,8 +145,10 @@ export const EditActivityForm: React.FC<EditActivityFormProps> = ({
           control={control}
           label="Tên hoạt động"
           required
-          // Error handling will be done automatically via `react-hook-form`
         />
+        {errors.activity_name && (
+          <p className="text-red-500 text-sm">{errors.activity_name.message}</p>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-2">
@@ -215,12 +220,18 @@ export const EditActivityForm: React.FC<EditActivityFormProps> = ({
           name="activity_categories"
           control={control}
           label="Danh mục"
+          add_value={true}
           required
-          options={[
-            { value: "Hội thảo", label: "Hội thảo" },
-            { value: "Việc làm", label: "Việc làm" },
-            { value: "Lễ hội", label: "Lễ hội" },
-          ]}
+          options={
+            isLoading
+              ? []
+              : categories.map((category: string) => {
+                  return {
+                    value: category,
+                    label: category,
+                  };
+                })
+          }
         />
         {errors.activity_categories && (
           <p className="text-red-500 text-sm">
@@ -229,7 +240,7 @@ export const EditActivityForm: React.FC<EditActivityFormProps> = ({
         )}
       </div>
 
-      <div>
+      <div className="grid grid-cols-2 gap-2">
         <FormInputText
           name="activity_host"
           control={control}
@@ -253,8 +264,8 @@ export const EditActivityForm: React.FC<EditActivityFormProps> = ({
       </div>
 
       <Button
-        onClick={handleSubmit(onSubmitForm)}
-        label="Cập nhật hoạt động"
+        type="submit"
+        label="Chỉnh sửa hoạt động"
         variant="primary"
         className="w-full py-2 mt-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
       />

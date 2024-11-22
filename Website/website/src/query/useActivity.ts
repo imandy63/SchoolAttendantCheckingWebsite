@@ -14,6 +14,11 @@ import {
   getUpcomingActivitiesGroupByDateAPI,
   participateActivityAPI,
   getActivityForStudent,
+  getActivityCategoriesAPI,
+  getAssignableActivitiesAPI,
+  assignCheckingAPI,
+  getAssignedActivitiesByWorkerAPI,
+  removeCheckingAssignmentAPI,
 } from "@/api/api.activity";
 import {
   ACTIVITIES,
@@ -34,6 +39,13 @@ export const useGetActivitiesByDate = (date: string) => {
     queryKey: [ACTIVITIES, date],
     queryFn: () => getActivitiesByDateAPI(date),
     retry: false,
+  });
+};
+
+export const useGetActivityCategories = () => {
+  return useQuery({
+    queryKey: [ACTIVITIES, "categories"],
+    queryFn: () => getActivityCategoriesAPI(),
   });
 };
 
@@ -102,5 +114,53 @@ export const useParticipateActivity = (activityId: string) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [ACTIVITY, activityId] });
     },
+  });
+};
+
+export const useGetAssignableActivity = (id: string) => {
+  return useQuery({
+    queryKey: [ACTIVITIES, "assignable"],
+    queryFn: () => getAssignableActivitiesAPI(id),
+  });
+};
+
+export const useAssignChecking = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      activity_id,
+      student_id,
+    }: {
+      activity_id: string;
+      student_id: string;
+    }) => assignCheckingAPI({ activity_id, student_id }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [ACTIVITIES, "assignable"] });
+      queryClient.invalidateQueries({ queryKey: [ACTIVITIES, "assigned"] });
+    },
+  });
+};
+
+export const useRemoveCheckingAssignment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      activity_id,
+      student_id,
+    }: {
+      activity_id: string;
+      student_id: string;
+    }) => removeCheckingAssignmentAPI({ activity_id, student_id }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [ACTIVITIES, "assignable"] });
+      queryClient.invalidateQueries({ queryKey: [ACTIVITIES, "assigned"] });
+    },
+  });
+};
+
+export const useGetAssignedActivities = (id: string) => {
+  return useQuery({
+    queryKey: [ACTIVITIES, "assigned"],
+    queryFn: () => getAssignedActivitiesByWorkerAPI(id),
   });
 };

@@ -1,6 +1,12 @@
 import { ReactNode } from "react";
 import { Button } from "./Button";
-import { useGetActivityParticipants } from "@/query/useActivity";
+import {
+  useAssignChecking,
+  useGetActivityParticipants,
+  useGetAssignableActivity,
+  useGetAssignedActivities,
+  useRemoveCheckingAssignment,
+} from "@/query/useActivity";
 import { useStudentActivities } from "@/query/useStudent";
 import { Skeleton } from "./SkeletonField";
 import {
@@ -8,15 +14,21 @@ import {
   Participation_Status,
 } from "@/enums/activityParticipant.enum";
 import { useGetActivityTrackingDetail } from "@/query/useTracking";
+import { AddUnionWorkerForm } from "./AddUnionWorkerForm";
+import { ResetUnionWorkerPasswordForm } from "./ResetPasswordForm";
+import ScrollableList from "@/components/ListDisplayer";
+import { useToast } from "@/context/ToastContext";
 
 interface PopupProps {
   isOpen: boolean;
   title: string;
   onClose: () => void;
   children: ReactNode;
+  className?: string;
 }
 
 export const Popup: React.FC<PopupProps> = ({
+  className,
   isOpen,
   title,
   onClose,
@@ -25,8 +37,12 @@ export const Popup: React.FC<PopupProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-8 rounded shadow-lg w-1/2 max-h-[80vh]">
+    <div
+      className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50`}
+    >
+      <div
+        className={`bg-white p-8 rounded flex-col flex justify-between shadow-lg w-1/2 max-h-[80vh] ${className}`}
+      >
         <h2 className="text-xl font-bold mb-4">{title}</h2>
         <div className="mb-4 overflow-y-auto max-h-[50vh]">{children}</div>
         <div className="flex justify-end">
@@ -170,5 +186,112 @@ export const ActivityAttendance: React.FC<ActivityParticipantsProps> = ({
         <p>Chưa có dữ liệu điểm danh</p>
       )}
     </ul>
+  );
+};
+
+export const CreateUnionWorker = ({
+  closePopup,
+}: {
+  closePopup: () => void;
+}) => {
+  return <AddUnionWorkerForm closePopup={closePopup} />;
+};
+
+export const ResetUnionWorkerPassword = ({
+  closePopup,
+  id,
+}: {
+  id: string;
+  closePopup: () => void;
+}) => {
+  return <ResetUnionWorkerPasswordForm id={id} closePopup={closePopup} />;
+};
+
+export const Assignment = ({ id }: { id: string }) => {
+  const { data: assignable, isLoading: isAssignableLoading } =
+    useGetAssignableActivity(id);
+  const { data: assigned, isLoading: isAssignedLoading } =
+    useGetAssignedActivities(id);
+
+  const { showToast } = useToast();
+
+  const { mutate: assign } = useAssignChecking();
+  const { mutate: removeAssignment } = useRemoveCheckingAssignment();
+
+  if (isAssignableLoading || isAssignedLoading) return <Skeleton count={5} />;
+  return (
+    <div className="flex gap-2">
+      <div className="flex flex-col w-1/2 items-center">
+        <p className="text-lg font-semibold py-2">Đã phân công</p>
+        <ScrollableList
+          items={assigned}
+          renderItem={(item, index) => {
+            return (
+              <div className="flex items-center justify-between w-full">
+                <div>
+                  <p className="font-semibold">{item.activity_name}</p>
+                  <p>{item.activity_start_date}</p>
+                  <p>Địa điểm: {item.activity_location}</p>
+                </div>
+                {item.removable ? (
+                  <Button
+                    label="Xóa phân công"
+                    className="bg-red-500"
+                    onClick={() => {
+                      removeAssignment(
+                        { activity_id: item._id, student_id: id },
+                        {
+                          onSuccess: () => {
+                            showToast("Thành công!", "success");
+                          },
+                          onError: () => {
+                            showToast("Lỗi!", "error");
+                          },
+                        }
+                      );
+                    }}
+                  />
+                ) : (
+                  <></>
+                )}
+              </div>
+            );
+          }}
+        />
+      </div>
+      <div className="flex flex-col w-1/2 items-center">
+        <p className="text-lg font-semibold py-2">Có thể phân công</p>
+        <ScrollableList
+          items={assignable}
+          renderItem={(item, index) => {
+            return (
+              <div className="flex  items-center justify-between w-full">
+                <div>
+                  <p className="font-semibold">{item.activity_name}</p>
+                  <p>{item.activity_start_date}</p>
+                  <p>Địa điểm: {item.activity_location}</p>
+                </div>
+                <Button
+                  label="Chọn"
+                  onClick={() => {
+                    assign(
+                      { activity_id: item._id, student_id: id },
+                      {
+                        onSuccess: () => {
+                          showToast("Thành công!", "success");
+                        },
+                        onError: () => {
+                          showToast("Lỗi!", "error");
+                        },
+                      }
+                    );
+                  }}
+                />
+              </div>
+            );
+          }}
+        />
+      </div>
+    </div>
   );
 };

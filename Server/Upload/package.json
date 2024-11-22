@@ -4,6 +4,7 @@
   "description": "",
   "main": "server.ts",
   "scripts": {
+    "build": "tsc",
     "dev": "npx nodemon --config nodemon.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
