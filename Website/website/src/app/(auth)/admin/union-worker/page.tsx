@@ -93,7 +93,7 @@ export default function UnionWorkerPage() {
 
             {/* Dropdown tác vụ */}
             <Menu as="div" className="relative inline-block text-center">
-              <Menu.Button className="px-2 py-1 bg-gray-200 rounded text-sm">
+              <Menu.Button className="px-2 py-1 ml-2 bg-gray-200 rounded text-sm">
                 Tác vụ
               </Menu.Button>
               <Menu.Items className="absolute mt-2 w-24 bg-white border rounded-md shadow-lg z-10">
