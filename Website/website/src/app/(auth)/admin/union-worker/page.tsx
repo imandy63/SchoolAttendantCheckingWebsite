@@ -12,7 +12,7 @@ import { Menu } from "@headlessui/react";
 
 const headers = ["MSSV", "Họ tên","Tình trạng"];
 
-const dataFields = ["student_id", "student_name"];
+const dataFields = ["student_id", "student_name", "status"];
 
 const mockUnionWorkers = [
   { student_id: "2001215836", student_name: "Kong Hoa Hung", status: "Enable" },
@@ -86,7 +86,7 @@ export default function UnionWorkerPage() {
             {/* Nút trạng thái */}
             <Button
               label={workerStatus[worker.student_id]}
-              variant={workerStatus[worker.student_id] === "Enable" ? "success" : "danger"}
+              variant={workerStatus[worker.student_id] === "Enable" ? "primary" : "secondary"}
               onClick={() => toggleStatus(worker.student_id)}
               className="w-20"
             />
