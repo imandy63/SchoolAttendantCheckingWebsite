@@ -38,7 +38,7 @@ const ActivityCard = ({
     <div className="bg-white shadow-md rounded-lg p-4">
       <div className="flex items-center mb-4">
         <Image
-          src={activity_thumb_url || "/placeholder.jpg"}
+          src={activity_thumb_url || "/default-activity-image.png"}
           alt={activity_name}
           width={100}
           height={100}
@@ -48,7 +48,7 @@ const ActivityCard = ({
           <h3
             className="text-xl font-bold cursor-pointer hover:text-gray-400 duration-200"
             onClick={() => {
-              router.push(`/activity/${activity_id}`);
+              router.push(`/student/activity/${activity_id}`);
             }}
           >
             {activity_name}
