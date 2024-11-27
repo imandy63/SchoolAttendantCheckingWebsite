@@ -248,6 +248,46 @@ class AccessService {
       throw new AuthFailureError("Auth error");
     }
   };
+
+  static createUnionWorker = async ({
+    student_id,
+    password,
+    student_name,
+  }: {
+    student_id: string;
+    password: string;
+    student_name: string;
+  }) => {
+    const foundUnionWorker = await students.findOne({ student_id });
+    if (foundUnionWorker) {
+      throw new BadRequestError("Union worker already exists");
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const result = await students.create({
+      student_id,
+      password: hashedPassword,
+      role: Role.UNION_WORKER,
+      student_name,
+    });
+
+    return result;
+  };
+
+  static resetUnionWorkerPassword = async ({
+    id,
+    password,
+  }: {
+    id: string;
+    password: string;
+  }) => {
+    return await students.findOneAndUpdate(
+      { _id: convertToObjectIdMongoose(id), role: Role.UNION_WORKER },
+      { $set: { password } },
+      { new: true }
+    );
+  };
 }
 
 export default AccessService;

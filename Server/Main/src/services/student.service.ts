@@ -174,30 +174,6 @@ export class StudentService {
     );
   };
 
-  static createUnionWorker = async ({
-    student_id,
-    password,
-    student_name,
-  }: {
-    student_id: string;
-    password: string;
-    student_name: string;
-  }) => {
-    const foundUnionWorker = await students.findOne({ student_id });
-    if (foundUnionWorker) {
-      throw new BadRequestError("Union worker already exists");
-    }
-
-    const result = await students.create({
-      student_id,
-      password,
-      role: Role.UNION_WORKER,
-      student_name,
-    });
-
-    return result;
-  };
-
   static enableWorker = async (id: string) => {
     return await students.findOneAndUpdate(
       { _id: convertToObjectIdMongoose(id), role: Role.UNION_WORKER },
@@ -232,20 +208,6 @@ export class StudentService {
       role: Role.UNION_WORKER,
     });
     return { data: result, total, page, limit };
-  };
-
-  static resetUnionWorkerPassword = async ({
-    id,
-    password,
-  }: {
-    id: string;
-    password: string;
-  }) => {
-    return await students.findOneAndUpdate(
-      { _id: convertToObjectIdMongoose(id), role: Role.UNION_WORKER },
-      { $set: { password } },
-      { new: true }
-    );
   };
 
   static getUnionWorkerAssignedActivities = async ({ id }: { id: string }) => {

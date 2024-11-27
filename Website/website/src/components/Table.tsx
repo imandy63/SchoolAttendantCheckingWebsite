@@ -65,6 +65,8 @@ export const Table = ({
 }: TableProps) => {
   const rowsToRender = [...data];
 
+  console.log(data);
+
   while (rowsToRender.length < 10) {
     rowsToRender.push(null);
   }

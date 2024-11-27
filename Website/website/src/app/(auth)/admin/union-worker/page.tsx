@@ -12,16 +12,15 @@ import {
   Popup,
   ResetUnionWorkerPassword,
 } from "../_components/Popup";
+import ActionButton from "../_components/ActionButton";
 import {
   useDisableUnionWorker,
   useEnableUnionWorker,
   useGetUnionWorkers,
 } from "@/query/useUnionWorker";
 import { useToast } from "@/context/ToastContext";
-import ActionButton from "../_components/ActionButton";
-import { set } from "date-fns";
 
-const headers = ["MSSV", "Họ tên", "Đang kích hoạt"];
+const headers = ["MSSV", "Họ tên", "Tình trạng"];
 
 const dataFields = ["student_id", "student_name", "is_active"];
 
@@ -97,7 +96,6 @@ export default function UnionWorkerPage() {
         />
       </div>
 
-      {/* Cập nhật bảng với căn giữa tiêu đề và canh trái dữ liệu */}
       <Table
         headers={headers}
         dataFieldsName={dataFields}
@@ -205,7 +203,7 @@ export default function UnionWorkerPage() {
           className={"w-4/5 h-4/5"}
           isOpen={assignment}
           title={`Phân công`}
-          onClose={closePopup}
+          onClose={closeAssignment}
         >
           <Assignment id={selectedId as string} />
         </Popup>

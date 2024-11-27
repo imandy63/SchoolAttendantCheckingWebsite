@@ -1,49 +1,38 @@
 "use client";
 
-import { useState } from "react";
-import { Table } from "../../../../components/Table";
-import { SearchBar } from "../_components/SearchBar";
-import { Pagination } from "../../../../components/Pagination";
-import { Button } from "../_components/Button";
+import React, { useState } from "react";
+import TabsComponent from "../_components/TabsComponent";
+import { OverviewTab } from "../_components/OverviewTab";
+import StatisticsTab from "../_components/StatisticsTab";
 
-const dashboardData = [
-  {
-    id: "D001",
-    hoat_dong: "Hoạt động thể thao",
-    tong_so_thanh_vien: 100,
-    ngay: "06/03/2023",
-  },
-  {
-    id: "D002",
-    hoat_dong: "Hoạt động văn nghệ",
-    tong_so_thanh_vien: 80,
-    ngay: "07/03/2023",
-  },
-];
+export default function DashboardPage() {
+  const [activeTab, setActiveTab] = useState("overview");
 
-export default function Dashboard() {
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const headers = ["ID", "Hoạt động", "Tổng số thành viên", "Ngày"];
+  const tabs = [
+    { id: "overview", name: "Tổng quan" },
+    { id: "statistics", name: "Thống kê" },
+  ];
 
   return (
-    <main className="flex-1 p-8">
-      <div className="flex justify-between items-center mb-4">
-        <SearchBar onSearch={() => {}} />
-        <Button label="Thêm hoạt động" onClick={() => {}} variant="primary" />
+    <main className="flex-1 h-[100vh] overflow-y-auto p-8 bg-gray-100">
+      {/* Header */}
+      <header className="mb-8">
+        <h1 className="text-2xl font-bold text-black">Dashboard Admin</h1>
+        <p className="text-gray-600">Thống kê và quản lý các hoạt động</p>
+      </header>
+
+      {/* Tabs */}
+      <TabsComponent
+        tabs={tabs}
+        defaultTab="overview"
+        onTabChange={setActiveTab}
+      />
+
+      {/* Nội dung theo tab */}
+      <div className="mt-6">
+        {activeTab === "overview" && <OverviewTab />}
+        {activeTab === "statistics" && <StatisticsTab />}
       </div>
-      <Table
-        headers={headers}
-        data={dashboardData}
-        actions={(row) => (
-          <Button label="Xem chi tiết" onClick={() => {}} variant="secondary" />
-        )}
-      />
-      <Pagination
-        currentPage={currentPage}
-        totalPages={10}
-        onPageChange={setCurrentPage}
-      />
     </main>
   );
 }

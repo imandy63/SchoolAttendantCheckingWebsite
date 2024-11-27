@@ -84,6 +84,31 @@ class AccessController {
       metadata: await AccessService.getMe({ userId }),
     }).send(res);
   };
+
+  resetUnionWorkerPassword = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    new SuccessResponse({
+      message: "Reset union worker password successfully",
+      metadata: await AccessService.resetUnionWorkerPassword({
+        id: req.params.id as string,
+        ...req.body,
+      }),
+    }).send(res);
+  };
+
+  createUnionWorker = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    new CREATED({
+      message: "Create union worker successfully",
+      metadata: await StudentService.createUnionWorker({ ...req.body }),
+    }).send(res);
+  };
 }
 
 export default new AccessController();

@@ -10,8 +10,6 @@ router.use(asyncHandler(authentication));
 
 router.get("", asyncHandler(UnionWorkerController.getUnionWorkers));
 
-router.post("", asyncHandler(UnionWorkerController.createUnionWorker));
-
 router.put(
   "/:id/disable",
   asyncHandler(UnionWorkerController.disableUnionWorker)
@@ -20,11 +18,6 @@ router.put(
 router.put(
   "/:id/enable",
   asyncHandler(UnionWorkerController.enableUnionWorker)
-);
-
-router.put(
-  "/:id/reset-password",
-  asyncHandler(UnionWorkerController.resetUnionWorkerPassword)
 );
 
 export default router;
