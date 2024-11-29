@@ -26,6 +26,63 @@ export class StudentService {
     );
   };
 
+  static getPastActivities = async ({ id }: { id: string }) => {
+    const result = await students.aggregate([
+      {
+        $match: {
+          _id: convertToObjectIdMongoose(id),
+          role: Role.STUDENT,
+        },
+      },
+      {
+        $unwind: "$student_participated_activities",
+      },
+      {
+        $lookup: {
+          from: "Activities",
+          localField: "student_participated_activities._id",
+          foreignField: "_id",
+          as: "activity",
+        },
+      },
+      {
+        $unwind: "$activity",
+      },
+      {
+        $addFields: {
+          leavable: {
+            $cond: {
+              if: {
+                $gt: [
+                  "$activity.activity_start_date",
+                  {
+                    $add: [new Date(), 2 * 24 * 60 * 60 * 1000],
+                  },
+                ],
+              },
+              then: true,
+              else: false,
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          _id: "$activity._id",
+          activity_name: "$activity.activity_name",
+          activity_start_date: "$activity.activity_start_date",
+          participating_status: "$student_participated_activities.status",
+          leavable: 1,
+          activity_location: "$activity.activity_location",
+        },
+      },
+    ]);
+
+    console.log(result);
+
+    return result;
+  };
+
   static getStudents = async ({
     page = 1,
     limit = 10,

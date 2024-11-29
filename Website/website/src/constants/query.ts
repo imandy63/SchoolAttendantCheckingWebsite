@@ -23,3 +23,5 @@ export const UNION_WORKERS = "union-workers";
 export const UNION_WORKER = "union-worker";
 
 export const ME = "me";
+
+export const CHECKING = "checking";

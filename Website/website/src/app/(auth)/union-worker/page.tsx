@@ -1,9 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Activity } from "@/interfaces/activity.interface";
-import { categorizeActivities } from "@/utils/activity-utils";
-import { ActivityEnum } from "@/enums/activity.enum";
+import { useState } from "react";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -14,7 +11,13 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import { FaRunning, FaClock, FaCheckCircle } from "react-icons/fa";
+import { FaClock, FaCheckCircle } from "react-icons/fa";
+import {
+  useGetPastAssignedActivities,
+  useGetUpcomingAssignedActivities,
+} from "@/query/useChecking";
+import { formatDate } from "@/utils/formatDate";
+import { useRouter } from "next/navigation";
 
 // Registering Chart.js components
 ChartJS.register(
@@ -26,54 +29,24 @@ ChartJS.register(
   Legend
 );
 
-const mockActivities: Activity[] = [
-  // Mock data as provided
-  {
-    _id: "1",
-    activity_name: "Hội thao sinh viên",
-    activity_start_date: new Date("2024-11-15T08:00:00"),
-    activity_participants: [
-      { student_id: "2001215836", student_name: "Kong Hoa Hung" },
-    ],
-    activity_max_participants: 50,
-    activity_point: 10,
-    activity_thumb_url: "/images/sample1.jpg",
-    activity_duration: 120,
-    activity_categories: ["Thể thao"],
-    activity_status: ActivityEnum.ONGOING,
-    activity_host: "Đoàn trường",
-    activity_location: "Sân vận động",
-  },
-  // More data as needed
-];
-
 export default function DashboardPage() {
-  const [categorizedActivities, setCategorizedActivities] = useState({
-    past: [] as Activity[],
-    ongoing: [] as Activity[],
-    upcoming: [] as Activity[],
-  });
   const [activeTab, setActiveTab] = useState<"overview" | "history">(
     "overview"
   );
 
-  useEffect(() => {
-    const categorized = categorizeActivities(mockActivities);
-    setCategorizedActivities(categorized);
-  }, []);
+  const { data: upcoming, isLoading: upcomingLoading } =
+    useGetUpcomingAssignedActivities();
+  const { data: past, isLoading: pastLoading } = useGetPastAssignedActivities();
+
+  const router = useRouter();
 
   const chartData = {
-    labels: ["Đã kết thúc", "Đang diễn ra", "Sắp diễn ra"],
+    labels: ["Đã kết thúc", "Sắp diễn ra"],
     datasets: [
       {
         label: "Số lượng hoạt động",
-        data: [
-          categorizedActivities.past.length,
-          categorizedActivities.ongoing.length,
-          categorizedActivities.upcoming.length,
-        ],
-        backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
-        borderWidth: 1,
+        data: [past?.length || 0, upcoming?.length || 0],
+        backgroundColor: ["#FF6384", "#36A2EB"],
       },
     ],
   };
@@ -131,21 +104,7 @@ export default function DashboardPage() {
 
           {/* Thống kê */}
           <section className="mb-8">
-            <div className="grid grid-cols-3 gap-4">
-              <div
-                className="shadow rounded p-4 flex items-center space-x-4"
-                style={{ backgroundColor: "#FAFAFA" }}
-              >
-                <FaRunning className="text-green-500 text-4xl" />
-                <div>
-                  <h3 className="text-lg font-semibold text-[#0066B3] mb-1">
-                    Hoạt động đang diễn ra
-                  </h3>
-                  <p className="text-3xl font-bold text-green-500">
-                    +{categorizedActivities.ongoing.length}
-                  </p>
-                </div>
-              </div>
+            <div className="grid grid-cols-2 gap-4">
               <div
                 className="shadow rounded p-4 flex items-center space-x-4"
                 style={{ backgroundColor: "#FAFAFA" }}
@@ -156,7 +115,7 @@ export default function DashboardPage() {
                     Hoạt động sắp diễn ra
                   </h3>
                   <p className="text-3xl font-bold text-blue-500">
-                    +{categorizedActivities.upcoming.length}
+                    +{upcoming?.length}
                   </p>
                 </div>
               </div>
@@ -170,7 +129,7 @@ export default function DashboardPage() {
                     Hoạt động đã kết thúc
                   </h3>
                   <p className="text-3xl font-bold text-red-500">
-                    +{categorizedActivities.past.length}
+                    +{past?.length}
                   </p>
                 </div>
               </div>
@@ -198,29 +157,45 @@ export default function DashboardPage() {
                 Danh sách hoạt động
               </h2>
               <ul className="space-y-2">
-                {mockActivities.map((activity) => (
-                  <li
-                    key={activity._id}
-                    className="flex items-center justify-between p-2 bg-white rounded shadow hover:bg-gray-50"
-                  >
-                    <div>
-                      <p className="font-semibold text-[#0066B3]">
-                        {activity.activity_name}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        {activity.activity_location} -{" "}
-                        {activity.activity_start_date.toLocaleDateString()}
-                      </p>
-                    </div>
+                {upcoming &&
+                  upcoming.map((activity) => {
+                    const activityDate = new Date(activity.activity_start_date);
+                    const now = new Date();
+                    const sixHoursLater = new Date(
+                      activityDate.getTime() + 6 * 60 * 60 * 1000
+                    );
 
-                    <button
-                      className="px-4 py-2 text-white bg-[#0066B3] rounded hover:bg-[#005699]"
-                      onClick={() => {}}
-                    >
-                      Tiến hành điểm danh
-                    </button>
-                  </li>
-                ))}
+                    const isButtonEnabled =
+                      now >= activityDate && now <= sixHoursLater;
+                    return (
+                      <li
+                        key={activity._id}
+                        className="flex items-center justify-between p-2 bg-white rounded shadow hover:bg-gray-50"
+                      >
+                        <div>
+                          <p className="font-semibold text-[#0066B3]">
+                            {activity.activity_name}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {activity.activity_location} -{" "}
+                            {formatDate(activity.activity_start_date)}
+                          </p>
+                        </div>
+                        {isButtonEnabled && (
+                          <button
+                            className="px-4 py-2 text-white bg-[#0066B3] rounded hover:bg-[#005699]"
+                            onClick={() => {
+                              router.push(
+                                `/union-worker/attendance-check/${activity._id}`
+                              );
+                            }}
+                          >
+                            Tiến hành điểm danh
+                          </button>
+                        )}
+                      </li>
+                    );
+                  })}
               </ul>
             </div>
           </section>
@@ -233,6 +208,35 @@ export default function DashboardPage() {
             Lịch sử hoạt động
           </h2>
           <p>Hiển thị danh sách lịch sử hoạt động.</p>
+          <div>
+            <ul className="space-y-2">
+              {past &&
+                past.map((activity) => {
+                  return (
+                    <li
+                      key={activity._id}
+                      className="flex items-center justify-between p-2 bg-white rounded shadow hover:bg-gray-50"
+                    >
+                      <div>
+                        <p className="font-semibold text-[#0066B3]">
+                          {activity.activity_name}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {activity.activity_location} -{" "}
+                          {formatDate(activity.activity_start_date)}
+                        </p>
+                      </div>
+                      <button
+                        className="px-4 py-2 text-white bg-[#0066B3] rounded hover:bg-[#005699]"
+                        onClick={() => {}}
+                      >
+                        Xem điểm danh
+                      </button>
+                    </li>
+                  );
+                })}
+            </ul>
+          </div>
         </div>
       )}
     </div>

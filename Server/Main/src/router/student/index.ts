@@ -7,8 +7,6 @@ const router = express.Router();
 
 router.use(asyncHandler(authentication));
 
-router.get("/:id", asyncHandler(StudentController.getStudent));
-
 router.get(
   "/activity/:id",
   asyncHandler(StudentController.getStudentParticipatedActivities)
@@ -19,7 +17,11 @@ router.put(
   asyncHandler(StudentController.changeSubscribeCategories)
 );
 
+router.get("/past", asyncHandler(StudentController.getPastActivities));
+
 router.get("/", asyncHandler(StudentController.getStudents));
+
+router.get("/:id", asyncHandler(StudentController.getStudent));
 
 router.post("/", asyncHandler(StudentController.updateStudentsDetails));
 

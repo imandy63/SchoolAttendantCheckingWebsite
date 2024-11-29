@@ -33,6 +33,27 @@ export const getActivityForStudent = async (activityId: string) => {
   return response.data.metadata;
 };
 
+export const getTimeRange = async () => {
+  const response = await axiosInstance.get(
+    `${urlConfig.CORE}/api/activity/time-range`
+  );
+  return response.data.metadata;
+};
+
+export const getStatistics = async (month: number, year: number) => {
+  const response = await axiosInstance.get(
+    `${urlConfig.CORE}/api/activity/statistic?month=${month}&year=${year}`
+  );
+  return response.data.metadata;
+};
+
+export const getYearStatistics = async (year: number) => {
+  const response = await axiosInstance.get(
+    `${urlConfig.CORE}/api/activity/year-statistic?year=${year}`
+  );
+  return response.data.metadata;
+};
+
 export const getUpcomingActivitiesGroupByDateAPI = async (
   page = 1,
   search = ""

@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   changeSubscribeCategoriesAPI,
   getAllStudentsAPI,
+  getPastActivities,
   getStudentActivitiesAPI,
 } from "@/api/api.student";
 import { STUDENT_ACTIVITIES, STUDENTS } from "@/constants/query";
@@ -30,5 +31,12 @@ export const useChangeSubscribedCategories = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [STUDENT_ACTIVITIES] });
     },
+  });
+};
+
+export const useGetPastActivities = () => {
+  return useQuery({
+    queryKey: [STUDENT_ACTIVITIES, "past"],
+    queryFn: () => getPastActivities(),
   });
 };

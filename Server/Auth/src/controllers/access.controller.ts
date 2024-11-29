@@ -1,7 +1,6 @@
 import { CREATED, SuccessResponse } from "../core/success.response";
 import AccessService from "../services/access.service";
 import { NextFunction, Request, Response } from "express";
-import { IPayload } from "../interfaces/auth";
 import { BadRequestError } from "../core/error.response";
 
 class AccessController {
@@ -106,7 +105,7 @@ class AccessController {
   ) => {
     new CREATED({
       message: "Create union worker successfully",
-      metadata: await StudentService.createUnionWorker({ ...req.body }),
+      metadata: await AccessService.createUnionWorker({ ...req.body }),
     }).send(res);
   };
 }

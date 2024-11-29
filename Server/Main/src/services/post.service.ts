@@ -21,6 +21,16 @@ class PostService {
     };
   }
 
+  static async getTop5LatestPosts() {
+    const postsList = await posts
+      .find({
+        post_deleted: false,
+      })
+      .sort({ post_created_at: -1 })
+      .limit(5);
+    return postsList;
+  }
+
   static async restorePost({ id }: { id: string }) {
     await posts.findOneAndUpdate(
       {

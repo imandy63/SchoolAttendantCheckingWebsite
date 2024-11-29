@@ -19,6 +19,9 @@ import {
   assignCheckingAPI,
   getAssignedActivitiesByWorkerAPI,
   removeCheckingAssignmentAPI,
+  getStatistics,
+  getTimeRange,
+  getYearStatistics,
 } from "@/api/api.activity";
 import {
   ACTIVITIES,
@@ -162,5 +165,32 @@ export const useGetAssignedActivities = (id: string) => {
   return useQuery({
     queryKey: [ACTIVITIES, "assigned"],
     queryFn: () => getAssignedActivitiesByWorkerAPI(id),
+  });
+};
+
+export const useGetTimeRange = () => {
+  return useQuery({
+    queryKey: [ACTIVITIES, "time-range"],
+    queryFn: () => getTimeRange(),
+  });
+};
+
+export const useGetStatistics = ({
+  month,
+  year,
+}: {
+  month: number;
+  year: number;
+}) => {
+  return useQuery({
+    queryKey: [ACTIVITIES, "statistics", month, year],
+    queryFn: () => getStatistics(month, year),
+  });
+};
+
+export const useGetYearStatistics = ({ year }: { year: number }) => {
+  return useQuery({
+    queryKey: [ACTIVITIES, "year-statistics", year],
+    queryFn: () => getYearStatistics(year),
   });
 };

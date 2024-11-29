@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Sidebar } from "../_components/Sidebar";
 import { Table } from "../../../../components/Table";
 import { SearchBar } from "../_components/SearchBar";
 import { Pagination } from "../../../../components/Pagination";
@@ -98,7 +97,7 @@ export default function Posts() {
 
   return (
     <>
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-8 h-screen overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <SearchBar onSearch={handleSearch} />
           <Button

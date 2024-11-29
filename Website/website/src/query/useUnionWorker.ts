@@ -1,13 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getAllUnionWorkersAPI,
-  createUnionWorkerAPI,
   disableUnionWorkerAPI,
   enableUnionWorkerAPI,
-  resetUnionWorkerPasswordAPI,
 } from "@/api/api.union-worker";
 import { UNION_WORKERS, UNION_WORKER } from "@/constants/query";
-
+import {
+  resetUnionWorkerPasswordAPI,
+  createUnionWorkerAPI,
+} from "@/api/api.auth";
 export const useGetUnionWorkers = (page: number, search = "") => {
   return useQuery({
     queryKey: [UNION_WORKERS, page, search],

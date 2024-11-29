@@ -28,6 +28,24 @@ class ActivityController {
     }).send(res);
   }
 
+  async getStatistics(req: Request, res: Response, next: NextFunction) {
+    const { month, year } = req.query;
+    new SuccessResponse({
+      message: "Get statistics successfully",
+      metadata: await ActivityService.getStatistics({
+        month: Number(month),
+        year: Number(year),
+      }),
+    }).send(res);
+  }
+
+  async getTimeRange(req: Request, res: Response, next: NextFunction) {
+    new SuccessResponse({
+      message: "Get time range successfully",
+      metadata: await ActivityService.getTimeRange(),
+    }).send(res);
+  }
+
   async getUpcomingActivitiesGroupByDate(
     req: Request,
     res: Response,
@@ -163,6 +181,35 @@ class ActivityController {
       metadata: await ActivityService.getAssignedActivitiesByWorker({
         id: req.query.id as string,
       }),
+    }).send(res);
+  }
+
+  async getAvailableAttendantChecking(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    new SuccessResponse({
+      message: "Get available attendant checking successfully",
+      metadata: await ActivityService.getAvailableAttendantChecking({
+        id: req.body.userId,
+      }),
+    }).send(res);
+  }
+
+  async getPastCheckings(req: Request, res: Response, next: NextFunction) {
+    new SuccessResponse({
+      message: "Get past checkings successfully",
+      metadata: await ActivityService.getPastCheckings({
+        id: req.body.userId,
+      }),
+    }).send(res);
+  }
+
+  async getYearStatistics(req: Request, res: Response, next: NextFunction) {
+    new SuccessResponse({
+      message: "Get year statistics successfully",
+      metadata: await ActivityService.getYearStatistics(Number(req.query.year)),
     }).send(res);
   }
 }

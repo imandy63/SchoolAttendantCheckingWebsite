@@ -258,7 +258,9 @@ class AccessService {
     password: string;
     student_name: string;
   }) => {
-    const foundUnionWorker = await students.findOne({ student_id });
+    const foundUnionWorker = await students.findOne({
+      student_id,
+    });
     if (foundUnionWorker) {
       throw new BadRequestError("Union worker already exists");
     }
@@ -284,7 +286,7 @@ class AccessService {
   }) => {
     return await students.findOneAndUpdate(
       { _id: convertToObjectIdMongoose(id), role: Role.UNION_WORKER },
-      { $set: { password } },
+      { $set: { password: await bcrypt.hash(password, 10) } },
       { new: true }
     );
   };

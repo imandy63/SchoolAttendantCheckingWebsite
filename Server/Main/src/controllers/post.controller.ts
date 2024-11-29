@@ -54,6 +54,17 @@ class PostController {
       message: "Delete post successfully",
     }).send(res);
   };
+
+  getTop5LatestPosts = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    new SuccessResponse({
+      message: "Get top 5 latest posts successfully",
+      metadata: await PostService.getTop5LatestPosts(),
+    }).send(res);
+  };
 }
 
 export default new PostController();

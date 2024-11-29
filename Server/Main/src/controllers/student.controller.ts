@@ -33,6 +33,15 @@ class StudentController {
     }).send(res);
   }
 
+  async getPastActivities(req: Request, res: Response, next: NextFunction) {
+    new SuccessResponse({
+      message: "Get past activities successfully",
+      metadata: await StudentService.getPastActivities({
+        id: req.body.userId,
+      }),
+    }).send(res);
+  }
+
   async updateStudentsDetails(req: Request, res: Response, next: NextFunction) {
     new SuccessResponse({
       message: "Update student details successfully",

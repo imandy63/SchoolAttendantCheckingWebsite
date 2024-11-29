@@ -12,7 +12,16 @@ router.get(
   asyncHandler(ActivityController.getActivityParticipants)
 );
 
+router.get("/time-range", asyncHandler(ActivityController.getTimeRange));
+
 router.get("/student", asyncHandler(ActivityController.getActivitiesByDate));
+
+router.get("/statistic", asyncHandler(ActivityController.getStatistics));
+
+router.get(
+  "/year-statistic",
+  asyncHandler(ActivityController.getYearStatistics)
+);
 
 router.get(
   "/upcoming",

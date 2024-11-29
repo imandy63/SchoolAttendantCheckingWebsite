@@ -79,3 +79,39 @@ export const adminPriviledge = async (
     throw new AuthFailureError("Un authorized");
   }
 };
+
+export const unionWorkerPriviledge = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const userId = req.headers[HEADER.CLIENT_ID];
+  if (!userId) {
+    throw new AuthFailureError("Invalid Request!");
+  }
+
+  const accessToken = req.headers[HEADER.AUTHORIZATION];
+  if (!accessToken) {
+    throw new AuthFailureError("Invalid Request!");
+  }
+
+  try {
+    const { data } = await axios.get(
+      `${URL_CONFIG.AUTH}/api/auth/is-union-worker`,
+      {
+        headers: { Authorization: accessToken, "x-client-id": userId },
+      }
+    );
+
+    if (!data || !data.metadata || !data.metadata.status) {
+      throw new AuthFailureError("Invalid authentication response");
+    }
+
+    req.body.userId = userId;
+
+    next();
+  } catch (err) {
+    console.log(err);
+    throw new AuthFailureError("Unauthorized");
+  }
+};

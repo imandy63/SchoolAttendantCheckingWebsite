@@ -11,6 +11,8 @@ import "react-quill/dist/quill.snow.css";
 import { updatePostAPI, getPostDetailsAPI } from "@/api/api.post";
 import { PostCreate } from "@/interfaces/post.interface";
 import { useToast } from "@/context/ToastContext";
+import { Popup } from "../../_components/Popup";
+import { formatDate } from "@/utils/formatDate";
 
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
@@ -31,6 +33,7 @@ const UpdatePostPage = () => {
   });
   const [showPreview, setShowPreview] = useState(false);
   const [previewData, setPreviewData] = useState<any>({});
+  const [date, setDate] = useState(new Date());
   const { id: postId } = useParams();
   const router = useRouter();
 
@@ -40,6 +43,7 @@ const UpdatePostPage = () => {
     const fetchPostData = async () => {
       try {
         const postData = await getPostDetailsAPI(postId as string);
+        setDate(postData.post_date);
         methods.reset({
           post_title: postData?.post_title || "",
           post_author: postData?.post_author || "",
@@ -111,14 +115,14 @@ const UpdatePostPage = () => {
               >
                 Nội dung bài viết
               </label>
-              <div className="border border-gray-300 rounded-lg overflow-hidden">
+              <div className="border border-gray-300 h-[500px] pb-11 rounded-lg overflow-hidden">
                 <ReactQuill
                   theme="snow"
                   value={methods.watch("post_contents")}
                   onChange={(content) => {
                     methods.setValue("post_contents", content);
                   }}
-                  className="w-full h-[500px] border-none"
+                  className="w-full border-none h-full"
                 />
               </div>
               {methods.formState.errors.post_contents && (
@@ -159,31 +163,34 @@ const UpdatePostPage = () => {
         </div>
       </div>
 
-      {showPreview && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-3/4">
-            <h2 className="text-xl font-bold mb-4">Xem trước bài viết</h2>
+      <Popup
+        isOpen={showPreview}
+        className="w-4/5 h-4/5"
+        title="Xem trước bài viết"
+        onClose={closeModal}
+      >
+        <div className="bg-white rounded-xl shadow-xl p-8 max-w-3xl mx-auto">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+            {previewData.post_title}
+          </h2>
+          <div className="text-sm text-gray-500 mb-6">
             <p>
-              <strong>Tiêu đề:</strong> {previewData.post_title}
+              <span className="font-medium text-gray-600">Tác giả:</span>{" "}
+              {previewData.post_author}
             </p>
             <p>
-              <strong>Tác giả:</strong> {previewData.post_author}
+              <span className="font-medium text-gray-600">Ngày:</span>{" "}
+              {formatDate(date)}
             </p>
-            <div>
-              <strong>Nội dung:</strong>
-              <div
-                dangerouslySetInnerHTML={{ __html: previewData.post_contents }}
-              />
-            </div>
-            <button
-              onClick={closeModal}
-              className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg"
-            >
-              Đóng
-            </button>
+          </div>
+          <div className="prose max-w-none prose-blue">
+            <strong className="block text-gray-700 mb-2">Nội dung:</strong>
+            <div
+              dangerouslySetInnerHTML={{ __html: previewData.post_contents }}
+            />
           </div>
         </div>
-      )}
+      </Popup>
     </FormProvider>
   );
 };

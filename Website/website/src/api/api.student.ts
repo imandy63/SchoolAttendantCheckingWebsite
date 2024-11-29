@@ -24,3 +24,10 @@ export const changeSubscribeCategoriesAPI = async ({
   axiosInstance.put(`${urlConfig.CORE}/api/student/categories`, {
     categories,
   });
+
+export const getPastActivities = async () => {
+  const response = await axiosInstance.get(
+    `${urlConfig.CORE}/api/student/past`
+  );
+  return response.data.metadata;
+};

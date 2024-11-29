@@ -16,7 +16,8 @@ import { students } from "../models/student.model";
 import { convertToObjectIdMongoose } from "../utils";
 import { NotificationService } from "./notification.service";
 import { RedisService } from "./redis.service";
-import { Role } from "../enum/role.enum";
+import { Participation_Status, Role } from "../enum/role.enum";
+import { ActivityTracking_status } from "../enum/activityTracking.enum";
 
 class ActivityService {
   static redisService = RedisService.getInstance();
@@ -65,6 +66,168 @@ class ActivityService {
       activity_name: { $regex: search, $options: "i" },
     });
     return { data: result, total, page, limit };
+  }
+
+  static async getYearStatistics(year: number) {
+    const result = await activities.aggregate([
+      {
+        $match: {
+          activity_start_date: {
+            $gte: new Date(`${year}-01-01`),
+            $lt: new Date(`${year + 1}-01-01`),
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "ActivityTrackings",
+          localField: "_id",
+          foreignField: "activity_id",
+          as: "tracking_data",
+        },
+      },
+      {
+        $addFields: {
+          participated_students: {
+            $size: {
+              $filter: {
+                input: "$tracking_data",
+                as: "tracking",
+                cond: {
+                  $eq: [
+                    "$$tracking.status",
+                    ActivityTracking_status.PARTICIPATED,
+                  ],
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { month: { $month: "$activity_start_date" } }, // Group by month
+          total_participants: { $sum: "$participated_students" }, // Sum participated students
+          total_students: { $sum: "$activity_total_participants" }, // Sum total students
+        },
+      },
+      {
+        $project: {
+          month: "$_id.month", // Extract month from _id
+          total_participants: 1,
+          total_students: 1,
+          _id: 0, // Exclude _id from the result
+        },
+      },
+      {
+        $sort: { month: 1 }, // Sort results by month
+      },
+    ]);
+
+    return result;
+  }
+
+  static async getTimeRange() {
+    const result = await activities.aggregate([
+      {
+        $group: {
+          _id: null,
+          min: { $min: "$activity_start_date" },
+          max: { $max: "$activity_start_date" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+        },
+      },
+    ]);
+
+    return result[0];
+  }
+
+  static async getStatistics({ year, month }: { year: number; month: number }) {
+    const result = await activities.aggregate([
+      {
+        $match: {
+          activity_start_date: {
+            $gte: new Date(`${year}-${month}-01`),
+            $lt: new Date(
+              `${month == 12 ? year + 1 : year}-${
+                month == 12 ? 1 : month + 1
+              }-01`
+            ),
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "ActivityTrackings",
+          localField: "_id",
+          foreignField: "activity_id",
+          as: "participants",
+        },
+      },
+      {
+        $addFields: {
+          number_of_students: "$activity_total_participants",
+          number_of_participated_students: {
+            $size: {
+              $filter: {
+                input: "$participants",
+                as: "participant",
+                cond: {
+                  $eq: [
+                    "$$participant.status",
+                    ActivityTracking_status.PARTICIPATED,
+                  ],
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          activities: { $push: "$$ROOT" },
+          number_of_activities: { $sum: 1 },
+          total_students_by_activities: { $sum: "$number_of_students" },
+          total_participated_students: {
+            $sum: "$number_of_participated_students",
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          number_of_activities: 1,
+          total_students_by_activities: 1,
+          total_participated_students: 1,
+          activities: {
+            _id: 1,
+            activity_name: 1,
+            number_of_students: 1,
+            number_of_participated_students: 1,
+          },
+        },
+      },
+    ]);
+    return result[0];
+  }
+
+  static async getPastCheckings({ id }: { id: string }) {
+    const foundStudent = await students.find({
+      _id: convertToObjectIdMongoose(id),
+      role: Role.UNION_WORKER,
+      is_active: true,
+    });
+    if (!foundStudent) throw new NotFoundError("Union worker not found");
+
+    return await activities.find({
+      activity_start_date: { $lt: new Date() },
+      assigned_to: convertToObjectIdMongoose(id),
+    });
   }
 
   static async getActivitiesByDate({
@@ -577,6 +740,24 @@ class ActivityService {
           $not: { $in: [Activity_status.REMOVED, Activity_status.CLOSED] },
         },
         assigned_to: null,
+        activity_start_date: { $gte: new Date().toUTCString() },
+      })
+      .lean();
+  }
+
+  static async getAvailableAttendantChecking({ id }: { id: string }) {
+    const foundWorker = await students.findOne({
+      _id: convertToObjectIdMongoose(id),
+      role: Role.UNION_WORKER,
+    });
+
+    if (!foundWorker) {
+      throw new NotFoundError("Worker not found");
+    }
+
+    return await activities
+      .find({
+        assigned_to: convertToObjectIdMongoose(id),
         activity_start_date: { $gte: new Date().toUTCString() },
       })
       .lean();
