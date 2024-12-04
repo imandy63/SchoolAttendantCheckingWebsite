@@ -56,6 +56,8 @@ router.post("/", asyncHandler(ActivityController.createActivity));
 
 router.post("/participate/:id", asyncHandler(ActivityController.participate));
 
+router.post("/leave/:id", asyncHandler(ActivityController.leaveActivity));
+
 router.get("/student/:id", asyncHandler(ActivityController.userGetActivity));
 
 router.get("/:id", asyncHandler(ActivityController.getActivity));

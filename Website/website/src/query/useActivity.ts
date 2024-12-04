@@ -22,12 +22,14 @@ import {
   getStatistics,
   getTimeRange,
   getYearStatistics,
+  leaveActivityAPI,
 } from "@/api/api.activity";
 import {
   ACTIVITIES,
   ACTIVITY_PARTICIPANTS,
   ACTIVITY,
   UPCOMING_ACTIVITIES,
+  STUDENT_ACTIVITIES,
 } from "@/constants/query";
 
 export const useGetAllActivities = (page: number, search: string = "") => {
@@ -116,6 +118,16 @@ export const useParticipateActivity = (activityId: string) => {
     mutationFn: () => participateActivityAPI(activityId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [ACTIVITY, activityId] });
+    },
+  });
+};
+
+export const useLeaveActivity = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (activityId: string) => leaveActivityAPI(activityId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [STUDENT_ACTIVITIES, "past"] });
     },
   });
 };

@@ -1,9 +1,13 @@
 "use client";
+import { useToast } from "@/context/ToastContext";
+import { useLeaveActivity } from "@/query/useActivity";
 import { useGetPastActivities } from "@/query/useStudent";
 import { formatDate } from "@/utils/formatDate";
 
 const PastActivityPage = () => {
   const { data, isLoading } = useGetPastActivities();
+  const { showToast } = useToast();
+  const { mutate } = useLeaveActivity();
 
   return (
     <>
@@ -47,7 +51,19 @@ const PastActivityPage = () => {
                       activity.leavable && (
                         <button
                           className="px-4 py-2 text-white bg-[#0066B3] rounded hover:bg-[#005699]"
-                          onClick={() => {}}
+                          onClick={() => {
+                            mutate(activity._id, {
+                              onSuccess: () => {
+                                showToast(
+                                  "Rời hoạt động thành công",
+                                  "success"
+                                );
+                              },
+                              onError: () => {
+                                showToast("Rời hoạt động thất bại", "error");
+                              },
+                            });
+                          }}
                         >
                           Rời hoạt động
                         </button>

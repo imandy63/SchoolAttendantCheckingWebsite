@@ -1,7 +1,8 @@
+"use client";
 import { getTop5LatestPostsAPI } from "@/api/api.post";
 import { formatDate } from "@/utils/formatDate";
 import { useEffect, useState } from "react";
-import { PostPopup } from "./Popup";
+import { PostPopup } from "@/components/Popup";
 
 interface Post {
   post_title: string;
@@ -11,7 +12,7 @@ interface Post {
   post_date: string;
 }
 
-export const Notification = () => {
+const PostPage = () => {
   const [data, setData] = useState<Post[]>([]);
   const [seletedPost, setSelectedPost] = useState<string>("");
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -20,7 +21,6 @@ export const Notification = () => {
     const fetchData = async () => {
       try {
         const response = await getTop5LatestPostsAPI();
-        console.log(response);
         setData([...response]);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -74,3 +74,5 @@ export const Notification = () => {
     </div>
   );
 };
+
+export default PostPage;

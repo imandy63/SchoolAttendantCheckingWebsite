@@ -37,7 +37,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       >
         {!imagePreview && !imageUrl && (
           <div className="absolute inset-0 flex justify-center items-center bg-black bg-opacity-50 text-white text-xl font-semibold">
-            Add/Change Image
+            Thêm/Đổi hình
           </div>
         )}
       </div>

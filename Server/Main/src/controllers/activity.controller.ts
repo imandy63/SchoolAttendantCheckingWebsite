@@ -123,6 +123,16 @@ class ActivityController {
     }).send(res);
   }
 
+  async leaveActivity(req: Request, res: Response, next: NextFunction) {
+    new SuccessResponse({
+      message: "Leave activity successfully",
+      metadata: await ActivityService.leaveActivity({
+        id: req.body.userId,
+        activity_id: req.params.id,
+      }),
+    }).send(res);
+  }
+
   async getActivityCategories(req: Request, res: Response, next: NextFunction) {
     new SuccessResponse({
       message: "Get activity categories successfully",

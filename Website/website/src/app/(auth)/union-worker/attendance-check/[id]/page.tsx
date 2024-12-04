@@ -93,7 +93,7 @@ const AttendancePage = () => {
             <strong>Người chủ trì:</strong> Nguyễn Thị Định
           </p>
           <Image
-            src="https://fit.huit.edu.vn/images/thong-bao-nhan-chung-chi/phat-dong-cuoc-thi-huit-iconic.jpg"
+            src="/default-activity-image.png"
             alt="Activity"
             className="rounded-lg shadow-md w-full h-auto"
             width={500}

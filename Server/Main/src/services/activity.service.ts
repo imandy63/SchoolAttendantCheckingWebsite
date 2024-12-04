@@ -469,8 +469,6 @@ class ActivityService {
       },
     ]);
 
-    console.log(users);
-
     const userIds = users[0].userIds.map((oid: ObjectId) => oid.toString());
 
     if (users.length > 0) {
@@ -587,27 +585,52 @@ class ActivityService {
 
   static async leaveActivity({
     activity_id,
-    student_id,
+    id,
   }: {
     activity_id: string;
-    student_id: string;
+    id: string;
   }) {
+    const foundStudent = await students
+      .findOne({ _id: convertToObjectIdMongoose(id) })
+      .lean();
+    if (!foundStudent) {
+      throw new NotFoundError("Student not found");
+    }
+
     const result = await activities.findOneAndUpdate(
-      { activity_id, activity_status: Activity_status.OPEN },
       {
-        $pull: { activity_participants: { student_id } },
+        _id: convertToObjectIdMongoose(activity_id),
+        activity_status: { $in: [Activity_status.OPEN, Activity_status.FULL] },
+      },
+      {
+        $pull: {
+          activity_participants: { student_id: foundStudent.student_id },
+        },
         $inc: { activity_total_participants: -1 },
       },
       { new: true }
     );
 
+    console.log(result);
+
+    await students.findOneAndUpdate(
+      { _id: foundStudent._id },
+      {
+        $pull: {
+          student_participated_activities: {
+            _id: convertToObjectIdMongoose(activity_id),
+          },
+        },
+      }
+    );
+
     if (
       result &&
-      result.activity_total_participants >= result.activity_max_participants
+      result.activity_total_participants <= result.activity_max_participants
     ) {
       return await activities.findOneAndUpdate(
-        { activity_id },
-        { activity_status: Activity_status.FULL },
+        { _id: convertToObjectIdMongoose(activity_id) },
+        { activity_status: Activity_status.OPEN },
         { new: true }
       );
     }
@@ -755,10 +778,13 @@ class ActivityService {
       throw new NotFoundError("Worker not found");
     }
 
+    const sixHoursEarlier = new Date();
+    sixHoursEarlier.setHours(sixHoursEarlier.getHours() - 6);
+
     return await activities
       .find({
         assigned_to: convertToObjectIdMongoose(id),
-        activity_start_date: { $gte: new Date().toUTCString() },
+        activity_start_date: { $gte: sixHoursEarlier.toUTCString() },
       })
       .lean();
   }

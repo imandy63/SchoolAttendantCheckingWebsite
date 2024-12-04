@@ -103,7 +103,7 @@ export default function Activities() {
           loading={"skeleton"}
           actions={(activity) => (
             <ActionButton
-              buttonLabel="Action"
+              buttonLabel="Tác vụ"
               actions={[
                 {
                   label: "Sửa",

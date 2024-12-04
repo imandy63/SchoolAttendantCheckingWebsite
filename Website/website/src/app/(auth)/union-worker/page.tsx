@@ -18,6 +18,8 @@ import {
 } from "@/query/useChecking";
 import { formatDate } from "@/utils/formatDate";
 import { useRouter } from "next/navigation";
+import { ActivityAttendance, Popup } from "../admin/_components/Popup";
+import { logoutUser } from "@/api/api.auth";
 
 // Registering Chart.js components
 ChartJS.register(
@@ -33,6 +35,20 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<"overview" | "history">(
     "overview"
   );
+
+  const [selectedActivityId, setSelectedActivityId] = useState("");
+  const [selectedActivityName, setSelectedActivityName] = useState("");
+  const [isAttendancePopupOpen, setIsAttendancePopupOpen] = useState(false);
+
+  const openAttendancePopup = (activityId: string, activityName: string) => {
+    setSelectedActivityName(activityName);
+    setSelectedActivityId(activityId);
+    setIsAttendancePopupOpen(true);
+  };
+
+  const closeAttendancePopup = () => {
+    setIsAttendancePopupOpen(false);
+  };
 
   const { data: upcoming, isLoading: upcomingLoading } =
     useGetUpcomingAssignedActivities();
@@ -67,26 +83,38 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col p-8 bg-[#F2F3F7]">
       {/* Tab Navigation */}
-      <div className="flex space-x-4 mb-8">
+      <div className="flex justify-between space-x-4 mb-8">
+        <div className="space-x-4">
+          <button
+            onClick={() => setActiveTab("overview")}
+            className={`px-4 py-2 rounded ${
+              activeTab === "overview"
+                ? "bg-[#0066B3] text-white font-semibold"
+                : "bg-[#FAFAFA] text-[#0066B3] hover:bg-[#A0D0EC]"
+            }`}
+          >
+            Tổng quan
+          </button>
+          <button
+            onClick={() => setActiveTab("history")}
+            className={`px-4 py-2 rounded ${
+              activeTab === "history"
+                ? "bg-[#0066B3] text-white font-semibold"
+                : "bg-[#FAFAFA] text-[#0066B3] hover:bg-[#A0D0EC]"
+            }`}
+          >
+            Lịch sử
+          </button>
+        </div>
         <button
-          onClick={() => setActiveTab("overview")}
-          className={`px-4 py-2 rounded ${
-            activeTab === "overview"
-              ? "bg-[#0066B3] text-white font-semibold"
-              : "bg-[#FAFAFA] text-[#0066B3] hover:bg-[#A0D0EC]"
-          }`}
+          onClick={async () => {
+            await logoutUser();
+            router.push("/login");
+          }}
+          className={`px-4 py-2 rounded bg-[#FAFAFA] text-[#0066B3] hover:bg-[#A0D0EC]
+          `}
         >
-          Tổng quan
-        </button>
-        <button
-          onClick={() => setActiveTab("history")}
-          className={`px-4 py-2 rounded ${
-            activeTab === "history"
-              ? "bg-[#0066B3] text-white font-semibold"
-              : "bg-[#FAFAFA] text-[#0066B3] hover:bg-[#A0D0EC]"
-          }`}
-        >
-          Lịch sử
+          Đăng xuất
         </button>
       </div>
 
@@ -115,7 +143,7 @@ export default function DashboardPage() {
                     Hoạt động sắp diễn ra
                   </h3>
                   <p className="text-3xl font-bold text-blue-500">
-                    +{upcoming?.length}
+                    +{upcoming?.length || 0}
                   </p>
                 </div>
               </div>
@@ -129,7 +157,7 @@ export default function DashboardPage() {
                     Hoạt động đã kết thúc
                   </h3>
                   <p className="text-3xl font-bold text-red-500">
-                    +{past?.length}
+                    +{past?.length || 0}
                   </p>
                 </div>
               </div>
@@ -164,6 +192,8 @@ export default function DashboardPage() {
                     const sixHoursLater = new Date(
                       activityDate.getTime() + 6 * 60 * 60 * 1000
                     );
+
+                    console.log({ now, activityDate, sixHoursLater });
 
                     const isButtonEnabled =
                       now >= activityDate && now <= sixHoursLater;
@@ -209,7 +239,7 @@ export default function DashboardPage() {
           </h2>
           <p>Hiển thị danh sách lịch sử hoạt động.</p>
           <div>
-            <ul className="space-y-2">
+            <ul className="py-4 space-y-2">
               {past &&
                 past.map((activity) => {
                   return (
@@ -228,7 +258,12 @@ export default function DashboardPage() {
                       </div>
                       <button
                         className="px-4 py-2 text-white bg-[#0066B3] rounded hover:bg-[#005699]"
-                        onClick={() => {}}
+                        onClick={() => {
+                          openAttendancePopup(
+                            activity._id,
+                            activity.activity_name
+                          );
+                        }}
                       >
                         Xem điểm danh
                       </button>
@@ -238,6 +273,16 @@ export default function DashboardPage() {
             </ul>
           </div>
         </div>
+      )}
+
+      {isAttendancePopupOpen && (
+        <Popup
+          isOpen={isAttendancePopupOpen}
+          title={selectedActivityName}
+          onClose={closeAttendancePopup}
+        >
+          <ActivityAttendance activityId={selectedActivityId} />
+        </Popup>
       )}
     </div>
   );

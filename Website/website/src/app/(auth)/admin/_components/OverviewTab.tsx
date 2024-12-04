@@ -98,7 +98,7 @@ export const OverviewTab = () => {
 
   // Prepare chart data
   const pieData = {
-    labels: ["Participated", "Not Participated"],
+    labels: ["Tham gia", "Vắng"],
     datasets: [
       {
         data: statistics
@@ -119,7 +119,7 @@ export const OverviewTab = () => {
       : [],
     datasets: [
       {
-        label: "Total Members",
+        label: "Tổng sinh viên",
         data: statistics
           ? statistics.activities?.map(
               (activity) => activity.number_of_students
@@ -128,7 +128,7 @@ export const OverviewTab = () => {
         backgroundColor: "#4caf50",
       },
       {
-        label: "Participated",
+        label: "Tổng tham gia",
         data: statistics
           ? statistics.activities?.map(
               (activity) => activity.number_of_participated_students
@@ -144,14 +144,14 @@ export const OverviewTab = () => {
     datasets: yearStatistics
       ? [
           {
-            label: "Participation Count",
+            label: "Tổng tham gia",
             data: yearStatistics.map((item) => item.total_participants),
             borderColor: "#4caf50",
             backgroundColor: "rgba(76, 175, 80, 0.2)",
             fill: true,
           },
           {
-            label: "Total Students",
+            label: "Tổng sinh viên",
             data: yearStatistics.map((item) => item.total_students),
             borderColor: "#2196f3",
             backgroundColor: "rgba(33, 150, 243, 0.2)",
@@ -184,7 +184,7 @@ export const OverviewTab = () => {
         <div className="flex items-center bg-white rounded-lg shadow-md p-4">
           <AiOutlinePieChart className="text-blue-500 text-4xl mr-4" />
           <div>
-            <p className="text-gray-600">Total Activities</p>
+            <p className="text-gray-600">Tổng số hoạt động</p>
             <h3 className="text-2xl font-bold text-blue-600">
               {statistics?.number_of_activities || 0}
             </h3>
@@ -193,7 +193,7 @@ export const OverviewTab = () => {
         <div className="flex items-center bg-white rounded-lg shadow-md p-4">
           <AiOutlineTeam className="text-green-500 text-4xl mr-4" />
           <div>
-            <p className="text-gray-600">Participation Count</p>
+            <p className="text-gray-600">Tổng số tham gia</p>
             <h3 className="text-2xl font-bold text-green-600">
               {statistics?.total_participated_students || 0}
             </h3>
@@ -202,7 +202,7 @@ export const OverviewTab = () => {
         <div className="flex items-center bg-white rounded-lg shadow-md p-4">
           <AiOutlineUser className="text-orange-500 text-4xl mr-4" />
           <div>
-            <p className="text-gray-600">Total Members</p>
+            <p className="text-gray-600">Tổng số sinh viên</p>
             <h3 className="text-2xl font-bold text-orange-600">
               {statistics?.total_students_by_activities || 0}
             </h3>
@@ -211,9 +211,11 @@ export const OverviewTab = () => {
         <div className="flex items-center bg-white rounded-lg shadow-md p-4">
           <AiOutlineFieldTime className="text-red-500 text-4xl mr-4" />
           <div>
-            <p className="text-gray-600">Participation Rate</p>
+            <p className="text-gray-600">Tỉ lệ tham gia</p>
             <h3 className="text-2xl font-bold text-red-600">
-              {statistics
+              {statistics &&
+              statistics.total_participated_students &&
+              statistics.total_students_by_activities
                 ? `${(
                     (statistics.total_participated_students /
                       statistics.total_students_by_activities) *

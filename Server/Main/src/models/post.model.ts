@@ -12,9 +12,6 @@ const PostSchema = new mongoose.Schema(
       type: Date,
       default: new Date().toUTCString(),
     },
-    post_thumb: {
-      type: String,
-    },
     post_deleted: {
       type: Boolean,
       default: false,
@@ -35,7 +32,6 @@ export interface Post {
   post_title: string;
   post_author: string;
   post_contents: string;
-  post_thumb: string | null;
 }
 
 export const posts = mongoose.model(DOCUMENT_NAME, PostSchema);

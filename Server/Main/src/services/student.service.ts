@@ -76,6 +76,11 @@ export class StudentService {
           activity_location: "$activity.activity_location",
         },
       },
+      {
+        $sort: {
+          activity_start_date: -1,
+        },
+      },
     ]);
 
     console.log(result);

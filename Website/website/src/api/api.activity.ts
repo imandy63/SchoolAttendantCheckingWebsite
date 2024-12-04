@@ -140,6 +140,13 @@ export const participateActivityAPI = async (activityId: string) => {
   return response.data.metadata;
 };
 
+export const leaveActivityAPI = async (activityId: string) => {
+  const response = await axiosInstance.post(
+    `${urlConfig.CORE}/api/activity/leave/${activityId}`
+  );
+  return response.data.metadata;
+};
+
 export const getAssignableActivitiesAPI = async (id: string) => {
   const response = await axiosInstance.get(
     `${urlConfig.CORE}/api/activity/assignable?id=${id}`
