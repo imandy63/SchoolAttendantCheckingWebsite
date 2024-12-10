@@ -193,10 +193,10 @@ export default function DashboardPage() {
                       activityDate.getTime() + 6 * 60 * 60 * 1000
                     );
 
-                    console.log({ now, activityDate, sixHoursLater });
-
                     const isButtonEnabled =
-                      now >= activityDate && now <= sixHoursLater;
+                      now >= activityDate &&
+                      now <= sixHoursLater &&
+                      activity.activity_status !== "CLOSED";
                     return (
                       <li
                         key={activity._id}
@@ -241,35 +241,40 @@ export default function DashboardPage() {
           <div>
             <ul className="py-4 space-y-2">
               {past &&
-                past.map((activity) => {
-                  return (
-                    <li
-                      key={activity._id}
-                      className="flex items-center justify-between p-2 bg-white rounded shadow hover:bg-gray-50"
-                    >
-                      <div>
-                        <p className="font-semibold text-[#0066B3]">
-                          {activity.activity_name}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {activity.activity_location} -{" "}
-                          {formatDate(activity.activity_start_date)}
-                        </p>
-                      </div>
-                      <button
-                        className="px-4 py-2 text-white bg-[#0066B3] rounded hover:bg-[#005699]"
-                        onClick={() => {
-                          openAttendancePopup(
-                            activity._id,
-                            activity.activity_name
-                          );
-                        }}
+                past
+                  .filter((a) => {
+                    console.log(a);
+                    return a.activity_status === "CLOSED";
+                  })
+                  .map((activity) => {
+                    return (
+                      <li
+                        key={activity._id}
+                        className="flex items-center justify-between p-2 bg-white rounded shadow hover:bg-gray-50"
                       >
-                        Xem điểm danh
-                      </button>
-                    </li>
-                  );
-                })}
+                        <div>
+                          <p className="font-semibold text-[#0066B3]">
+                            {activity.activity_name}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {activity.activity_location} -{" "}
+                            {formatDate(activity.activity_start_date)}
+                          </p>
+                        </div>
+                        <button
+                          className="px-4 py-2 text-white bg-[#0066B3] rounded hover:bg-[#005699]"
+                          onClick={() => {
+                            openAttendancePopup(
+                              activity._id,
+                              activity.activity_name
+                            );
+                          }}
+                        >
+                          Xem điểm danh
+                        </button>
+                      </li>
+                    );
+                  })}
             </ul>
           </div>
         </div>

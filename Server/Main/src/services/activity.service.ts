@@ -469,6 +469,8 @@ class ActivityService {
       },
     ]);
 
+    if (users.length === 0 || users[0].userIds.length === 0) return result;
+
     const userIds = users[0].userIds.map((oid: ObjectId) => oid.toString());
 
     if (users.length > 0) {
@@ -610,8 +612,6 @@ class ActivityService {
       },
       { new: true }
     );
-
-    console.log(result);
 
     await students.findOneAndUpdate(
       { _id: foundStudent._id },
