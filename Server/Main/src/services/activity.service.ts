@@ -18,6 +18,8 @@ import { NotificationService } from "./notification.service";
 import { RedisService } from "./redis.service";
 import { Participation_Status, Role } from "../enum/role.enum";
 import { ActivityTracking_status } from "../enum/activityTracking.enum";
+import ExcelJS from "exceljs";
+import { all } from "axios";
 
 class ActivityService {
   static redisService = RedisService.getInstance();
@@ -787,6 +789,225 @@ class ActivityService {
         activity_start_date: { $gte: sixHoursEarlier.toUTCString() },
       })
       .lean();
+  }
+
+  static async exportExcel() {
+    try {
+      const allActivities = await activities.find();
+      const allStudents = await students.find({ role: { $ne: Role.ADMIN } });
+
+      // Create a new workbook and worksheet
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Activities");
+
+      const font = { bold: true, size: 11, name: "Cambria" };
+      const lastColumn = String.fromCharCode(65 + allActivities.length + 5);
+
+      // Add merged title rows
+      worksheet.mergeCells(`A1:C1`);
+      worksheet.mergeCells(`A2:C2`);
+      worksheet.mergeCells(`A3:C3`);
+      worksheet.getCell("A1").value = "TRƯỜNG ĐẠI HỌC";
+      worksheet.getCell("A1").alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      };
+      worksheet.getCell("A1").font = font;
+
+      worksheet.getCell("A2").value = "CÔNG THƯƠNG THÀNH PHỐ TP. HỒ CHÍ MINH";
+      worksheet.getCell("A2").alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      };
+      worksheet.getCell("A2").font = font;
+
+      worksheet.getCell("A3").value = "KHOA CÔNG NGHỆ THÔNG TIN";
+      worksheet.getCell("A3").alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      };
+      worksheet.getCell("A3").font = font;
+
+      worksheet.mergeCells(`E1:${lastColumn}1`);
+      worksheet.getCell("E1").value = "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM";
+      worksheet.getCell("E1").alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      };
+      worksheet.getCell("E1").font = font;
+
+      worksheet.mergeCells(`E2:${lastColumn}2`);
+      worksheet.getCell("E2").value = "Độc lập - Tự do - Hạnh Phúc";
+      worksheet.getCell("E2").alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      };
+      worksheet.getCell("E2").font = font;
+
+      worksheet.mergeCells(`A5:${lastColumn}5`);
+      worksheet.getCell("A5").value = "DANH SÁCH CHẤM ĐIỂM";
+      worksheet.getCell("A5").alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      };
+      worksheet.getCell("A5").font = font;
+
+      worksheet.mergeCells(`A6:${lastColumn}6`);
+      worksheet.getCell("A6").value = allActivities
+        .map((activity) => activity.activity_name)
+        .join(", ");
+      worksheet.getCell("A6").alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      };
+      worksheet.getCell("A6").font = font;
+
+      worksheet.addRow([]);
+
+      const headers = [
+        "STT",
+        "MSSV",
+        "Họ và tên",
+        "Lớp",
+        ...allActivities.map((activity, index) => `HD${index + 1}`),
+        "Tổng điểm",
+        "Ghi chú",
+      ];
+
+      const headerRows = worksheet.addRow(headers);
+
+      headerRows.eachCell((cell, colNumber) => {
+        // Add border to the cell
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+
+        // Set alignment to center
+        cell.alignment = {
+          vertical: "middle",
+          horizontal: "center",
+        };
+
+        // Set font style
+        cell.font = { bold: true };
+      });
+
+      allStudents.forEach((student, index) => {
+        const activityPoints = allActivities.map((activity) => {
+          const participation = student.student_participated_activities.find(
+            (participation) =>
+              participation._id.toString() === activity._id.toString()
+          );
+          return participation?.point || 0;
+        });
+
+        const totalPoints = activityPoints.reduce(
+          (sum, point) => sum + point,
+          0
+        );
+
+        const dataRow = [
+          index + 1,
+          student.student_id,
+          student.student_name,
+          student.student_class?.class_name,
+          ...activityPoints,
+          totalPoints,
+          "",
+        ];
+
+        const row = worksheet.addRow(dataRow);
+
+        row.eachCell((cell, colNumber) => {
+          cell.border = {
+            top: { style: "thin" },
+            left: { style: "thin" },
+            bottom: { style: "thin" },
+            right: { style: "thin" },
+          };
+
+          if (colNumber === headers.length) {
+            cell.border = {
+              top: { style: "thin" },
+              left: { style: "thin" },
+              bottom: { style: "thin" },
+              right: { style: "thin" },
+            };
+          }
+        });
+      });
+
+      worksheet.columns.forEach((column) => {
+        column.width = 20;
+      });
+
+      const numberOfColumns = allActivities.length + 5;
+
+      const maxRow = allStudents.length + 10;
+
+      if (numberOfColumns / 4 >= 3) {
+        worksheet.mergeCells(`A${maxRow}:C${maxRow}`);
+        worksheet.getCell(`A${maxRow}`).value = "Trưởng Đơn Vị";
+        worksheet.getCell(`A${maxRow}`).alignment = {
+          vertical: "middle",
+          horizontal: "center",
+        };
+        worksheet.getCell(`A${maxRow}`).font = font;
+
+        const c2 = String.fromCharCode(65 + numberOfColumns / 2 - 1);
+        const endC2 = String.fromCharCode(65 + numberOfColumns / 2 + 1);
+
+        worksheet.mergeCells(`${c2}${maxRow}:${endC2}${maxRow}`);
+        worksheet.getCell(`${c2}${maxRow}`).value = "Ban Tổ Chức";
+        worksheet.getCell(`${c2}${maxRow}`).alignment = {
+          vertical: "middle",
+          horizontal: "center",
+        };
+        worksheet.getCell(`${c2}${maxRow}`).font = font;
+
+        const c3 = String.fromCharCode(65 + numberOfColumns - 2);
+
+        worksheet.mergeCells(`${c3}${maxRow}:${lastColumn}${maxRow}`);
+        worksheet.getCell(`${c3}${maxRow}`).value = "Người Tổng Hợp";
+        worksheet.getCell(`${c3}${maxRow}`).alignment = {
+          vertical: "middle",
+          horizontal: "center",
+        };
+        worksheet.getCell(`${c3}${maxRow}`).font = font;
+      } else {
+        worksheet.mergeCells(`A${maxRow}:C${maxRow}`);
+        worksheet.getCell(`A${maxRow}`).value = "Trưởng Đơn Vị";
+        worksheet.getCell(`A${maxRow}`).alignment = {
+          vertical: "middle",
+          horizontal: "center",
+        };
+        worksheet.getCell(`A${maxRow}`).font = font;
+
+        worksheet.mergeCells(`E${maxRow}:G${maxRow}`);
+        worksheet.getCell(`E${maxRow}`).value = "Ban Tổ Chức";
+        worksheet.getCell(`E${maxRow}`).alignment = {
+          vertical: "middle",
+          horizontal: "center",
+        };
+        worksheet.getCell(`E${maxRow}`).font = font;
+
+        worksheet.mergeCells(`I${maxRow}:K${maxRow}`);
+        worksheet.getCell(`I${maxRow}`).value = "Người Tổng Hợp";
+        worksheet.getCell(`I${maxRow}`).alignment = {
+          vertical: "middle",
+          horizontal: "center",
+        };
+        worksheet.getCell(`I${maxRow}`).font = font;
+      }
+
+      return await workbook.xlsx.writeBuffer();
+    } catch (error) {
+      console.error("Error exporting activities:", error);
+      throw new BadRequestError("Error exporting activities");
+    }
   }
 }
 

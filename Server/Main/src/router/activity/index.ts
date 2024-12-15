@@ -1,9 +1,12 @@
 import express from "express";
+
 import { asyncHandler } from "../../helpers/asyncHandler";
 import ActivityController from "../../controllers/activity.controller";
 import { authentication } from "../../auth/authentication";
 
 const router = express.Router();
+
+router.get("/excel", asyncHandler(ActivityController.exportExcel));
 
 router.use(asyncHandler(authentication));
 

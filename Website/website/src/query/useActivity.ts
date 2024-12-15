@@ -39,6 +39,21 @@ export const useGetAllActivities = (page: number, search: string = "") => {
   });
 };
 
+export const useGetActivityInfinite = (searchParam = "") => {
+  return useInfiniteQuery({
+    queryKey: [ACTIVITIES, searchParam],
+    queryFn: ({ pageParam = 1 }: { pageParam: number }) =>
+      getAllActivitiesAPI(pageParam, searchParam),
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.data.length < 10) {
+        return undefined;
+      }
+      return pages.length + 1;
+    },
+    initialPageParam: 1,
+  });
+};
+
 export const useGetActivitiesByDate = (date: string) => {
   return useQuery({
     queryKey: [ACTIVITIES, date],

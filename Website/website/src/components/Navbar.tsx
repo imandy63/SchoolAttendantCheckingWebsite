@@ -23,7 +23,7 @@ const Navbar = () => {
   const handleSearch = (e: React.FormEvent | React.MouseEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/search?query=${encodeURIComponent(searchQuery)}`);
+      router.push(`/student/search?search=${encodeURIComponent(searchQuery)}`);
     }
   };
 

@@ -222,6 +222,18 @@ class ActivityController {
       metadata: await ActivityService.getYearStatistics(Number(req.query.year)),
     }).send(res);
   }
+
+  async exportExcel(req: Request, res: Response, next: NextFunction) {
+    res.setHeader(
+      "Content-Disposition",
+      'attachment; filename="activities.xlsx"'
+    );
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.send(await ActivityService.exportExcel());
+  }
 }
 
 export default new ActivityController();

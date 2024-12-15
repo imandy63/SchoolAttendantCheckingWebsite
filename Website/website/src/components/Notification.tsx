@@ -11,7 +11,7 @@ interface Post {
   post_date: string;
 }
 
-export const Notification = () => {
+export const Notification = ({ className }: { className?: string }) => {
   const [data, setData] = useState<Post[]>([]);
   const [seletedPost, setSelectedPost] = useState<string>("");
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -29,7 +29,7 @@ export const Notification = () => {
     fetchData();
   }, []);
   return (
-    <div className="bg-white shadow p-4 rounded-lg">
+    <div className={`bg-white shadow p-4 rounded-lg ${className}`}>
       <h2 className="text-xl font-semibold border-b py-2 text-blue-800">
         THÔNG BÁO CHUNG
       </h2>
