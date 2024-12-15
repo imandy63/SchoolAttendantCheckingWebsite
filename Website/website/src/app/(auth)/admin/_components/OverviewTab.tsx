@@ -165,7 +165,7 @@ export const OverviewTab = () => {
     <>
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-bold text-gray-700">Activity Overview</h2>
+        <h2 className="text-lg font-bold text-gray-700">Tổng quan hoạt động</h2>
         <select
           value={selectedMonth}
           onChange={(e) => setSelectedMonth(Number(e.target.value))}

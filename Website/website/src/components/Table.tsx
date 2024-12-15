@@ -73,6 +73,7 @@ export const Table = ({
   const [checkedRows, setCheckedRows] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
+    console.log("?", checkboxRules);
     const initialCheckedRows: Record<number, boolean> = {};
     data.forEach((row, index) => {
       checkboxRules.forEach(({ column, data: ruleData }) => {
@@ -83,7 +84,7 @@ export const Table = ({
       });
     });
     setCheckedRows(initialCheckedRows);
-  }, [data, checkboxRules]);
+  }, [data, checkboxRules.length]);
 
   const handleCheckboxChange = (
     isChecked: boolean,
