@@ -98,6 +98,22 @@ class AccessController {
     }).send(res);
   };
 
+  toStudent = async (req: Request, res: Response, next: NextFunction) => {
+    new SuccessResponse({
+      message: "To student successfully",
+      metadata: await AccessService.toStudent({ id: req.params.id as string }),
+    }).send(res);
+  };
+
+  toUnionWorker = async (req: Request, res: Response, next: NextFunction) => {
+    new SuccessResponse({
+      message: "To union worker successfully",
+      metadata: await AccessService.toUnionWorker({
+        id: req.params.id as string,
+      }),
+    }).send(res);
+  };
+
   createUnionWorker = async (
     req: Request,
     res: Response,

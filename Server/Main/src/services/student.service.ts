@@ -97,8 +97,11 @@ export class StudentService {
     const result = await students.aggregate([
       {
         $match: {
-          student_name: { $regex: search, $options: "i" },
-          role: Role.STUDENT,
+          $or: [
+            { student_name: { $regex: search, $options: "i" } },
+            { student_id: { $regex: search, $options: "i" } },
+          ],
+          role: { $in: [Role.STUDENT, Role.UNION_WORKER] },
         },
       },
       {
@@ -124,6 +127,13 @@ export class StudentService {
           student_id: 1,
           student_activity_point: 1,
           student_class: 1,
+          role: {
+            $cond: {
+              if: { $eq: ["$role", Role.STUDENT] },
+              then: "sinh viên",
+              else: "công tác viên",
+            },
+          },
         },
       },
     ]);

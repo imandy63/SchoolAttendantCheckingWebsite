@@ -38,7 +38,6 @@ const studentSchema = new Schema(
       ],
       default: [],
     },
-    is_active: { type: Boolean, default: true },
     subscribed_categories: { type: [{ type: String }], default: [] },
   },
   {
@@ -51,6 +50,7 @@ const studentSchema = new Schema(
 );
 
 studentSchema.index({ student_name: "text" });
+studentSchema.index({ student_id: "text" });
 
 export interface StudentPayload extends Document {
   student_id: string;

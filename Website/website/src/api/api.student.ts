@@ -31,3 +31,17 @@ export const getPastActivities = async () => {
   );
   return response.data.metadata;
 };
+
+export const toStudentAPI = async (id: string) => {
+  const response = await axiosInstance.put(
+    `${urlConfig.AUTH}/api/auth/to-student/${id}`
+  );
+  return response.data.metadata;
+};
+
+export const toUnionWorkerAPI = async (id: string) => {
+  const response = await axiosInstance.put(
+    `${urlConfig.AUTH}/api/auth/to-union-worker/${id}`
+  );
+  return response.data.metadata;
+};

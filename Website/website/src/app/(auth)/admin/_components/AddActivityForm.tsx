@@ -180,24 +180,23 @@ export const AddActivityForm: React.FC<AddActivityFormProps> = ({
             {errors.activity_duration.message}
           </p>
         )}
-        <FormMultiSelect
-          name="activity_categories"
-          control={control}
-          label="Danh mục"
-          add_value={true}
-          required
-          options={
-            isLoading
-              ? []
-              : categories.map((category: string) => {
-                  console.log(category);
-                  return {
-                    value: category,
-                    label: category,
-                  };
-                })
-          }
-        />
+        {!isLoading && (
+          <FormMultiSelect
+            name="activity_categories"
+            control={control}
+            label="Danh mục"
+            add_value={true}
+            required
+            options={categories.map((category: string) => {
+              console.log(category);
+              return {
+                value: category,
+                label: category,
+              };
+            })}
+          />
+        )}
+
         {errors.activity_categories && (
           <p className="text-red-500 text-sm">
             {errors.activity_categories.message}

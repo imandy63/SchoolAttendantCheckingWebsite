@@ -18,6 +18,7 @@ const headers = [
   "Ngày",
   "Thời gian (phút)",
   "Điểm rèn luyện",
+  "Người điểm danh",
   "Số lượng",
   "Đã tham gia",
 ];
@@ -27,6 +28,7 @@ const dataFields = [
   "activity_start_date",
   "activity_duration",
   "activity_point",
+  "assigned_to",
   "activity_max_participants",
   "activity_participants_total",
 ];
@@ -85,7 +87,7 @@ export default function Activities() {
 
   return (
     <>
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-8 h-screen overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <SearchBar onSearch={handleSearch} />
           <Button

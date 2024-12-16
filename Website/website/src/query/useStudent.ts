@@ -4,8 +4,9 @@ import {
   getAllStudentsAPI,
   getPastActivities,
   getStudentActivitiesAPI,
+  toStudentAPI,
 } from "@/api/api.student";
-import { STUDENT_ACTIVITIES, STUDENTS } from "@/constants/query";
+import { STUDENT_ACTIVITIES, STUDENTS, UNION_WORKERS } from "@/constants/query";
 
 export const useStudents = (page: number, search = "") => {
   return useQuery({
@@ -20,6 +21,19 @@ export const useStudentActivities = (studentId: string) => {
     queryKey: [STUDENT_ACTIVITIES, studentId],
     queryFn: () => getStudentActivitiesAPI(studentId),
     enabled: !!studentId,
+  });
+};
+
+export const useToStudent = (page: number, search: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => toStudentAPI(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [STUDENTS, page, search] });
+      queryClient.invalidateQueries({
+        queryKey: [UNION_WORKERS, page, search],
+      });
+    },
   });
 };
 

@@ -8,6 +8,8 @@ import { ActivityTracking_status } from "../enum/activityTracking.enum";
 import { ActivityService } from "./activity.service";
 import { StudentService } from "./student.service";
 import { NotFoundError } from "../core/error.response";
+import { Notification_type } from "../enum/notificationType.enum";
+import { NotificationService } from "./notification.service";
 
 export class ActivityTrackingService {
   static async getStudentActivityTracking({
@@ -146,7 +148,7 @@ export class ActivityTrackingService {
           },
         },
       },
-      { activity_participants: 1, _id: 0, activity_point: 1 }
+      { activity_participants: 1, _id: 0, activity_name: 1, activity_point: 1 }
     );
     if (!foundActivity) {
       throw new NotFoundError("Activity not found");
@@ -169,35 +171,79 @@ export class ActivityTrackingService {
         },
       },
     ]);
-    if (foundStudents.length == 0) {
+    if (student_ids.length !== foundStudents.length) {
       throw new NotFoundError("Students not found");
+    }
+
+    const absentStudents = await students.aggregate([
+      {
+        $match: {
+          "student_participated_activities._id":
+            convertToObjectIdMongoose(activity_id),
+          student_id: { $nin: student_ids },
+        },
+      },
+      {
+        $group: {
+          _id: 1,
+          ids: { $push: "$_id" },
+        },
+      },
+      {
+        $project: {
+          ids: 1,
+        },
+      },
+    ]);
+
+    console.log("ABSENT:::", absentStudents);
+
+    if (absentStudents.length !== 0 && absentStudents[0].ids.length !== 0) {
+      await NotificationService.sendNotification({
+        userIds: absentStudents[0].ids,
+        title: `Điểm danh vắng`,
+        message: `Bạn đã không tham gia hoat động ${foundActivity.activity_name}`,
+        type: Notification_type.WARNING,
+      });
     }
 
     // update student participated activities
 
-    await activityTrackings.updateMany(
-      {
-        activity_id: convertToObjectIdMongoose(activity_id),
-        user_id: { $in: foundStudents[0].ids },
-      },
-      {
-        $set: {
-          status: ActivityTracking_status.PARTICIPATED,
+    if (student_ids.length === 0) {
+      await activityTrackings.updateMany(
+        {
+          activity_id: convertToObjectIdMongoose(activity_id),
         },
-      }
-    );
-
-    await activityTrackings.updateMany(
-      {
-        activity_id: convertToObjectIdMongoose(activity_id),
-        user_id: { $nin: foundStudents[0].ids },
-      },
-      {
-        $set: {
-          status: ActivityTracking_status.ABSENT,
+        {
+          $set: {
+            status: ActivityTracking_status.ABSENT,
+          },
+        }
+      );
+    } else {
+      await activityTrackings.updateMany(
+        {
+          activity_id: convertToObjectIdMongoose(activity_id),
+          user_id: { $in: foundStudents[0].ids },
         },
-      }
-    );
+        {
+          $set: {
+            status: ActivityTracking_status.PARTICIPATED,
+          },
+        }
+      );
+      await activityTrackings.updateMany(
+        {
+          activity_id: convertToObjectIdMongoose(activity_id),
+          user_id: { $nin: foundStudents[0].ids },
+        },
+        {
+          $set: {
+            status: ActivityTracking_status.ABSENT,
+          },
+        }
+      );
+    }
 
     // update student point
 

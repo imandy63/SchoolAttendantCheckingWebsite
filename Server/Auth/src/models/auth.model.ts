@@ -12,16 +12,20 @@ const studentSchema = new Schema(
 
     student_name: { type: String, required: true },
     student_avatar_url: { type: String, default: "" },
-    student_address: { type: String, required: true },
+    student_address: { type: String },
     student_class: {
-      class_name: { type: String, required: true },
-      faculty: { type: String, required: true },
+      class_name: { type: String },
+      faculty: { type: String },
     },
-    is_active: { type: Boolean, default: true },
     student_activity_point: { type: Number, default: 0 },
     student_participated_activities: {
       type: [
         {
+          _id: {
+            type: Schema.Types.ObjectId,
+            ref: "Activity",
+            required: true,
+          },
           name: { type: String },
           status: {
             type: String,
@@ -43,6 +47,5 @@ const studentSchema = new Schema(
     },
   }
 );
-
 export const students = model(DOCUMENT_NAME, studentSchema);
 export type StudentPayload = InferSchemaType<typeof studentSchema>;

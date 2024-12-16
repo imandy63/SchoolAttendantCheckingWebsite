@@ -16,10 +16,9 @@ import { students } from "../models/student.model";
 import { convertToObjectIdMongoose } from "../utils";
 import { NotificationService } from "./notification.service";
 import { RedisService } from "./redis.service";
-import { Participation_Status, Role } from "../enum/role.enum";
+import { Role } from "../enum/role.enum";
 import { ActivityTracking_status } from "../enum/activityTracking.enum";
 import ExcelJS from "exceljs";
-import { all } from "axios";
 
 class ActivityService {
   static redisService = RedisService.getInstance();
@@ -35,6 +34,15 @@ class ActivityService {
   }) {
     const result = await activities.aggregate([
       { $match: { activity_name: { $regex: search, $options: "i" } } },
+      {
+        $lookup: {
+          from: "Students",
+          localField: "assigned_to",
+          foreignField: "_id",
+          as: "worker",
+        },
+      },
+
       {
         $sort: { activity_start_date: -1 },
       },
@@ -61,6 +69,7 @@ class ActivityService {
           activity_categories: 1,
           activity_status: 1,
           activity_host: 1,
+          assigned_to: "$worker.student_name",
         },
       },
     ]);
@@ -660,7 +669,6 @@ class ActivityService {
       .findOne({
         _id: convertToObjectIdMongoose(student_id),
         role: Role.UNION_WORKER,
-        is_active: true,
       })
       .lean();
 

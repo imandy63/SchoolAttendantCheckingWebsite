@@ -4,16 +4,29 @@ import {
   disableUnionWorkerAPI,
   enableUnionWorkerAPI,
 } from "@/api/api.union-worker";
-import { UNION_WORKERS, UNION_WORKER } from "@/constants/query";
+import { STUDENTS, UNION_WORKERS } from "@/constants/query";
 import {
   resetUnionWorkerPasswordAPI,
   createUnionWorkerAPI,
 } from "@/api/api.auth";
+import { toUnionWorkerAPI } from "@/api/api.student";
 export const useGetUnionWorkers = (page: number, search = "") => {
   return useQuery({
     queryKey: [UNION_WORKERS, page, search],
     queryFn: () => getAllUnionWorkersAPI(page, search),
     enabled: !!page,
+  });
+};
+
+export const useToUnionWorker = (currentPage: number, searchQuery: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => toUnionWorkerAPI(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [STUDENTS, currentPage, searchQuery],
+      });
+    },
   });
 };
 

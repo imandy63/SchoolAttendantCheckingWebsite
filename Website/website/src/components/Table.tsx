@@ -17,7 +17,7 @@ type TableProps = {
     name: string;
     conditions: {
       value: string | number | boolean;
-      fontColor: "RED" | "GREEN";
+      fontColor: "RED" | "GREEN" | "NONE";
     }[];
   }[];
   showCheckbox?: boolean;
@@ -32,6 +32,7 @@ type TableProps = {
 enum FontColorEnum {
   RED = "text-red-500",
   GREEN = "text-green-500",
+  NONE = "",
 }
 
 const getNestedValue = (obj: any, path: string): any => {
@@ -71,6 +72,8 @@ export const Table = ({
   checkboxRules = [],
 }: TableProps) => {
   const [checkedRows, setCheckedRows] = useState<Record<number, boolean>>({});
+
+  console.log(data);
 
   useEffect(() => {
     console.log("?", checkboxRules);

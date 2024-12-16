@@ -5,24 +5,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Table } from "../../../../components/Table";
 import { SearchBar } from "../_components/SearchBar";
 import { Pagination } from "../../../../components/Pagination";
-import { Button } from "../_components/Button";
-import {
-  Assignment,
-  CreateUnionWorker,
-  Popup,
-  ResetUnionWorkerPassword,
-} from "../_components/Popup";
+import { Assignment, Popup } from "../_components/Popup";
 import ActionButton from "../_components/ActionButton";
-import {
-  useDisableUnionWorker,
-  useEnableUnionWorker,
-  useGetUnionWorkers,
-} from "@/query/useUnionWorker";
+import { useGetUnionWorkers } from "@/query/useUnionWorker";
 import { useToast } from "@/context/ToastContext";
+import { useToStudent } from "@/query/useStudent";
 
-const headers = ["MSSV", "Họ tên", "Tình trạng"];
+const headers = ["MSSV", "Họ tên"];
 
-const dataFields = ["student_id", "student_name", "is_active"];
+const dataFields = ["student_id", "student_name"];
 
 export default function UnionWorkerPage() {
   const searchParams = useSearchParams();
@@ -39,12 +30,9 @@ export default function UnionWorkerPage() {
   );
 
   const [assignment, setAssignment] = useState(false);
-  const [showCreatePopup, setShowCreatePopup] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [resetPassword, setResetPassword] = useState(false);
 
-  const { mutate: enableWorker } = useEnableUnionWorker();
-  const { mutate: disableWorker } = useDisableUnionWorker();
+  const { mutate: toStudent } = useToStudent(currentPage, searchQuery);
 
   useEffect(() => {
     console.log(error);
@@ -63,16 +51,6 @@ export default function UnionWorkerPage() {
     setCurrentPage(1);
   };
 
-  const openPopup = (id: string) => {
-    setSelectedId(id);
-    setResetPassword(true);
-  };
-
-  const closePopup = () => {
-    setResetPassword(false);
-    setSelectedId(null);
-  };
-
   const openAssignment = (id: string) => {
     setAssignment(true);
     setSelectedId(id);
@@ -89,11 +67,6 @@ export default function UnionWorkerPage() {
     <main className="flex-1 p-8">
       <div className="flex justify-between items-center mb-4">
         <SearchBar onSearch={handleSearch} />
-        <Button
-          label="Thêm công tác viên"
-          variant="primary"
-          onClick={() => setShowCreatePopup(true)}
-        />
       </div>
 
       <Table
@@ -121,37 +94,17 @@ export default function UnionWorkerPage() {
           <ActionButton
             buttonLabel="Tác vụ"
             actions={[
-              worker.is_active
-                ? {
-                    label: "Khóa hoạt động",
-                    onClick: () =>
-                      disableWorker(worker._id, {
-                        onSuccess: () => {
-                          showToast("Khóa thành công", "success");
-                        },
-                        onError: () => {
-                          showToast("Lỗi khi cập nhật", "error");
-                        },
-                      }),
-                  }
-                : {
-                    label: "Mở hoạt động",
-                    onClick: () =>
-                      enableWorker(worker._id, {
-                        onSuccess: () => {
-                          showToast("Mở thành công", "success");
-                        },
-                        onError: () => {
-                          showToast("Lỗi khi cập nhật", "error");
-                        },
-                      }),
-                  },
-
               {
-                label: "Reset mật khẩu",
-                onClick: () => {
-                  openPopup(worker._id);
-                },
+                label: "Bỏ quyền",
+                onClick: () =>
+                  toStudent(worker._id, {
+                    onSuccess: () => {
+                      showToast("Khóa thành công", "success");
+                    },
+                    onError: () => {
+                      showToast("Lỗi khi cập nhật", "error");
+                    },
+                  }),
               },
               {
                 label: "Phân công",
@@ -174,29 +127,6 @@ export default function UnionWorkerPage() {
           router.push(`?${newParams.toString()}`);
         }}
       />
-
-      {selectedId && resetPassword && (
-        <Popup
-          isOpen={resetPassword}
-          title={`Reset mât khẩu`}
-          onClose={closePopup}
-        >
-          <ResetUnionWorkerPassword
-            id={selectedId as string}
-            closePopup={closePopup}
-          />
-        </Popup>
-      )}
-
-      {showCreatePopup && (
-        <Popup
-          isOpen={showCreatePopup}
-          title="Tạo công tác viên"
-          onClose={() => setShowCreatePopup(false)}
-        >
-          <CreateUnionWorker closePopup={() => setShowCreatePopup(false)} />
-        </Popup>
-      )}
 
       {selectedId && assignment && (
         <Popup

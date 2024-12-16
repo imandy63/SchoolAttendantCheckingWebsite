@@ -290,6 +290,22 @@ class AccessService {
       { new: true }
     );
   };
+
+  static toUnionWorker = async ({ id }: { id: string }) => {
+    return await students.findOneAndUpdate(
+      { _id: convertToObjectIdMongoose(id), role: Role.STUDENT },
+      { $set: { role: Role.UNION_WORKER } },
+      { new: true }
+    );
+  };
+
+  static toStudent = async ({ id }: { id: string }) => {
+    return await students.findOneAndUpdate(
+      { _id: convertToObjectIdMongoose(id), role: Role.UNION_WORKER },
+      { $set: { role: Role.STUDENT } },
+      { new: true }
+    );
+  };
 }
 
 export default AccessService;
