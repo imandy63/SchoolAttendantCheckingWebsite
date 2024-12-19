@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faSearch,
@@ -12,12 +12,13 @@ import { useRouter } from "next/navigation";
 import NotificationBell from "@/app/(auth)/student/_components/NotificationBell";
 import Image from "next/image";
 import { useStudentInfoContext } from "@/context/StudentAuthContext";
-import { logoutUser } from "@/api/api.auth";
+import { isUnionWorker, logoutUser } from "@/api/api.auth";
 
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [unionWorker, setUnionWorker] = useState(false);
   const router = useRouter();
 
   const handleSearch = (e: React.FormEvent | React.MouseEvent) => {
@@ -26,6 +27,15 @@ const Navbar = () => {
       router.push(`/student/search?search=${encodeURIComponent(searchQuery)}`);
     }
   };
+
+  useEffect(() => {
+    const checkUnionWorker = async () => {
+      const isUW = (await isUnionWorker()).status;
+      setUnionWorker(isUW);
+    };
+
+    checkUnionWorker();
+  }, []);
 
   const { data, isLoading } = useStudentInfoContext();
 
@@ -62,6 +72,11 @@ const Navbar = () => {
           <Link href="/student/posts" className="hover:text-gray-200">
             Bài viết
           </Link>
+          {unionWorker && (
+            <Link href="/union-worker" className="hover:text-gray-200">
+              Vào trang điểm danh
+            </Link>
+          )}
         </div>
 
         {/* Search Bar */}

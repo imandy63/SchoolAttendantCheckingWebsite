@@ -7,9 +7,13 @@ import { students } from "../models/student.model";
 import { ActivityTracking_status } from "../enum/activityTracking.enum";
 import { ActivityService } from "./activity.service";
 import { StudentService } from "./student.service";
-import { NotFoundError } from "../core/error.response";
+import { BadRequestError, NotFoundError } from "../core/error.response";
 import { Notification_type } from "../enum/notificationType.enum";
 import { NotificationService } from "./notification.service";
+import PdfPrinter from "pdfmake";
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import fontkit from "@pdf-lib/fontkit";
+import fs from "fs";
 
 export class ActivityTrackingService {
   static async getStudentActivityTracking({
@@ -98,6 +102,133 @@ export class ActivityTrackingService {
     return null;
   }
 
+  static async exportPdf({ id }: { id: string }, res: any) {
+    try {
+      // Fetch data for the PDF report
+      const data = await this.getStudentActivityTracking({ activity_id: id });
+
+      const foundActivity = await activities
+        .findOne({ _id: convertToObjectIdMongoose(id) })
+        .lean();
+
+      if (!foundActivity) throw new NotFoundError("Activity not found");
+
+      if (foundActivity.activity_start_date > new Date()) {
+        throw new BadRequestError("Error");
+      }
+
+      if (!data || data.length === 0) return res.send("No data found");
+
+      const processedData = data.map((item) => ({
+        student_id: item.student_id,
+        student_name: item.student_name,
+        student_class: item.student_class?.class_name || "N/A",
+        attendance: " ", // Placeholder for "Điểm danh" column
+      }));
+      // Create a new PDF document with A4 page size
+      const pdfDoc = await PDFDocument.create();
+      const page = pdfDoc.addPage([595.28, 841.89]); // A4 dimensions in points (72 DPI)
+
+      // Register the font and set it
+      pdfDoc.registerFontkit(fontkit);
+      const fontBytes = fs.readFileSync("./src/fonts/Roboto-Regular.ttf");
+      const font = await pdfDoc.embedFont(fontBytes);
+      pdfDoc.setLanguage("vi");
+
+      // Write the title
+      page.drawText(`${foundActivity.activity_name as string}`, {
+        x: 20,
+        y: 800, // Adjusted for A4 size
+        size: 16,
+        font,
+        color: rgb(0, 0, 0),
+      });
+
+      // Define table headers
+      const headers = ["MSSV", "Họ và tên", "Lớp", "Điểm danh"];
+      const columnWidths = [100, 200, 150, 100]; // Adjust column widths
+      let yPosition = 760; // Starting Y position for headers
+
+      // Draw header row with borders
+      headers.forEach((header, index) => {
+        const xPosition =
+          10 + columnWidths.slice(0, index).reduce((a, b) => a + b, 0);
+
+        // Draw header cell border
+        page.drawRectangle({
+          x: xPosition,
+          y: yPosition - 20,
+          width: columnWidths[index],
+          height: 20,
+          borderWidth: 1,
+          borderColor: rgb(0, 0, 0),
+        });
+
+        // Draw header text
+        page.drawText(header, {
+          x: xPosition + 10,
+          y: yPosition - 15,
+          size: 12,
+          font,
+          color: rgb(0, 0, 0),
+        });
+      });
+
+      // Draw table rows with borders
+      yPosition -= 20; // Adjust Y position for the first row
+      processedData.forEach((row) => {
+        const rowValues = [
+          row.student_id,
+          row.student_name,
+          row.student_class,
+          row.attendance,
+        ];
+
+        rowValues.forEach((value, index) => {
+          const xPosition =
+            10 + columnWidths.slice(0, index).reduce((a, b) => a + b, 0);
+
+          // Draw cell border
+          page.drawRectangle({
+            x: xPosition,
+            y: yPosition - 20,
+            width: columnWidths[index],
+            height: 20,
+            borderWidth: 1,
+            borderColor: rgb(0, 0, 0),
+          });
+
+          // Draw cell text
+          page.drawText(value || "", {
+            x: xPosition + 10,
+            y: yPosition - 15,
+            size: 10,
+            font,
+            color: rgb(0, 0, 0),
+          });
+        });
+
+        yPosition -= 20; // Move to the next row
+      });
+
+      // Generate PDF bytes
+      const pdfBytes = await pdfDoc.save();
+
+      // Set response headers for PDF file download
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        "attachment; filename=StudentActivityTracking.pdf"
+      );
+
+      // Send the PDF file
+      res.end(pdfBytes);
+    } catch (error) {
+      console.error("Error exporting PDF file:", error);
+      res.status(500).send("Error exporting PDF.");
+    }
+  }
+
   static async getTracking({ activity_id }: { activity_id: string }) {
     const result = await activityTrackings.aggregate([
       {
@@ -128,7 +259,6 @@ export class ActivityTrackingService {
         },
       },
     ]);
-    console.log(result);
     return result;
   }
 
@@ -171,7 +301,11 @@ export class ActivityTrackingService {
         },
       },
     ]);
-    if (student_ids.length !== foundStudents.length) {
+
+    if (
+      foundStudents.length > 0 &&
+      student_ids.length !== foundStudents[0].ids.length
+    ) {
       throw new NotFoundError("Students not found");
     }
 
@@ -195,8 +329,6 @@ export class ActivityTrackingService {
         },
       },
     ]);
-
-    console.log("ABSENT:::", absentStudents);
 
     if (absentStudents.length !== 0 && absentStudents[0].ids.length !== 0) {
       await NotificationService.sendNotification({

@@ -9,7 +9,7 @@ export const Sidebar = () => {
     { name: "Sinh viên", icon: "👨‍🎓", href: "/admin/students" },
     { name: "Hoạt động", icon: "⚡", href: "/admin/activities" },
     { name: "Bài viết", icon: "📝", href: "/admin/posts" },
-    { name: "Công tác đoàn", icon: "👥", href: "/admin/union-worker" }, // Thêm mục Công tác đoàn
+    { name: "Công tác viên", icon: "👥", href: "/admin/union-worker" },
   ];
 
   return (

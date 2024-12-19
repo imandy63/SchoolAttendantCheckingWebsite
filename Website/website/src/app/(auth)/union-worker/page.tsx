@@ -20,6 +20,8 @@ import { formatDate } from "@/utils/formatDate";
 import { useRouter } from "next/navigation";
 import { ActivityAttendance, Popup } from "../admin/_components/Popup";
 import { logoutUser } from "@/api/api.auth";
+import Link from "next/link";
+import { exportPDFAPI } from "@/api/api.tracking";
 
 // Registering Chart.js components
 ChartJS.register(
@@ -48,6 +50,32 @@ export default function DashboardPage() {
 
   const closeAttendancePopup = () => {
     setIsAttendancePopupOpen(false);
+  };
+
+  const handleExportPDF = async (activityId: string) => {
+    try {
+      // Fetch the file as a Blob
+      const blob = await exportPDFAPI({
+        activity_id: activityId,
+      });
+
+      // Create a URL for the Blob
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+
+      // Set the downloaded file name
+      const fileName = `activities_${activityId}.pdf`;
+      a.download = fileName;
+
+      // Trigger the download
+      a.click();
+
+      // Clean up the URL object
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Failed to export Excel:", error);
+    }
   };
 
   const { data: upcoming, isLoading: upcomingLoading } =
@@ -106,16 +134,23 @@ export default function DashboardPage() {
             Lịch sử
           </button>
         </div>
-        <button
-          onClick={async () => {
-            await logoutUser();
-            router.push("/login");
-          }}
-          className={`px-4 py-2 rounded bg-[#FAFAFA] text-[#0066B3] hover:bg-[#A0D0EC]
-          `}
-        >
-          Đăng xuất
-        </button>
+        <div className="flex items-center justify-between">
+          <Link
+            href="/student/main"
+            className="text-blue-600 px-4 py-2 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 font-medium transition-colors duration-200"
+          >
+            Về trang sinh viên
+          </Link>
+          <button
+            onClick={async () => {
+              await logoutUser();
+              router.push("/login");
+            }}
+            className="px-4 py-2 bg-blue-50 text-blue-600 font-medium rounded-lg hover:bg-blue-100 hover:text-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
+          >
+            Đăng xuất
+          </button>
+        </div>
       </div>
 
       {/* Tab Content */}
@@ -189,13 +224,13 @@ export default function DashboardPage() {
                   upcoming.map((activity) => {
                     const activityDate = new Date(activity.activity_start_date);
                     const now = new Date();
-                    const sixHoursLater = new Date(
-                      activityDate.getTime() + 6 * 60 * 60 * 1000
+                    const oneHourLater = new Date(
+                      activityDate.getTime() + 60 * 60 * 1000
                     );
 
                     const isButtonEnabled =
                       now >= activityDate &&
-                      now <= sixHoursLater &&
+                      now <= oneHourLater &&
                       activity.activity_status !== "CLOSED";
                     return (
                       <li
@@ -211,18 +246,26 @@ export default function DashboardPage() {
                             {formatDate(activity.activity_start_date)}
                           </p>
                         </div>
-                        {isButtonEnabled && (
+                        <div className="flex gap-2">
                           <button
-                            className="px-4 py-2 text-white bg-[#0066B3] rounded hover:bg-[#005699]"
-                            onClick={() => {
-                              router.push(
-                                `/union-worker/attendance-check/${activity._id}`
-                              );
-                            }}
+                            className="px-4 py-2 text-white bg-[#f5672e] rounded hover:bg-[#cc7439]"
+                            onClick={() => handleExportPDF(activity._id)}
                           >
-                            Tiến hành điểm danh
+                            PDF
                           </button>
-                        )}
+                          {isButtonEnabled && (
+                            <button
+                              className="px-4 py-2 text-white bg-[#0066B3] rounded hover:bg-[#005699]"
+                              onClick={() => {
+                                router.push(
+                                  `/union-worker/attendance-check/${activity._id}`
+                                );
+                              }}
+                            >
+                              Tiến hành điểm danh
+                            </button>
+                          )}
+                        </div>
                       </li>
                     );
                   })}

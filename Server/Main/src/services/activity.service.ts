@@ -87,6 +87,7 @@ class ActivityService {
             $gte: new Date(`${year}-01-01`),
             $lt: new Date(`${year + 1}-01-01`),
           },
+          activity_status: Activity_status.CLOSED,
         },
       },
       {
@@ -169,6 +170,7 @@ class ActivityService {
               }-01`
             ),
           },
+          activity_status: Activity_status.CLOSED,
         },
       },
       {
@@ -231,11 +233,11 @@ class ActivityService {
     const foundStudent = await students.find({
       _id: convertToObjectIdMongoose(id),
       role: Role.UNION_WORKER,
-      is_active: true,
     });
     if (!foundStudent) throw new NotFoundError("Union worker not found");
 
     return await activities.find({
+      activity_status: Activity_status.CLOSED,
       activity_start_date: { $lt: new Date() },
       assigned_to: convertToObjectIdMongoose(id),
     });
@@ -789,19 +791,48 @@ class ActivityService {
     }
 
     const sixHoursEarlier = new Date();
-    sixHoursEarlier.setHours(sixHoursEarlier.getHours() - 6);
+    sixHoursEarlier.setHours(sixHoursEarlier.getHours() - 2);
 
     return await activities
       .find({
         assigned_to: convertToObjectIdMongoose(id),
+        activity_status: {
+          $in: [Activity_status.OPEN, Activity_status.FULL],
+        },
         activity_start_date: { $gte: sixHoursEarlier.toUTCString() },
       })
       .lean();
   }
 
-  static async exportExcel() {
+  static async exportExcel({ year, month }: { year: number; month?: number }) {
     try {
-      const allActivities = await activities.find();
+      let allActivities;
+      if (!month) {
+        allActivities = await activities.find({
+          activity_start_date: {
+            $gte: new Date(`${year}-01-01T00:00:00.000Z`),
+            $lt: new Date(`${year + 1}-01-01T00:00:00.000Z`),
+          },
+          activity_status: Activity_status.CLOSED,
+        });
+      } else {
+        const nextMonth = month === 12 ? 1 : month + 1;
+        const nextYear = month === 12 ? year + 1 : year;
+
+        allActivities = await activities.find({
+          activity_start_date: {
+            $gte: new Date(
+              `${year}-${String(month).padStart(2, "0")}-01T00:00:00.000Z`
+            ),
+            $lt: new Date(
+              `${nextYear}-${String(nextMonth).padStart(
+                2,
+                "0"
+              )}-01T00:00:00.000Z`
+            ),
+          },
+        });
+      }
       const allStudents = await students.find({ role: { $ne: Role.ADMIN } });
 
       // Create a new workbook and worksheet

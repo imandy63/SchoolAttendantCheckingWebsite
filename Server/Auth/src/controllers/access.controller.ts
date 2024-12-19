@@ -84,20 +84,6 @@ class AccessController {
     }).send(res);
   };
 
-  resetUnionWorkerPassword = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    new SuccessResponse({
-      message: "Reset union worker password successfully",
-      metadata: await AccessService.resetUnionWorkerPassword({
-        id: req.params.id as string,
-        ...req.body,
-      }),
-    }).send(res);
-  };
-
   toStudent = async (req: Request, res: Response, next: NextFunction) => {
     new SuccessResponse({
       message: "To student successfully",
@@ -111,17 +97,6 @@ class AccessController {
       metadata: await AccessService.toUnionWorker({
         id: req.params.id as string,
       }),
-    }).send(res);
-  };
-
-  createUnionWorker = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    new CREATED({
-      message: "Create union worker successfully",
-      metadata: await AccessService.createUnionWorker({ ...req.body }),
     }).send(res);
   };
 }

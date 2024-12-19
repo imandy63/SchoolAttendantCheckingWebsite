@@ -85,6 +85,19 @@ export default function Activities() {
     setIsPopupOpen(false);
   };
 
+  const statusHandler = (status: string) => {
+    switch (status) {
+      case "OPEN":
+        return "Mở";
+      case "CLOSED":
+        return "Đóng";
+      case "REMOVED":
+        return "Đã bỏ";
+      case "FULL":
+        return "Đầy";
+    }
+  };
+
   return (
     <>
       <main className="flex-1 p-8 h-screen overflow-y-auto">
@@ -106,24 +119,46 @@ export default function Activities() {
           actions={(activity) => (
             <ActionButton
               buttonLabel="Tác vụ"
-              actions={[
-                {
-                  label: "Sửa",
-                  onClick: () =>
-                    router.push(`/admin/activities/${activity._id}`),
-                },
-                {
-                  label: "Xem sinh viên",
-                  onClick: () =>
-                    openPopup(activity._id, activity.activity_name),
-                },
-                {
-                  label: "Xem điểm danh",
-                  onClick: () => {
-                    openAttendancePopup(activity._id, activity.activity_name);
-                  },
-                },
-              ]}
+              actions={
+                activity.activity_status !== "active"
+                  ? [
+                      {
+                        label: "Sửa",
+                        onClick: () =>
+                          router.push(`/admin/activities/${activity._id}`),
+                      },
+                      {
+                        label: "Xem sinh viên",
+                        onClick: () =>
+                          openPopup(activity._id, activity.activity_name),
+                      },
+                      {
+                        label: "Xem điểm danh",
+                        onClick: () => {
+                          openAttendancePopup(
+                            activity._id,
+                            activity.activity_name
+                          );
+                        },
+                      },
+                    ]
+                  : [
+                      {
+                        label: "Xem sinh viên",
+                        onClick: () =>
+                          openPopup(activity._id, activity.activity_name),
+                      },
+                      {
+                        label: "Xem điểm danh",
+                        onClick: () => {
+                          openAttendancePopup(
+                            activity._id,
+                            activity.activity_name
+                          );
+                        },
+                      },
+                    ]
+              }
             />
           )}
         />

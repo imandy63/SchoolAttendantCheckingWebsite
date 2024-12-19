@@ -4,9 +4,14 @@ import Image from "next/image";
 import { Pagination } from "@/components/Pagination";
 import { Table } from "@/components/Table";
 import { useRouter, useParams } from "next/navigation";
-import { useGetTracking, useUpdateTracking } from "@/query/useTracking";
+import {
+  useGetTracking,
+  useImageProcessing,
+  useUpdateTracking,
+} from "@/query/useTracking";
 import { useToast } from "@/context/ToastContext";
 import { useGetActivity } from "@/query/useActivity";
+import { Popup } from "@/app/(auth)/admin/_components/Popup";
 
 const AttendancePage = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -22,6 +27,46 @@ const AttendancePage = () => {
   const [students, setStudents] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredData, setFilteredData] = useState(data || []);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [popupItem, setPopupItem] = useState<string[] | null>(null);
+  const { mutate: imageProcess } = useImageProcessing();
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      imageProcess(file, {
+        onSuccess: (returnData) => {
+          const firstArr = valueInTwoArrays(
+            returnData.data,
+            data.map((student) => student.student_id)
+          );
+          const secondArr = valueNotInSecondArrays(firstArr, students);
+
+          if (secondArr.length !== 0) {
+            setPopupItem(secondArr);
+            setIsPopupOpen(true);
+          }
+
+          setStudents((prev) => [...prev, ...secondArr]);
+
+          showToast("Xử lý thành công", "success");
+        },
+        onError: () => {
+          showToast("Xử lý thất bại", "error");
+        },
+      });
+    }
+  };
+
+  const valueInTwoArrays = (returnData: string[], data: string[]) => {
+    const commonValues = returnData.filter((value) => data.includes(value));
+    return commonValues;
+  };
+
+  const valueNotInSecondArrays = (returnData: string[], data: string[]) => {
+    const commonValues = returnData.filter((value) => !data.includes(value));
+    return commonValues;
+  };
 
   // Filter data based on search term
   useEffect(() => {
@@ -144,12 +189,27 @@ const AttendancePage = () => {
                 className="w-64 p-2 border border-gray-300 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
             </div>
-            <button
-              onClick={handleSubmit}
-              className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 shadow-md"
-            >
-              Xác nhận
-            </button>
+            <div className="flex items-center justify-between gap-2">
+              <label
+                htmlFor="fileInput"
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 shadow-md cursor-pointer"
+              >
+                Xử lý điểm danh ảnh
+              </label>
+              <input
+                type="file"
+                id="fileInput"
+                className="hidden"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+              <button
+                onClick={handleSubmit}
+                className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 shadow-md"
+              >
+                Xác nhận
+              </button>
+            </div>
           </div>
 
           {/* Student Table */}
@@ -187,6 +247,19 @@ const AttendancePage = () => {
           />
         </div>
       </div>
+      {isPopupOpen && (
+        <Popup
+          isOpen={isPopupOpen}
+          onClose={() => setIsPopupOpen(false)}
+          title="Mã số các sinh viên được thêm"
+        >
+          {popupItem?.map((item, index) => (
+            <div key={index} className="mb-4">
+              <p>{item}</p>
+            </div>
+          ))}
+        </Popup>
+      )}
     </div>
   );
 };

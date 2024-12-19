@@ -19,6 +19,17 @@ services:
       final_mongo:
         condition: service_started
 
+  final_ocr:
+    build: ./Server/OCR
+    image: ocr:latest
+    container_name: final_ocr_server
+    ports:
+      - "39895:39895"
+    env_file:
+      - "./Server/OCR/.env"
+    networks:
+      - final-network
+
   final_notification:
     build: ./Server/Notification
     image: notification:latest

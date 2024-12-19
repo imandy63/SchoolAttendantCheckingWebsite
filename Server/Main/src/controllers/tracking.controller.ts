@@ -34,6 +34,22 @@ class ActivityTrackingController {
       }),
     }).send(res);
   }
+
+  async exportPdf(req: Request, res: Response, next: NextFunction) {
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=activityTracking.pdf"
+    );
+    res.send(
+      await ActivityTrackingService.exportPdf(
+        {
+          id: req.params.id as string,
+        },
+        res
+      )
+    );
+  }
 }
 
 export default new ActivityTrackingController();

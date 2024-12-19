@@ -133,6 +133,13 @@ export const updateActivityAPI = async ({
   return response.data.metadata;
 };
 
+export const removeActivityAPI = async (id: string) => {
+  const response = await axiosInstance.put(
+    `${urlConfig.CORE}/api/activity/remove/${id}`
+  );
+  return response.data.metadata;
+};
+
 export const participateActivityAPI = async (activityId: string) => {
   const response = await axiosInstance.post(
     `${urlConfig.CORE}/api/activity/participate/${activityId}`
@@ -191,4 +198,31 @@ export const removeCheckingAssignmentAPI = async ({
     }
   );
   return response.data.metadata;
+};
+
+export const exportExcelAPI = async ({
+  year,
+  month,
+}: {
+  year: number;
+  month?: number;
+}) => {
+  const queryParams = new URLSearchParams({ year: String(year) });
+  if (month) queryParams.append("month", String(month));
+
+  const response = await fetch(
+    `${urlConfig.CORE}/api/activity/excel?${queryParams.toString()}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch Excel file: ${response.statusText}`);
+  }
+
+  return await response.blob();
 };

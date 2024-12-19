@@ -23,6 +23,7 @@ import {
   getTimeRange,
   getYearStatistics,
   leaveActivityAPI,
+  removeActivityAPI,
 } from "@/api/api.activity";
 import {
   ACTIVITIES,
@@ -51,6 +52,16 @@ export const useGetActivityInfinite = (searchParam = "") => {
       return pages.length + 1;
     },
     initialPageParam: 1,
+  });
+};
+
+export const useRemoveActivity = (page: number, search: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => removeActivityAPI(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [ACTIVITIES, page, search] });
+    },
   });
 };
 

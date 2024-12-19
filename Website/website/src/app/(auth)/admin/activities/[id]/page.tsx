@@ -33,6 +33,7 @@ export default function EditActivityPage() {
   };
 
   const handleSubmit = (formData: CreateAndEditActivityPagePayload) => {
+    console.log(formData.activity_start_datetime);
     if (formData.activity_file) {
       uploadImageAPI(formData.activity_file, {
         onSuccess(data) {

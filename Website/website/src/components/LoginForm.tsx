@@ -1,6 +1,6 @@
 "use client";
 
-import { isAdmin, isUnionWorker, loginUser } from "@/api/api.auth";
+import { isAdmin, loginUser } from "@/api/api.auth";
 import React from "react";
 import { useRouter } from "next/navigation";
 
@@ -24,12 +24,7 @@ export const LoginForm = () => {
         if (admin) {
           router.push("/admin/students");
         } else {
-          const unionWorker = (await isUnionWorker()).status;
-          if (unionWorker) {
-            router.push("/union-worker");
-          } else {
-            router.push("/student/main");
-          }
+          router.push("/student/main");
         }
       }
     } catch (error: any) {

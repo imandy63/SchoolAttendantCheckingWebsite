@@ -18,6 +18,7 @@ import { AddUnionWorkerForm } from "./AddUnionWorkerForm";
 import { ResetUnionWorkerPasswordForm } from "./ResetPasswordForm";
 import ScrollableList from "@/components/ListDisplayer";
 import { useToast } from "@/context/ToastContext";
+import { formatDate } from "@/utils/formatDate";
 
 interface PopupProps {
   isOpen: boolean;
@@ -89,10 +90,10 @@ export const StudentActivities: React.FC<StudentActivitiesProps> = ({
               >
                 <h3 className="font-semibold text-lg">{activity.name}</h3>
                 <p className="text-sm text-gray-600">
-                  Point: {activity.point || 0}
+                  Điểm: {activity.point || 0}
                 </p>
                 <p className={`text-sm `}>
-                  Status:{" "}
+                  Tình trạng:{" "}
                   <span
                     className={`${
                       activity.status === Participation_Status.REJECTED
@@ -230,7 +231,7 @@ export const Assignment = ({ id }: { id: string }) => {
               <div className="flex items-center justify-between w-full">
                 <div>
                   <p className="font-semibold">{item.activity_name}</p>
-                  <p>{item.activity_start_date}</p>
+                  <p>{formatDate(item.activity_start_date)}</p>
                   <p>Địa điểm: {item.activity_location}</p>
                 </div>
                 {item.removable ? (
@@ -268,7 +269,7 @@ export const Assignment = ({ id }: { id: string }) => {
               <div className="flex  items-center justify-between w-full">
                 <div>
                   <p className="font-semibold">{item.activity_name}</p>
-                  <p>{item.activity_start_date}</p>
+                  <p>{formatDate(item.activity_start_date)}</p>
                   <p>Địa điểm: {item.activity_location}</p>
                 </div>
                 <Button

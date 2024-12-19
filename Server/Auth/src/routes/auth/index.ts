@@ -31,13 +31,6 @@ router.post(
   asyncHandler(AccessController.importXLSX)
 );
 
-router.post("", asyncHandler(AccessController.createUnionWorker));
-
-router.put(
-  "/:id/reset-password",
-  asyncHandler(AccessController.resetUnionWorkerPassword)
-);
-
 router.get("/is-admin", asyncHandler(AccessController.isAdmin));
 
 router.get("/is-union-worker", asyncHandler(AccessController.isUnionWorker));

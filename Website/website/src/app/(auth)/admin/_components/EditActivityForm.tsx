@@ -16,11 +16,41 @@ import dayjs from "dayjs";
 import { useToast } from "@/context/ToastContext";
 import ImageInput from "./ImageField";
 import { useGetActivityCategories } from "@/query/useActivity";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+import { parse, isValid } from "date-fns";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const validationSchema = yup.object({
   activity_name: yup.string().required("Tên hoạt động là bắt buộc"),
-  activity_start_date: yup.string().required("Ngày bắt đầu là bắt buộc"),
-  activity_start_time: yup.string().required("Giờ bắt đầu là bắt buộc"),
+  activity_start_date: yup
+    .string()
+    .required("Ngày bắt đầu là bắt buộc")
+    .test(
+      "is-not-in-the-past",
+      "Ngày bắt đầu không được bé hơn hôm nay",
+      (value) => {
+        if (!value) return false;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const parsedDate = parse(value, "dd/MM/yyyy", new Date());
+        if (!isValid(parsedDate)) return false;
+
+        parsedDate.setHours(0, 0, 0, 0);
+
+        return parsedDate >= today;
+      }
+    ),
+  activity_start_time: yup
+    .string()
+    .required("Giờ bắt đầu là bắt buộc")
+    .matches(
+      /^([01]\d|2[0-3]):([0-5]\d)$/,
+      "Giờ bắt đầu phải đúng định dạng hh:mm"
+    ),
   activity_location: yup.string().required("Địa điểm tổ chức là bắt buộc"),
   activity_max_participants: yup
     .number()
@@ -71,9 +101,11 @@ export const EditActivityForm: React.FC<EditActivityFormProps> = ({
         const activity = await getActivityAPI(activityId as string);
         setDefaultImage(activity.activity_thumb_url);
         const [date, time] = activity.activity_start_date.split("T");
+        const localTime = dayjs(`${date}T${time}`).utc().tz("Asia/Bangkok");
+
         setValue("activity_name", activity.activity_name);
-        setValue("activity_start_date", dayjs(date).format("DD-MM-YYYY"));
-        setValue("activity_start_time", time.slice(0, 5));
+        setValue("activity_start_date", localTime.format("DD-MM-YYYY"));
+        setValue("activity_start_time", localTime.format("HH:mm"));
         setValue(
           "activity_max_participants",
           activity.activity_max_participants
@@ -114,7 +146,7 @@ export const EditActivityForm: React.FC<EditActivityFormProps> = ({
       activity_location: data.activity_location,
       activity_id: activityId as string,
       activity_name: data.activity_name,
-      activity_start_date: startDateTime,
+      activity_start_datetime: startDateTime,
       activity_max_participants: data.activity_max_participants,
       activity_point: data.activity_point,
       activity_duration: data.activity_duration,

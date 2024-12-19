@@ -14,6 +14,7 @@ import dayjs from "dayjs";
 import { useToast } from "@/context/ToastContext";
 import ImageInput from "./ImageField";
 import { useGetActivityCategories } from "@/query/useActivity";
+import { parse, isValid } from "date-fns";
 
 type AddActivityFormProps = {
   onSubmit: (activityData: CreateAndEditActivityPagePayload) => void;
@@ -21,8 +22,42 @@ type AddActivityFormProps = {
 
 const validationSchema = yup.object({
   activity_name: yup.string().required("Tên hoạt động là bắt buộc"),
-  activity_start_date: yup.string().required("Ngày bắt đầu là bắt buộc"),
-  activity_start_time: yup.string().required("Giờ bắt đầu là bắt buộc"),
+  activity_start_date: yup
+    .string()
+    .required("Ngày bắt đầu là bắt buộc")
+    .test(
+      "is-not-within-two-days",
+      "Ngày bắt đầu không được nằm trong 2 ngày tới",
+      (value) => {
+        if (!value) return false;
+        const today = new Date();
+        const parsedDate = parse(value, "dd/MM/yyyy", new Date());
+
+        console.log(parsedDate);
+
+        // Ensure parsedDate is valid
+        if (!isValid(parsedDate)) return true;
+
+        // If the date is before or equal to today, skip the 2-day rule
+        if (parsedDate <= today) return false;
+
+        const twoDaysLater = new Date(today);
+        twoDaysLater.setDate(today.getDate() + 2);
+
+        // Compare only date parts
+        twoDaysLater.setHours(0, 0, 0, 0);
+        parsedDate.setHours(0, 0, 0, 0);
+
+        return parsedDate > twoDaysLater;
+      }
+    ),
+  activity_start_time: yup
+    .string()
+    .required("Giờ bắt đầu là bắt buộc")
+    .matches(
+      /^([01]\d|2[0-3]):([0-5]\d)$/,
+      "Giờ bắt đầu phải đúng định dạng hh:mm"
+    ),
   activity_max_participants: yup
     .number()
     .required("Số lượng tối đa là bắt buộc")

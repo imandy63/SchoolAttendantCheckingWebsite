@@ -154,6 +154,15 @@ class ActivityController {
     }).send(res);
   }
 
+  async removeActivity(req: Request, res: Response, next: NextFunction) {
+    new SuccessResponse({
+      message: "Remove activity successfully",
+      metadata: await ActivityService.removeActivity({
+        activity_id: req.params.id,
+      }),
+    }).send(res);
+  }
+
   async removeCheckingAssignment(
     req: Request,
     res: Response,
@@ -232,7 +241,12 @@ class ActivityController {
       "Content-Type",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     );
-    res.send(await ActivityService.exportExcel());
+    res.send(
+      await ActivityService.exportExcel({
+        year: Number(req.query.year),
+        month: Number(req.query.month),
+      })
+    );
   }
 }
 

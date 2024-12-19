@@ -25,6 +25,7 @@ import {
   useGetTimeRange,
   useGetYearStatistics,
 } from "@/query/useActivity";
+import { exportExcelAPI } from "@/api/api.activity";
 
 // Register Chart.js components
 ChartJS.register(
@@ -45,6 +46,32 @@ export const OverviewTab = () => {
   const [availableMonths, setAvailableMonths] = useState<number[]>([]);
   const [availableYears, setAvailableYears] = useState<number[]>([]);
 
+  const handleExportExcel = async (year: number, month?: number) => {
+    try {
+      // Fetch the file as a Blob
+      const blob = await exportExcelAPI({ year, month });
+
+      // Create a URL for the Blob
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+
+      // Set the downloaded file name
+      const fileName = `activities_${year}${
+        month ? `_month${month}` : ""
+      }.xlsx`;
+      a.download = fileName;
+
+      // Trigger the download
+      a.click();
+
+      // Clean up the URL object
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Failed to export Excel:", error);
+    }
+  };
+
   // Fetch data using react-query
   const { data: yearStatistics } = useGetYearStatistics({ year: selectedYear });
   const { data: timeRange } = useGetTimeRange();
@@ -52,8 +79,6 @@ export const OverviewTab = () => {
     year: selectedYear,
     month: selectedMonth,
   });
-
-  console.log(yearStatistics);
 
   useEffect(() => {
     if (timeRange) {
@@ -166,17 +191,25 @@ export const OverviewTab = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-bold text-gray-700">Tổng quan hoạt động</h2>
-        <select
-          value={selectedMonth}
-          onChange={(e) => setSelectedMonth(Number(e.target.value))}
-          className="p-2 border border-gray-300 rounded-lg bg-white text-black"
-        >
-          {availableMonths.map((month) => (
-            <option key={month} value={month}>
-              Tháng {month}
-            </option>
-          ))}
-        </select>
+        <div className="flex items-center gap-4">
+          <button
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onClick={() => handleExportExcel(selectedYear, selectedMonth)}
+          >
+            Xuất Excel
+          </button>
+          <select
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(Number(e.target.value))}
+            className="p-2 border border-gray-300 rounded-lg bg-white text-gray-700 shadow focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {availableMonths.map((month) => (
+              <option key={month} value={month}>
+                Tháng {month}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Quick Stats */}
@@ -291,17 +324,25 @@ export const OverviewTab = () => {
 
       {/* Dropdown for Year */}
       <div className="flex justify-end mb-4">
-        <select
-          value={selectedYear}
-          onChange={(e) => setSelectedYear(Number(e.target.value))}
-          className="p-2 border border-gray-300 rounded-lg bg-white text-black"
-        >
-          {availableYears.map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))}
-        </select>
+        <div className="flex items-center gap-4">
+          <button
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onClick={() => handleExportExcel(selectedYear)}
+          >
+            Xuất Excel
+          </button>
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(Number(e.target.value))}
+            className="p-2 border border-gray-300 rounded-lg bg-white text-black"
+          >
+            {availableYears.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Line Chart */}

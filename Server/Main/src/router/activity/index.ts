@@ -38,6 +38,8 @@ router.get(
   asyncHandler(ActivityController.getAssignedActivitiesByWorker)
 );
 
+router.put("/remove/:id", asyncHandler(ActivityController.removeActivity));
+
 router.put(
   "/remove-assignment/:id",
   asyncHandler(ActivityController.removeCheckingAssignment)
