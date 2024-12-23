@@ -24,6 +24,8 @@ import {
   getYearStatistics,
   leaveActivityAPI,
   removeActivityAPI,
+  getTotalActivityAPI,
+  getOverallStatistics,
 } from "@/api/api.activity";
 import {
   ACTIVITIES,
@@ -40,11 +42,14 @@ export const useGetAllActivities = (page: number, search: string = "") => {
   });
 };
 
-export const useGetActivityInfinite = (searchParam = "") => {
+export const useGetActivityInfinite = (
+  searchParam = "",
+  end: null | boolean = null
+) => {
   return useInfiniteQuery({
     queryKey: [ACTIVITIES, searchParam],
     queryFn: ({ pageParam = 1 }: { pageParam: number }) =>
-      getAllActivitiesAPI(pageParam, searchParam),
+      getAllActivitiesAPI(pageParam, searchParam, end),
     getNextPageParam: (lastPage, pages) => {
       if (lastPage.data.length < 10) {
         return undefined;
@@ -52,6 +57,13 @@ export const useGetActivityInfinite = (searchParam = "") => {
       return pages.length + 1;
     },
     initialPageParam: 1,
+  });
+};
+
+export const useGetTotalActivity = (search: string) => {
+  return useQuery({
+    queryKey: [ACTIVITIES, search],
+    queryFn: () => getTotalActivityAPI(search),
   });
 };
 
@@ -230,5 +242,12 @@ export const useGetYearStatistics = ({ year }: { year: number }) => {
   return useQuery({
     queryKey: [ACTIVITIES, "year-statistics", year],
     queryFn: () => getYearStatistics(year),
+  });
+};
+
+export const useGetOverallStatistics = () => {
+  return useQuery({
+    queryKey: [ACTIVITIES, "overall-statistics"],
+    queryFn: () => getOverallStatistics(),
   });
 };

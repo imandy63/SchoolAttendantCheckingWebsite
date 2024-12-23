@@ -3,11 +3,27 @@ import { useToast } from "@/context/ToastContext";
 import { useLeaveActivity } from "@/query/useActivity";
 import { useGetPastActivities } from "@/query/useStudent";
 import { formatDate } from "@/utils/formatDate";
+import { useState } from "react";
 
 const PastActivityPage = () => {
   const { data, isLoading } = useGetPastActivities();
   const { showToast } = useToast();
   const { mutate } = useLeaveActivity();
+
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [search, setSearch] = useState<string>("");
+
+  const filteredData =
+    data &&
+    data.filter((activity) => {
+      const matchesStatus =
+        statusFilter === "all" ||
+        activity.participating_status === statusFilter;
+      const matchesSearch = activity.activity_name
+        .toLowerCase()
+        .includes(search.toLowerCase());
+      return matchesStatus && matchesSearch;
+    });
 
   return (
     <>
@@ -20,10 +36,31 @@ const PastActivityPage = () => {
         </div>
       </div>
       <div className="p-4">
+        <div className="flex items-center gap-4 mb-4">
+          {/* Select Box for Status Filter */}
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="p-2 border rounded"
+          >
+            <option value="all">Tất cả</option>
+            <option value="participated">Đã tham gia</option>
+            <option value="rejected">Vắng</option>
+            <option value="registered">Đã đăng ký</option>
+          </select>
+          {/* Search Box */}
+          <input
+            type="text"
+            placeholder="Tìm kiếm theo tên hoạt động..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="flex-grow p-2 border rounded"
+          />
+        </div>
         <ul className="space-y-2">
           {!isLoading &&
-            data &&
-            data.map((activity) => {
+            filteredData &&
+            filteredData.map((activity) => {
               return (
                 <li
                   key={activity._id}
@@ -72,6 +109,11 @@ const PastActivityPage = () => {
                 </li>
               );
             })}
+          {!isLoading && filteredData?.length === 0 && (
+            <p className="text-center text-gray-500">
+              Không có hoạt động phù hợp
+            </p>
+          )}
         </ul>
       </div>
     </>

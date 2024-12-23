@@ -21,6 +21,7 @@ import {
   AiOutlineFieldTime,
 } from "react-icons/ai";
 import {
+  useGetOverallStatistics,
   useGetStatistics,
   useGetTimeRange,
   useGetYearStatistics,
@@ -79,6 +80,9 @@ export const OverviewTab = () => {
     year: selectedYear,
     month: selectedMonth,
   });
+  const { data: overall } = useGetOverallStatistics();
+
+  console.log(overall);
 
   useEffect(() => {
     if (timeRange) {
@@ -191,25 +195,72 @@ export const OverviewTab = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-bold text-gray-700">Tổng quan hoạt động</h2>
-        <div className="flex items-center gap-4">
-          <button
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            onClick={() => handleExportExcel(selectedYear, selectedMonth)}
-          >
-            Xuất Excel
-          </button>
-          <select
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(Number(e.target.value))}
-            className="p-2 border border-gray-300 rounded-lg bg-white text-gray-700 shadow focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {availableMonths.map((month) => (
-              <option key={month} value={month}>
-                Tháng {month}
-              </option>
-            ))}
-          </select>
+      </div>
+
+      <div className="grid grid-cols-4 gap-4 mb-6">
+        <div className="flex items-center bg-white rounded-lg shadow-md p-4">
+          <AiOutlinePieChart className="text-blue-500 text-4xl mr-4" />
+          <div>
+            <p className="text-gray-600">Tổng số hoạt động</p>
+            <h3 className="text-2xl font-bold text-blue-600">
+              {overall?.total_activities || 0}
+            </h3>
+          </div>
         </div>
+        <div className="flex items-center bg-white rounded-lg shadow-md p-4">
+          <AiOutlineTeam className="text-green-500 text-4xl mr-4" />
+          <div>
+            <p className="text-gray-600">Tổng số tham gia</p>
+            <h3 className="text-2xl font-bold text-green-600">
+              {overall?.total_participants || 0}
+            </h3>
+          </div>
+        </div>
+        <div className="flex items-center bg-white rounded-lg shadow-md p-4">
+          <AiOutlineUser className="text-orange-500 text-4xl mr-4" />
+          <div>
+            <p className="text-gray-600">Tổng số đăng ký</p>
+            <h3 className="text-2xl font-bold text-orange-600">
+              {overall?.total_students || 0}
+            </h3>
+          </div>
+        </div>
+        <div className="flex items-center bg-white rounded-lg shadow-md p-4">
+          <AiOutlineFieldTime className="text-red-500 text-4xl mr-4" />
+          <div>
+            <p className="text-gray-600">Tỉ lệ tham gia</p>
+            <h3 className="text-2xl font-bold text-red-600">
+              {overall && overall.total_participants && overall.total_students
+                ? `${(
+                    (overall.total_participants / overall.total_students) *
+                    100
+                  ).toFixed(2)}%`
+                : "0%"}
+            </h3>
+          </div>
+        </div>
+      </div>
+
+      <hr />
+
+      <div className="flex items-center justify-end gap-4 my-4">
+        <button
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          onClick={() => handleExportExcel(selectedYear, selectedMonth)}
+        >
+          Xuất Excel
+        </button>
+        <select
+          value={selectedMonth}
+          onChange={(e) => setSelectedMonth(Number(e.target.value))}
+          className="p-2 border border-gray-300 rounded-lg bg-white text-gray-700 shadow focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          {availableMonths.map((month) => (
+            <option key={month} value={month}>
+              Tháng {month}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Quick Stats */}

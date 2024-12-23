@@ -35,7 +35,7 @@ const Sidebar: React.FC = () => {
               </span>
             </div>
           </Link>
-          <Link href="/student/activity">
+          <Link href="/student/search">
             <div className="flex items-center space-x-4 p-4 hover:bg-gray-200 rounded-lg cursor-pointer">
               <FontAwesomeIcon icon={faTasks} className="text-gray-700" />
               <span className="text-gray-700 font-medium">Hoạt động</span>

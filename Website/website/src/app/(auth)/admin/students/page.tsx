@@ -35,6 +35,7 @@ const dataFields = [
 export default function Students() {
   const searchParams = useSearchParams();
   const page = searchParams.get("page") ? Number(searchParams.get("page")) : 1;
+  const [totalStudents, setTotalStudents] = useState(0);
   const search = searchParams.get("search") || "";
   const [currentPage, setCurrentPage] = useState(page);
   const [searchQuery, setSearchQuery] = useState(search);
@@ -129,6 +130,9 @@ export default function Students() {
             />
           )}
         />
+        <div className="py-4 font-bold">
+          Tổng số lượng sinh viên: {data?.total ?? 0}
+        </div>
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

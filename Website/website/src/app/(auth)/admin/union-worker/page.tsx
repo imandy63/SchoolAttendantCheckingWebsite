@@ -116,7 +116,9 @@ export default function UnionWorkerPage() {
           />
         )}
       />
-
+      <div className="py-4 font-bold">
+        Tổng số lượng công tác viên: {data?.total ?? 0}
+      </div>
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}

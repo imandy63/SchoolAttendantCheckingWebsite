@@ -26,10 +26,14 @@ router.get(
   asyncHandler(ActivityController.getYearStatistics)
 );
 
+router.get("/overall", asyncHandler(ActivityController.getOverallStatistics));
+
 router.get(
   "/upcoming",
   asyncHandler(ActivityController.getUpcomingActivitiesGroupByDate)
 );
+
+router.get("/total", asyncHandler(ActivityController.getTotal));
 
 router.get("/", asyncHandler(ActivityController.getActivities));
 

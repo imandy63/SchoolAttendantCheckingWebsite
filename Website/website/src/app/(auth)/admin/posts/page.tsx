@@ -157,6 +157,16 @@ export default function Posts() {
             );
           }}
         />
+        {
+          <>
+            <div className="py-4 font-bold">
+              Tổng số lượng bài viết: {!isLoading ? data?.total : 0}
+            </div>
+            <div className="py-4 font-bold">
+              Tổng bài viết đã xóa: {!isLoading ? data?.totalDeleted : 0}
+            </div>
+          </>
+        }
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

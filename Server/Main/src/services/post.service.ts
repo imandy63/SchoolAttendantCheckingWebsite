@@ -1,3 +1,4 @@
+import { create } from "lodash";
 import { posts, Post } from "../models/post.model";
 import { convertToObjectIdMongoose } from "../utils";
 
@@ -8,14 +9,21 @@ class PostService {
         post_title: { $regex: search, $options: "i" },
       })
       .skip((page - 1) * limit)
-      .limit(limit);
+      .limit(limit)
+      .sort({ post_date: -1 });
 
     const total = await posts.countDocuments({
+      post_title: { $regex: search, $options: "i" },
       post_deleted: false,
+    });
+    const totalDeleted = await posts.countDocuments({
+      post_deleted: true,
+      post_title: { $regex: search, $options: "i" },
     });
     return {
       data: postsList,
       total,
+      totalDeleted,
       page,
       limit,
     };
@@ -26,7 +34,7 @@ class PostService {
       .find({
         post_deleted: false,
       })
-      .sort({ post_created_at: -1 })
+      .sort({ post_date: -1 })
       .limit(5);
     return postsList;
   }
@@ -49,7 +57,8 @@ class PostService {
         post_deleted: false,
       })
       .skip((page - 1) * limit)
-      .limit(limit);
+      .limit(limit)
+      .sort({ post_date: -1 });
 
     const total = await posts.countDocuments({
       post_deleted: false,

@@ -109,13 +109,19 @@ const ActivityPage: React.FC = () => {
         <div className="flex space-x-4">
           <button
             className={`${
-              !participatable || isSuccess || activity_status === "CLOSED"
+              !participatable ||
+              isSuccess ||
+              activity_status === "CLOSED" ||
+              activity_max_participants === activity_total_participants
                 ? "bg-gray-400 text-gray-700 cursor-not-allowed"
                 : "bg-blue-600 text-white hover:bg-blue-700"
             } font-semibold py-3 px-8 rounded-full transition duration-300 shadow-md text-lg`}
             onClick={handleParticipation}
             disabled={
-              !participatable || isSuccess || activity_status === "CLOSED"
+              !participatable ||
+              isSuccess ||
+              activity_status === "CLOSED" ||
+              activity_max_participants === activity_total_participants
             }
           >
             {activity_status === "CLOSED"

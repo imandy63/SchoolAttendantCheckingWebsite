@@ -5,9 +5,15 @@ import {
   CreateActivityPayload,
 } from "@/interfaces/activity.interface";
 
-export const getAllActivitiesAPI = async (page: number, search = "") => {
+export const getAllActivitiesAPI = async (
+  page: number,
+  search = "",
+  end: null | boolean = null
+) => {
   const response = await axiosInstance.get(
-    `${urlConfig.CORE}/api/activity?page=${page}&search=${search}`
+    `${urlConfig.CORE}/api/activity?page=${page}&search=${search}${
+      end ? `&end=${end}` : ""
+    }`
   );
   return response.data.metadata;
 };
@@ -22,6 +28,13 @@ export const getActivityParticipantsAPI = async (activityId: string) => {
 export const getActivityAPI = async (activityId: string) => {
   const response = await axiosInstance.get(
     `${urlConfig.CORE}/api/activity/${activityId}`
+  );
+  return response.data.metadata;
+};
+
+export const getTotalActivityAPI = async (search: string) => {
+  const response = await axiosInstance.get(
+    `${urlConfig.CORE}/api/activity/total?search=${search}`
   );
   return response.data.metadata;
 };
@@ -43,6 +56,13 @@ export const getTimeRange = async () => {
 export const getStatistics = async (month: number, year: number) => {
   const response = await axiosInstance.get(
     `${urlConfig.CORE}/api/activity/statistic?month=${month}&year=${year}`
+  );
+  return response.data.metadata;
+};
+
+export const getOverallStatistics = async () => {
+  const response = await axiosInstance.get(
+    `${urlConfig.CORE}/api/activity/overall`
   );
   return response.data.metadata;
 };

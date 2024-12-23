@@ -4,14 +4,32 @@ import { ActivityService } from "../services/activity.service";
 
 class ActivityController {
   async getActivities(req: Request, res: Response, next: NextFunction) {
-    const { page = 1, limit = 10, search = "" } = req.query;
+    const { page = 1, limit = 10, search = "", end = null } = req.query;
+    const parsedEnd = end
+      ? end === "true"
+        ? true
+        : end === "false"
+        ? false
+        : null
+      : null;
+
+    console.log(parsedEnd);
+
     new SuccessResponse({
       message: "Get activities successfully",
       metadata: await ActivityService.getActivities({
         page: page as number,
         limit: limit as number,
         search: search as string,
+        end: parsedEnd,
       }),
+    }).send(res);
+  }
+
+  async getOverallStatistics(req: Request, res: Response, next: NextFunction) {
+    new SuccessResponse({
+      message: "Get overall statistics successfully",
+      metadata: await ActivityService.getOverallStatistics(),
     }).send(res);
   }
 
@@ -247,6 +265,15 @@ class ActivityController {
         month: Number(req.query.month),
       })
     );
+  }
+
+  async getTotal(req: Request, res: Response, next: NextFunction) {
+    new SuccessResponse({
+      message: "Get total successfully",
+      metadata: await ActivityService.getTotalActivity(
+        req.query.search as string
+      ),
+    }).send(res);
   }
 }
 

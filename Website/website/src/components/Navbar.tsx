@@ -25,6 +25,8 @@ const Navbar = () => {
     e.preventDefault();
     if (searchQuery.trim()) {
       router.push(`/student/search?search=${encodeURIComponent(searchQuery)}`);
+    } else {
+      router.push(`/student/search`);
     }
   };
 

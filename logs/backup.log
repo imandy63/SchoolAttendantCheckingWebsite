@@ -140,3 +140,66 @@ Exporting collection: ActivityTrackings
 2024-12-19T03:38:02.383+0700	exported 21 records
 Backup completed successfully!
 Backup location: /mnt/c/Users/kongh/Desktop/DATN/backups/json_backup_2024-12-19_03-38-01
+Starting export of collections...
+Exporting collection: Students
+2024-12-19T09:01:02.385+0700	connected to: mongodb://localhost:39990/
+2024-12-19T09:01:02.426+0700	exported 28 records
+Exporting collection: Activities
+2024-12-19T09:01:02.443+0700	connected to: mongodb://localhost:39990/
+2024-12-19T09:01:02.464+0700	exported 7 records
+Exporting collection: Notifications
+2024-12-19T09:01:02.479+0700	connected to: mongodb://localhost:39990/
+2024-12-19T09:01:02.503+0700	exported 19 records
+Exporting collection: Posts
+2024-12-19T09:01:02.518+0700	connected to: mongodb://localhost:39990/
+2024-12-19T09:01:02.538+0700	exported 3 records
+Exporting collection: User_notification_tokens
+2024-12-19T09:01:02.555+0700	connected to: mongodb://localhost:39990/
+2024-12-19T09:01:02.570+0700	exported 0 records
+Exporting collection: ActivityTrackings
+2024-12-19T09:01:02.583+0700	connected to: mongodb://localhost:39990/
+2024-12-19T09:01:02.631+0700	exported 92 records
+Backup completed successfully!
+Backup location: /mnt/c/Users/kongh/Desktop/DATN/backups/json_backup_2024-12-19_09-01-01
+Starting export of collections...
+Exporting collection: Students
+2024-12-19T10:01:02.765+0700	connected to: mongodb://localhost:39990/
+2024-12-19T10:01:02.807+0700	exported 54 records
+Exporting collection: Activities
+2024-12-19T10:01:02.820+0700	connected to: mongodb://localhost:39990/
+2024-12-19T10:01:02.838+0700	exported 7 records
+Exporting collection: Notifications
+2024-12-19T10:01:02.851+0700	connected to: mongodb://localhost:39990/
+2024-12-19T10:01:02.871+0700	exported 19 records
+Exporting collection: Posts
+2024-12-19T10:01:02.884+0700	connected to: mongodb://localhost:39990/
+2024-12-19T10:01:02.902+0700	exported 5 records
+Exporting collection: User_notification_tokens
+2024-12-19T10:01:02.922+0700	connected to: mongodb://localhost:39990/
+2024-12-19T10:01:02.935+0700	exported 0 records
+Exporting collection: ActivityTrackings
+2024-12-19T10:01:02.955+0700	connected to: mongodb://localhost:39990/
+2024-12-19T10:01:03.036+0700	exported 92 records
+Backup completed successfully!
+Backup location: /mnt/c/Users/kongh/Desktop/DATN/backups/json_backup_2024-12-19_10-01-01
+Starting export of collections...
+Exporting collection: Students
+2024-12-19T11:01:02.228+0700	connected to: mongodb://localhost:39990/
+2024-12-19T11:01:02.264+0700	exported 54 records
+Exporting collection: Activities
+2024-12-19T11:01:02.292+0700	connected to: mongodb://localhost:39990/
+2024-12-19T11:01:02.327+0700	exported 10 records
+Exporting collection: Notifications
+2024-12-19T11:01:02.343+0700	connected to: mongodb://localhost:39990/
+2024-12-19T11:01:02.365+0700	exported 22 records
+Exporting collection: Posts
+2024-12-19T11:01:02.381+0700	connected to: mongodb://localhost:39990/
+2024-12-19T11:01:02.398+0700	exported 6 records
+Exporting collection: User_notification_tokens
+2024-12-19T11:01:02.412+0700	connected to: mongodb://localhost:39990/
+2024-12-19T11:01:02.430+0700	exported 0 records
+Exporting collection: ActivityTrackings
+2024-12-19T11:01:02.448+0700	connected to: mongodb://localhost:39990/
+2024-12-19T11:01:02.501+0700	exported 94 records
+Backup completed successfully!
+Backup location: /mnt/c/Users/kongh/Desktop/DATN/backups/json_backup_2024-12-19_11-01-01

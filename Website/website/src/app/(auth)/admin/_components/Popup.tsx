@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { Button } from "./Button";
 import {
   useAssignChecking,
@@ -66,54 +66,88 @@ export const StudentActivities: React.FC<StudentActivitiesProps> = ({
   studentId,
 }) => {
   const { data, error, isLoading } = useStudentActivities(studentId);
+  const [search, setSearch] = useState("");
 
   if (isLoading) return <Skeleton count={5} />;
   if (error) return <p>Error loading activities: {error.message}</p>;
 
-  // Check if data exists and has activities
-  const activities = data?.student_participated_activities;
+  const activities = data?.student_participated_activities || [];
+
+  // Totals
+  const totalActivities = activities.length;
+  const totalPresent = activities.filter(
+    (activity) => activity.status === Participation_Status.PARTICIPATED
+  ).length;
+  const totalAbsent = activities.filter(
+    (activity) => activity.status === Participation_Status.REJECTED
+  ).length;
+
+  // Filtered activities based on search input
+  const filteredActivities = activities.filter((activity) =>
+    activity.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="space-y-4">
-      {activities && activities.length > 0 ? (
-        <ul className="space-y-3">
-          {activities.map(
-            (activity: {
-              _id: string;
-              name: string;
-              point: number;
-              status: Participation_Status;
-            }) => (
-              <li
-                key={activity._id}
-                className="p-4 border rounded-lg shadow-sm bg-white"
-              >
-                <h3 className="font-semibold text-lg">{activity.name}</h3>
-                <p className="text-sm text-gray-600">
-                  Điểm: {activity.point || 0}
-                </p>
-                <p className={`text-sm `}>
-                  Tình trạng:{" "}
-                  <span
-                    className={`${
-                      activity.status === Participation_Status.REJECTED
-                        ? "text-red-600"
-                        : activity.status === Participation_Status.REGISTERED
-                        ? "text-yellow-600"
-                        : "text-green-600"
-                    }`}
-                  >
-                    {activity.status === Participation_Status.REGISTERED
-                      ? "Chờ điểm danh"
-                      : activity.status === Participation_Status.REJECTED
-                      ? "Vắng"
-                      : "Có mặt"}
-                  </span>
-                </p>
-              </li>
-            )
-          )}
-        </ul>
+      {totalActivities > 0 ? (
+        <>
+          <div className="mb-4">
+            <p className="font-semibold">
+              Tổng số: <span>{totalActivities}</span>
+            </p>
+            <p className="font-semibold">
+              Có điểm danh:{" "}
+              <span className="text-green-600">{totalPresent}</span>
+            </p>
+            <p className="font-semibold">
+              Vắng: <span className="text-red-600">{totalAbsent}</span>
+            </p>
+          </div>
+          <input
+            type="text"
+            placeholder="Tìm kiếm hoạt động..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded mb-4"
+          />
+          <ul className="space-y-3">
+            {filteredActivities.length > 0 ? (
+              filteredActivities.map((activity) => (
+                <li
+                  key={activity._id}
+                  className="p-4 border rounded-lg shadow-sm bg-white"
+                >
+                  <h3 className="font-semibold text-lg">{activity.name}</h3>
+                  <p className="text-sm text-gray-600">
+                    Điểm: {activity.point || 0}
+                  </p>
+                  <p className="text-sm">
+                    Tình trạng:{" "}
+                    <span
+                      className={`${
+                        activity.status === Participation_Status.REJECTED
+                          ? "text-red-600"
+                          : activity.status === Participation_Status.REGISTERED
+                          ? "text-yellow-600"
+                          : "text-green-600"
+                      }`}
+                    >
+                      {activity.status === Participation_Status.REGISTERED
+                        ? "Chờ điểm danh"
+                        : activity.status === Participation_Status.REJECTED
+                        ? "Vắng"
+                        : "Có mặt"}
+                    </span>
+                  </p>
+                </li>
+              ))
+            ) : (
+              <p className="text-center text-gray-500">
+                Không tìm thấy hoạt động nào
+              </p>
+            )}
+          </ul>
+        </>
       ) : (
         <p className="text-center text-gray-500">Không có hoạt động</p>
       )}
@@ -152,41 +186,84 @@ export const ActivityAttendance: React.FC<ActivityParticipantsProps> = ({
   activityId,
 }) => {
   const { data, error, isLoading } = useGetActivityTrackingDetail(activityId);
+  const [search, setSearch] = useState("");
 
   if (isLoading) return <Skeleton count={5} />;
   if (error) return <p>Error loading participants: {error.message}</p>;
 
+  const filteredData = data?.filter((student) =>
+    student.student_name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const totalAbsent = data?.filter(
+    (student) => student.activity_status === ActivityTracking_status.ABSENT
+  ).length;
+
+  const totalPresent = data?.filter(
+    (student) =>
+      student.activity_status === ActivityTracking_status.PARTICIPATED
+  ).length;
+
   return (
-    <ul className="space-y-2">
+    <div>
       {data && data.length > 0 ? (
-        data.map((student, index) => (
-          <li key={student.student_id}>
-            <p>{student.student_name}</p>
-            <p>
-              Status:{" "}
-              <span
-                className={`${
-                  student.activity_status === ActivityTracking_status.ABSENT
-                    ? "text-red-600"
-                    : student.activity_status ===
-                      ActivityTracking_status.PENDING
-                    ? "text-yellow-600"
-                    : "text-green-600"
-                }`}
-              >
-                {student.activity_status === ActivityTracking_status.ABSENT
-                  ? "Vắng"
-                  : student.activity_status === ActivityTracking_status.PENDING
-                  ? "Chờ điểm danh"
-                  : "Có mặt"}
-              </span>
+        <>
+          <div className="mb-4">
+            <p className="font-semibold">
+              Tổng số: <span>{data.length}</span>
             </p>
-          </li>
-        ))
+            <p className="font-semibold">
+              Vắng: <span className="text-red-600">{totalAbsent}</span>
+            </p>
+            <p className="font-semibold">
+              Có mặt: <span className="text-green-600">{totalPresent}</span>
+            </p>
+          </div>
+          <input
+            type="text"
+            placeholder="Tìm kiếm sinh viên..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded mb-4"
+          />
+          <ul className="space-y-2">
+            {filteredData && filteredData.length > 0 ? (
+              filteredData.map((student) => (
+                <li key={student.student_id} className="p-2 border rounded">
+                  <p>{student.student_name}</p>
+                  <p>
+                    Status:{" "}
+                    <span
+                      className={`${
+                        student.activity_status ===
+                        ActivityTracking_status.ABSENT
+                          ? "text-red-600"
+                          : student.activity_status ===
+                            ActivityTracking_status.PENDING
+                          ? "text-yellow-600"
+                          : "text-green-600"
+                      }`}
+                    >
+                      {student.activity_status ===
+                      ActivityTracking_status.ABSENT
+                        ? "Vắng"
+                        : student.activity_status ===
+                          ActivityTracking_status.PENDING
+                        ? "Chờ điểm danh"
+                        : "Có mặt"}
+                    </span>
+                  </p>
+                </li>
+              ))
+            ) : (
+              <p>Không tìm thấy sinh viên nào</p>
+            )}
+          </ul>
+        </>
       ) : (
         <p>Chưa có dữ liệu điểm danh</p>
       )}
-    </ul>
+    </div>
   );
 };
 

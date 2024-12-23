@@ -27,13 +27,42 @@ class ActivityService {
     page = 1,
     limit = 10,
     search = "",
+    end = null,
   }: {
     page: number;
     limit: number;
     search: string;
+    end: boolean | null;
   }) {
+    console.log(":::", end);
+    const now = new Date();
+    const matchConditions: any = {
+      activity_name: { $regex: search, $options: "i" },
+    };
+
+    if (end === true) {
+      matchConditions.$or = [
+        { activity_status: Activity_status.CLOSED },
+        { activity_start_date: { $lt: now } },
+      ];
+    } else if (end === false) {
+      console.log("ĐỊT MẸ MÀY");
+      matchConditions.$and = [
+        {
+          activity_status: {
+            $in: [Activity_status.OPEN, Activity_status.FULL],
+          },
+        },
+        { activity_start_date: { $gt: now } },
+      ];
+    }
+
+    console.log(matchConditions);
+
     const result = await activities.aggregate([
-      { $match: { activity_name: { $regex: search, $options: "i" } } },
+      {
+        $match: matchConditions,
+      },
       {
         $lookup: {
           from: "Students",
@@ -42,16 +71,9 @@ class ActivityService {
           as: "worker",
         },
       },
-
-      {
-        $sort: { activity_start_date: -1 },
-      },
-      {
-        $skip: (page - 1) * limit,
-      },
-      {
-        $limit: limit,
-      },
+      { $sort: { activity_start_date: -1 } },
+      { $skip: (page - 1) * limit },
+      { $limit: limit },
       {
         $addFields: {
           activity_participants_total: { $size: "$activity_participants" },
@@ -69,13 +91,13 @@ class ActivityService {
           activity_categories: 1,
           activity_status: 1,
           activity_host: 1,
+          activity_location: 1,
           assigned_to: "$worker.student_name",
         },
       },
     ]);
-    const total = await activities.countDocuments({
-      activity_name: { $regex: search, $options: "i" },
-    });
+    const total = await activities.countDocuments(matchConditions);
+
     return { data: result, total, page, limit };
   }
 
@@ -137,6 +159,60 @@ class ActivityService {
     ]);
 
     return result;
+  }
+
+  static async getOverallStatistics() {
+    const result = await activities.aggregate([
+      {
+        $match: {
+          activity_status: Activity_status.CLOSED,
+        },
+      },
+      {
+        $lookup: {
+          from: "ActivityTrackings",
+          localField: "_id",
+          foreignField: "activity_id",
+          as: "tracking_data",
+        },
+      },
+      {
+        $addFields: {
+          participated_students: {
+            $size: {
+              $filter: {
+                input: "$tracking_data",
+                as: "tracking",
+                cond: {
+                  $eq: [
+                    "$$tracking.status",
+                    ActivityTracking_status.PARTICIPATED,
+                  ],
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        $group: {
+          _id: null, // Group everything together
+          total_activities: { $sum: 1 }, // Total number of activities
+          total_participants: { $sum: "$participated_students" }, // Total participants
+          total_students: { $sum: "$activity_total_participants" }, // Total students
+        },
+      },
+      {
+        $project: {
+          total_activities: 1,
+          total_participants: 1,
+          total_students: 1,
+          _id: 0, // Exclude _id from the result
+        },
+      },
+    ]);
+
+    return result.length > 0 ? result[0] : null; // Return the result or null if empty
   }
 
   static async getTimeRange() {
@@ -342,6 +418,50 @@ class ActivityService {
     }
     throw new NotFoundError("Activity not found");
   }
+
+  static getTotalActivity = (search: string) => {
+    const now = new Date();
+    const twoHoursLater = new Date();
+    twoHoursLater.setHours(now.getHours() + 2);
+
+    const data = activities.aggregate([
+      {
+        $facet: {
+          closedCount: [
+            {
+              $match: {
+                activity_status: "CLOSED",
+                activity_name: { $regex: search, $options: "i" },
+              },
+            },
+            { $count: "count" },
+          ],
+          notSubmittedCount: [
+            {
+              $match: {
+                activity_status: { $in: ["OPEN", "FULL"] },
+                activity_start_date: { $lt: twoHoursLater },
+                activity_name: { $regex: search, $options: "i" },
+              },
+            },
+            { $count: "count" },
+          ],
+          upcomingCount: [
+            {
+              $match: {
+                activity_status: { $in: ["OPEN", "FULL"] },
+                activity_name: { $regex: search, $options: "i" },
+                activity_start_date: { $gte: twoHoursLater },
+              },
+            },
+            { $count: "count" },
+          ],
+        },
+      },
+    ]);
+
+    return data;
+  };
 
   static async getParticipatableActivity({
     activity_id,
