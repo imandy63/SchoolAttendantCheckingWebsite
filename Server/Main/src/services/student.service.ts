@@ -1,6 +1,7 @@
 import { BadRequestError, NotFoundError } from "../core/error.response";
 import { Participation_Status, Role } from "../enum/role.enum";
 import { StudentParticipatedActivity } from "../interfaces/activity.interface";
+import { activities } from "../models/activity.model";
 import { students, StudentPayload } from "../models/student.model";
 import { convertToObjectIdMongoose } from "../utils";
 import { ActivityService } from "./activity.service";
@@ -25,6 +26,68 @@ export class StudentService {
     );
   };
 
+  static getPastActivities = async ({ id }: { id: string }) => {
+    const result = await students.aggregate([
+      {
+        $match: {
+          _id: convertToObjectIdMongoose(id),
+          role: Role.STUDENT,
+        },
+      },
+      {
+        $unwind: "$student_participated_activities",
+      },
+      {
+        $lookup: {
+          from: "Activities",
+          localField: "student_participated_activities._id",
+          foreignField: "_id",
+          as: "activity",
+        },
+      },
+      {
+        $unwind: "$activity",
+      },
+      {
+        $addFields: {
+          leavable: {
+            $cond: {
+              if: {
+                $gt: [
+                  "$activity.activity_start_date",
+                  {
+                    $add: [new Date(), 2 * 24 * 60 * 60 * 1000],
+                  },
+                ],
+              },
+              then: true,
+              else: false,
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          _id: "$activity._id",
+          activity_name: "$activity.activity_name",
+          activity_start_date: "$activity.activity_start_date",
+          participating_status: "$student_participated_activities.status",
+          leavable: 1,
+          activity_location: "$activity.activity_location",
+        },
+      },
+      {
+        $sort: {
+          activity_start_date: -1,
+        },
+      },
+    ]);
+
+    console.log(result);
+
+    return result;
+  };
+
   static getStudents = async ({
     page = 1,
     limit = 10,
@@ -34,8 +97,11 @@ export class StudentService {
     const result = await students.aggregate([
       {
         $match: {
-          student_name: { $regex: search, $options: "i" },
-          role: Role.STUDENT,
+          $or: [
+            { student_name: { $regex: search, $options: "i" } },
+            { student_id: { $regex: search, $options: "i" } },
+          ],
+          role: { $in: [Role.STUDENT, Role.UNION_WORKER] },
         },
       },
       {
@@ -61,6 +127,13 @@ export class StudentService {
           student_id: 1,
           student_activity_point: 1,
           student_class: 1,
+          role: {
+            $cond: {
+              if: { $eq: ["$role", Role.STUDENT] },
+              then: "sinh viên",
+              else: "công tác viên",
+            },
+          },
         },
       },
     ]);
@@ -171,5 +244,55 @@ export class StudentService {
       { $set: { subscribed_categories: categories } },
       { new: true }
     );
+  };
+
+  static enableWorker = async (id: string) => {
+    return await students.findOneAndUpdate(
+      { _id: convertToObjectIdMongoose(id), role: Role.UNION_WORKER },
+      { $set: { is_active: true } },
+      { new: true }
+    );
+  };
+
+  static disableWorker = async (id: string) => {
+    return await students.findOneAndUpdate(
+      { _id: convertToObjectIdMongoose(id), role: Role.UNION_WORKER },
+      { $set: { is_active: false } },
+      { new: true }
+    );
+  };
+
+  static getUnionWorkers = async ({ page = 1, limit = 10, search = "" }) => {
+    const result = await students
+      .find(
+        {
+          role: Role.UNION_WORKER,
+          student_name: { $regex: search, $options: "i" },
+        },
+        { student_name: 1, student_id: 1, is_active: 1 }
+      )
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean();
+
+    const total = await students.countDocuments({
+      student_name: { $regex: search, $options: "i" },
+      role: Role.UNION_WORKER,
+    });
+    return { data: result, total, page, limit };
+  };
+
+  static getUnionWorkerAssignedActivities = async ({ id }: { id: string }) => {
+    const foundUnionWorker = await students
+      .findOne({ _id: convertToObjectIdMongoose(id), role: Role.UNION_WORKER })
+      .lean();
+
+    if (!foundUnionWorker) {
+      throw new NotFoundError("Union worker not found");
+    }
+
+    return await activities
+      .find({ assigned_to: convertToObjectIdMongoose(id) })
+      .lean();
   };
 }

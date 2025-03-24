@@ -55,8 +55,8 @@ class AccessService {
             faculty: row["faculty"],
           },
           password: hashedPassword,
-          student_activity_point: row["student_activity_point"],
-          subscribed_categories: row["subscribed_categories"],
+          student_activity_point: 70,
+          subscribed_categories: [],
         });
       }
 
@@ -68,12 +68,13 @@ class AccessService {
   }
 
   static async getMe({ userId }: { userId: string }) {
-    const foundUser = await students.find(
+    const foundUser = await students.findOne(
       { _id: convertToObjectIdMongoose(userId) },
       {
-        student_id: 1,
-        student_name: 1,
-        student_avatar_url: 1,
+        is_active: 0,
+        password: 0,
+        role: 0,
+        student_participated_activities: 0,
       }
     );
 
@@ -81,7 +82,7 @@ class AccessService {
       throw new AuthFailureError("User is not registered!");
     }
 
-    return { user: foundUser };
+    return foundUser;
   }
 
   static isAdmin = async ({ userId }: { userId: string }) => {
@@ -246,6 +247,22 @@ class AccessService {
     } catch (error) {
       throw new AuthFailureError("Auth error");
     }
+  };
+
+  static toUnionWorker = async ({ id }: { id: string }) => {
+    return await students.findOneAndUpdate(
+      { _id: convertToObjectIdMongoose(id), role: Role.STUDENT },
+      { $set: { role: Role.UNION_WORKER } },
+      { new: true }
+    );
+  };
+
+  static toStudent = async ({ id }: { id: string }) => {
+    return await students.findOneAndUpdate(
+      { _id: convertToObjectIdMongoose(id), role: Role.UNION_WORKER },
+      { $set: { role: Role.STUDENT } },
+      { new: true }
+    );
   };
 }
 

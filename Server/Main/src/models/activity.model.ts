@@ -48,9 +48,9 @@ const ActivitySchema = new Schema(
       type: Date,
       required: true,
     },
-    created_by: {
-      type: String,
-      default: "",
+    assigned_to: {
+      type: Schema.ObjectId,
+      default: null,
       required: false,
     },
     activity_location: {

@@ -6,12 +6,10 @@ export const Sidebar = () => {
 
   const menuItems = [
     { name: "Dashboard", icon: "📊", href: "/admin/dashboard" },
-    { name: "Sinh viên", icon: "👨‍🎓", href: "/admin/students" }, 
+    { name: "Sinh viên", icon: "👨‍🎓", href: "/admin/students" },
     { name: "Hoạt động", icon: "⚡", href: "/admin/activities" },
     { name: "Bài viết", icon: "📝", href: "/admin/posts" },
-    { name: "Thống kê & Báo cáo", icon: "📈", href: "/admin/reports" },
-    { name: "Trợ giúp", icon: "❓", href: "/admin/help" },
-    { name: "Công tác đoàn", icon: "👥", href: "/admin/union-worker" } // Thêm mục Công tác đoàn
+    { name: "Công tác viên", icon: "👥", href: "/admin/union-worker" },
   ];
 
   return (
@@ -20,13 +18,14 @@ export const Sidebar = () => {
       <ul className="space-y-4">
         {menuItems.map((item) => (
           <li key={item.name} className="flex items-center p-2 cursor-pointer">
-            <Link href={item.href} className="flex items-center hover:bg-gray-700 px-2 py-1 rounded w-full">
+            <Link
+              href={item.href}
+              className="flex items-center hover:bg-gray-700 px-2 py-1 rounded w-full"
+            >
               <span className="mr-3">{item.icon}</span>
               <span
                 onClick={() => setActive(item.name)}
-                className={`${
-                  active === item.name ? "bg-gray-700" : ""
-                }`}
+                className={`${active === item.name ? "bg-gray-700" : ""}`}
               >
                 {item.name}
               </span>

@@ -15,11 +15,42 @@ import { getActivityAPI } from "@/api/api.activity";
 import dayjs from "dayjs";
 import { useToast } from "@/context/ToastContext";
 import ImageInput from "./ImageField";
+import { useGetActivityCategories } from "@/query/useActivity";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+import { parse, isValid } from "date-fns";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const validationSchema = yup.object({
   activity_name: yup.string().required("Tên hoạt động là bắt buộc"),
-  activity_start_date: yup.string().required("Ngày bắt đầu là bắt buộc"),
-  activity_start_time: yup.string().required("Giờ bắt đầu là bắt buộc"),
+  activity_start_date: yup
+    .string()
+    .required("Ngày bắt đầu là bắt buộc")
+    .test(
+      "is-not-in-the-past",
+      "Ngày bắt đầu không được bé hơn hôm nay",
+      (value) => {
+        if (!value) return false;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const parsedDate = parse(value, "dd/MM/yyyy", new Date());
+        if (!isValid(parsedDate)) return false;
+
+        parsedDate.setHours(0, 0, 0, 0);
+
+        return parsedDate >= today;
+      }
+    ),
+  activity_start_time: yup
+    .string()
+    .required("Giờ bắt đầu là bắt buộc")
+    .matches(
+      /^([01]\d|2[0-3]):([0-5]\d)$/,
+      "Giờ bắt đầu phải đúng định dạng hh:mm"
+    ),
   activity_location: yup.string().required("Địa điểm tổ chức là bắt buộc"),
   activity_max_participants: yup
     .number()
@@ -53,6 +84,7 @@ export const EditActivityForm: React.FC<EditActivityFormProps> = ({
   const [file, setFile] = useState<File | null>(null);
   const { showToast } = useToast();
   const [defaultImage, setDefaultImage] = useState<string | null>(null);
+  const { data: categories, isLoading } = useGetActivityCategories();
 
   const {
     handleSubmit,
@@ -69,9 +101,11 @@ export const EditActivityForm: React.FC<EditActivityFormProps> = ({
         const activity = await getActivityAPI(activityId as string);
         setDefaultImage(activity.activity_thumb_url);
         const [date, time] = activity.activity_start_date.split("T");
+        const localTime = dayjs(`${date}T${time}`).utc().tz("Asia/Bangkok");
+
         setValue("activity_name", activity.activity_name);
-        setValue("activity_start_date", dayjs(date).format("DD-MM-YYYY"));
-        setValue("activity_start_time", time.slice(0, 5));
+        setValue("activity_start_date", localTime.format("DD-MM-YYYY"));
+        setValue("activity_start_time", localTime.format("HH:mm"));
         setValue(
           "activity_max_participants",
           activity.activity_max_participants
@@ -80,6 +114,7 @@ export const EditActivityForm: React.FC<EditActivityFormProps> = ({
         setValue("activity_duration", activity.activity_duration);
         setValue("activity_host", activity.activity_host);
         setValue("activity_categories", activity.activity_categories);
+        setValue("activity_location", activity.activity_location);
         setLoading(false);
       } catch (error) {
         console.error("Failed to load activity details", error);
@@ -111,7 +146,7 @@ export const EditActivityForm: React.FC<EditActivityFormProps> = ({
       activity_location: data.activity_location,
       activity_id: activityId as string,
       activity_name: data.activity_name,
-      activity_start_date: startDateTime,
+      activity_start_datetime: startDateTime,
       activity_max_participants: data.activity_max_participants,
       activity_point: data.activity_point,
       activity_duration: data.activity_duration,
@@ -142,8 +177,10 @@ export const EditActivityForm: React.FC<EditActivityFormProps> = ({
           control={control}
           label="Tên hoạt động"
           required
-          // Error handling will be done automatically via `react-hook-form`
         />
+        {errors.activity_name && (
+          <p className="text-red-500 text-sm">{errors.activity_name.message}</p>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-2">
@@ -215,12 +252,18 @@ export const EditActivityForm: React.FC<EditActivityFormProps> = ({
           name="activity_categories"
           control={control}
           label="Danh mục"
+          add_value={true}
           required
-          options={[
-            { value: "Hội thảo", label: "Hội thảo" },
-            { value: "Việc làm", label: "Việc làm" },
-            { value: "Lễ hội", label: "Lễ hội" },
-          ]}
+          options={
+            isLoading
+              ? []
+              : categories.map((category: string) => {
+                  return {
+                    value: category,
+                    label: category,
+                  };
+                })
+          }
         />
         {errors.activity_categories && (
           <p className="text-red-500 text-sm">
@@ -229,7 +272,7 @@ export const EditActivityForm: React.FC<EditActivityFormProps> = ({
         )}
       </div>
 
-      <div>
+      <div className="grid grid-cols-2 gap-2">
         <FormInputText
           name="activity_host"
           control={control}
@@ -253,8 +296,8 @@ export const EditActivityForm: React.FC<EditActivityFormProps> = ({
       </div>
 
       <Button
-        onClick={handleSubmit(onSubmitForm)}
-        label="Cập nhật hoạt động"
+        type="submit"
+        label="Chỉnh sửa hoạt động"
         variant="primary"
         className="w-full py-2 mt-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
       />

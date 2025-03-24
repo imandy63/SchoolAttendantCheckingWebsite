@@ -16,6 +16,9 @@ import { students } from "../models/student.model";
 import { convertToObjectIdMongoose } from "../utils";
 import { NotificationService } from "./notification.service";
 import { RedisService } from "./redis.service";
+import { Role } from "../enum/role.enum";
+import { ActivityTracking_status } from "../enum/activityTracking.enum";
+import ExcelJS from "exceljs";
 
 class ActivityService {
   static redisService = RedisService.getInstance();
@@ -24,22 +27,53 @@ class ActivityService {
     page = 1,
     limit = 10,
     search = "",
+    end = null,
   }: {
     page: number;
     limit: number;
     search: string;
+    end: boolean | null;
   }) {
+    console.log(":::", end);
+    const now = new Date();
+    const matchConditions: any = {
+      activity_name: { $regex: search, $options: "i" },
+    };
+
+    if (end === true) {
+      matchConditions.$or = [
+        { activity_status: Activity_status.CLOSED },
+        { activity_start_date: { $lt: now } },
+      ];
+    } else if (end === false) {
+      console.log("ĐỊT MẸ MÀY");
+      matchConditions.$and = [
+        {
+          activity_status: {
+            $in: [Activity_status.OPEN, Activity_status.FULL],
+          },
+        },
+        { activity_start_date: { $gt: now } },
+      ];
+    }
+
+    console.log(matchConditions);
+
     const result = await activities.aggregate([
-      { $match: { activity_name: { $regex: search, $options: "i" } } },
       {
-        $sort: { activity_start_date: -1 },
+        $match: matchConditions,
       },
       {
-        $skip: (page - 1) * limit,
+        $lookup: {
+          from: "Students",
+          localField: "assigned_to",
+          foreignField: "_id",
+          as: "worker",
+        },
       },
-      {
-        $limit: limit,
-      },
+      { $sort: { activity_start_date: -1 } },
+      { $skip: (page - 1) * limit },
+      { $limit: limit },
       {
         $addFields: {
           activity_participants_total: { $size: "$activity_participants" },
@@ -57,13 +91,232 @@ class ActivityService {
           activity_categories: 1,
           activity_status: 1,
           activity_host: 1,
+          activity_location: 1,
+          assigned_to: "$worker.student_name",
         },
       },
     ]);
-    const total = await activities.countDocuments({
-      activity_name: { $regex: search, $options: "i" },
-    });
+    const total = await activities.countDocuments(matchConditions);
+
     return { data: result, total, page, limit };
+  }
+
+  static async getYearStatistics(year: number) {
+    const result = await activities.aggregate([
+      {
+        $match: {
+          activity_start_date: {
+            $gte: new Date(`${year}-01-01`),
+            $lt: new Date(`${year + 1}-01-01`),
+          },
+          activity_status: Activity_status.CLOSED,
+        },
+      },
+      {
+        $lookup: {
+          from: "ActivityTrackings",
+          localField: "_id",
+          foreignField: "activity_id",
+          as: "tracking_data",
+        },
+      },
+      {
+        $addFields: {
+          participated_students: {
+            $size: {
+              $filter: {
+                input: "$tracking_data",
+                as: "tracking",
+                cond: {
+                  $eq: [
+                    "$$tracking.status",
+                    ActivityTracking_status.PARTICIPATED,
+                  ],
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { month: { $month: "$activity_start_date" } }, // Group by month
+          total_participants: { $sum: "$participated_students" }, // Sum participated students
+          total_students: { $sum: "$activity_total_participants" }, // Sum total students
+        },
+      },
+      {
+        $project: {
+          month: "$_id.month", // Extract month from _id
+          total_participants: 1,
+          total_students: 1,
+          _id: 0, // Exclude _id from the result
+        },
+      },
+      {
+        $sort: { month: 1 }, // Sort results by month
+      },
+    ]);
+
+    return result;
+  }
+
+  static async getOverallStatistics() {
+    const result = await activities.aggregate([
+      {
+        $match: {
+          activity_status: Activity_status.CLOSED,
+        },
+      },
+      {
+        $lookup: {
+          from: "ActivityTrackings",
+          localField: "_id",
+          foreignField: "activity_id",
+          as: "tracking_data",
+        },
+      },
+      {
+        $addFields: {
+          participated_students: {
+            $size: {
+              $filter: {
+                input: "$tracking_data",
+                as: "tracking",
+                cond: {
+                  $eq: [
+                    "$$tracking.status",
+                    ActivityTracking_status.PARTICIPATED,
+                  ],
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        $group: {
+          _id: null, // Group everything together
+          total_activities: { $sum: 1 }, // Total number of activities
+          total_participants: { $sum: "$participated_students" }, // Total participants
+          total_students: { $sum: "$activity_total_participants" }, // Total students
+        },
+      },
+      {
+        $project: {
+          total_activities: 1,
+          total_participants: 1,
+          total_students: 1,
+          _id: 0, // Exclude _id from the result
+        },
+      },
+    ]);
+
+    return result.length > 0 ? result[0] : null; // Return the result or null if empty
+  }
+
+  static async getTimeRange() {
+    const result = await activities.aggregate([
+      {
+        $group: {
+          _id: null,
+          min: { $min: "$activity_start_date" },
+          max: { $max: "$activity_start_date" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+        },
+      },
+    ]);
+
+    return result[0];
+  }
+
+  static async getStatistics({ year, month }: { year: number; month: number }) {
+    const result = await activities.aggregate([
+      {
+        $match: {
+          activity_start_date: {
+            $gte: new Date(`${year}-${month}-01`),
+            $lt: new Date(
+              `${month == 12 ? year + 1 : year}-${
+                month == 12 ? 1 : month + 1
+              }-01`
+            ),
+          },
+          activity_status: Activity_status.CLOSED,
+        },
+      },
+      {
+        $lookup: {
+          from: "ActivityTrackings",
+          localField: "_id",
+          foreignField: "activity_id",
+          as: "participants",
+        },
+      },
+      {
+        $addFields: {
+          number_of_students: "$activity_total_participants",
+          number_of_participated_students: {
+            $size: {
+              $filter: {
+                input: "$participants",
+                as: "participant",
+                cond: {
+                  $eq: [
+                    "$$participant.status",
+                    ActivityTracking_status.PARTICIPATED,
+                  ],
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          activities: { $push: "$$ROOT" },
+          number_of_activities: { $sum: 1 },
+          total_students_by_activities: { $sum: "$number_of_students" },
+          total_participated_students: {
+            $sum: "$number_of_participated_students",
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          number_of_activities: 1,
+          total_students_by_activities: 1,
+          total_participated_students: 1,
+          activities: {
+            _id: 1,
+            activity_name: 1,
+            number_of_students: 1,
+            number_of_participated_students: 1,
+          },
+        },
+      },
+    ]);
+    return result[0];
+  }
+
+  static async getPastCheckings({ id }: { id: string }) {
+    const foundStudent = await students.find({
+      _id: convertToObjectIdMongoose(id),
+      role: Role.UNION_WORKER,
+    });
+    if (!foundStudent) throw new NotFoundError("Union worker not found");
+
+    return await activities.find({
+      activity_status: Activity_status.CLOSED,
+      activity_start_date: { $lt: new Date() },
+      assigned_to: convertToObjectIdMongoose(id),
+    });
   }
 
   static async getActivitiesByDate({
@@ -126,6 +379,10 @@ class ActivityService {
     return result;
   }
 
+  static async getActivityCategories() {
+    return await activities.find({}).distinct("activity_categories");
+  }
+
   static async userGetActivity({
     activity_id,
     userId,
@@ -161,6 +418,50 @@ class ActivityService {
     }
     throw new NotFoundError("Activity not found");
   }
+
+  static getTotalActivity = (search: string) => {
+    const now = new Date();
+    const twoHoursLater = new Date();
+    twoHoursLater.setHours(now.getHours() + 2);
+
+    const data = activities.aggregate([
+      {
+        $facet: {
+          closedCount: [
+            {
+              $match: {
+                activity_status: "CLOSED",
+                activity_name: { $regex: search, $options: "i" },
+              },
+            },
+            { $count: "count" },
+          ],
+          notSubmittedCount: [
+            {
+              $match: {
+                activity_status: { $in: ["OPEN", "FULL"] },
+                activity_start_date: { $lt: twoHoursLater },
+                activity_name: { $regex: search, $options: "i" },
+              },
+            },
+            { $count: "count" },
+          ],
+          upcomingCount: [
+            {
+              $match: {
+                activity_status: { $in: ["OPEN", "FULL"] },
+                activity_name: { $regex: search, $options: "i" },
+                activity_start_date: { $gte: twoHoursLater },
+              },
+            },
+            { $count: "count" },
+          ],
+        },
+      },
+    ]);
+
+    return data;
+  };
 
   static async getParticipatableActivity({
     activity_id,
@@ -261,6 +562,14 @@ class ActivityService {
     activity_location,
     activity_host,
   }: IActivity) {
+    const foundActivity = await activities
+      .findOne({ activity_name: activity_name })
+      .lean();
+
+    if (foundActivity) {
+      throw new BadRequestError("Activity name already exists");
+    }
+
     const result = await activities.create({
       activity_name,
       activity_start_date,
@@ -292,6 +601,8 @@ class ActivityService {
         },
       },
     ]);
+
+    if (users.length === 0 || users[0].userIds.length === 0) return result;
 
     const userIds = users[0].userIds.map((oid: ObjectId) => oid.toString());
 
@@ -409,27 +720,50 @@ class ActivityService {
 
   static async leaveActivity({
     activity_id,
-    student_id,
+    id,
   }: {
     activity_id: string;
-    student_id: string;
+    id: string;
   }) {
+    const foundStudent = await students
+      .findOne({ _id: convertToObjectIdMongoose(id) })
+      .lean();
+    if (!foundStudent) {
+      throw new NotFoundError("Student not found");
+    }
+
     const result = await activities.findOneAndUpdate(
-      { activity_id, activity_status: Activity_status.OPEN },
       {
-        $pull: { activity_participants: { student_id } },
+        _id: convertToObjectIdMongoose(activity_id),
+        activity_status: { $in: [Activity_status.OPEN, Activity_status.FULL] },
+      },
+      {
+        $pull: {
+          activity_participants: { student_id: foundStudent.student_id },
+        },
         $inc: { activity_total_participants: -1 },
       },
       { new: true }
     );
 
+    await students.findOneAndUpdate(
+      { _id: foundStudent._id },
+      {
+        $pull: {
+          student_participated_activities: {
+            _id: convertToObjectIdMongoose(activity_id),
+          },
+        },
+      }
+    );
+
     if (
       result &&
-      result.activity_total_participants >= result.activity_max_participants
+      result.activity_total_participants <= result.activity_max_participants
     ) {
       return await activities.findOneAndUpdate(
-        { activity_id },
-        { activity_status: Activity_status.FULL },
+        { _id: convertToObjectIdMongoose(activity_id) },
+        { activity_status: Activity_status.OPEN },
         { new: true }
       );
     }
@@ -444,6 +778,395 @@ class ActivityService {
       },
       { activity_status: Activity_status.CLOSED }
     );
+  }
+
+  static async assignAttendantChecking({
+    activity_id,
+    student_id,
+  }: {
+    activity_id: string;
+    student_id: string;
+  }) {
+    const foundWorker = await students
+      .findOne({
+        _id: convertToObjectIdMongoose(student_id),
+        role: Role.UNION_WORKER,
+      })
+      .lean();
+
+    if (!foundWorker) {
+      throw new NotFoundError("Worker not found");
+    }
+    return await activities.findOneAndUpdate(
+      { _id: convertToObjectIdMongoose(activity_id) },
+      { assigned_to: convertToObjectIdMongoose(student_id) },
+      {
+        new: true,
+      }
+    );
+  }
+
+  static async removeCheckingAssignment({
+    student_id,
+    activity_id,
+  }: {
+    student_id: string;
+    activity_id: string;
+  }) {
+    const foundWorker = await students
+      .findOne({
+        _id: convertToObjectIdMongoose(student_id),
+        role: Role.UNION_WORKER,
+      })
+      .lean();
+
+    if (!foundWorker) {
+      throw new NotFoundError("Worker not found");
+    }
+    return await activities.findOneAndUpdate(
+      {
+        assigned_to: convertToObjectIdMongoose(student_id),
+        _id: convertToObjectIdMongoose(activity_id),
+      },
+      { assigned_to: null },
+      {
+        new: true,
+      }
+    );
+  }
+
+  static async getAssignedActivitiesByWorker({ id }: { id?: string }) {
+    if (!id) {
+      throw new BadRequestError("Id not found");
+    }
+    const foundWorker = await students
+      .findOne({
+        _id: convertToObjectIdMongoose(id),
+        role: Role.UNION_WORKER,
+      })
+      .lean();
+
+    if (!foundWorker) {
+      throw new NotFoundError("Worker not found");
+    }
+
+    return await activities.aggregate([
+      {
+        $match: {
+          assigned_to: convertToObjectIdMongoose(id),
+          activity_status: { $ne: Activity_status.REMOVED },
+        },
+      },
+      {
+        $sort: { activity_start_date: -1 },
+      },
+      {
+        $addFields: {
+          removable: {
+            $cond: {
+              if: { $gte: ["$activity_start_date", new Date()] },
+              then: true,
+              else: false,
+            },
+          },
+        },
+      },
+    ]);
+  }
+
+  static async getAssignableActivities({ id }: { id?: string }) {
+    if (!id) {
+      throw new BadRequestError("Id not found");
+    }
+    const foundWorker = await students
+      .findOne({
+        _id: convertToObjectIdMongoose(id),
+        role: Role.UNION_WORKER,
+      })
+      .lean();
+
+    if (!foundWorker) {
+      throw new NotFoundError("Worker not found");
+    }
+
+    return await activities
+      .find({
+        activity_status: {
+          $not: { $in: [Activity_status.REMOVED, Activity_status.CLOSED] },
+        },
+        assigned_to: null,
+        activity_start_date: { $gte: new Date().toUTCString() },
+      })
+      .lean();
+  }
+
+  static async getAvailableAttendantChecking({ id }: { id: string }) {
+    const foundWorker = await students.findOne({
+      _id: convertToObjectIdMongoose(id),
+      role: Role.UNION_WORKER,
+    });
+
+    if (!foundWorker) {
+      throw new NotFoundError("Worker not found");
+    }
+
+    const sixHoursEarlier = new Date();
+    sixHoursEarlier.setHours(sixHoursEarlier.getHours() - 2);
+
+    return await activities
+      .find({
+        assigned_to: convertToObjectIdMongoose(id),
+        activity_status: {
+          $in: [Activity_status.OPEN, Activity_status.FULL],
+        },
+        activity_start_date: { $gte: sixHoursEarlier.toUTCString() },
+      })
+      .lean();
+  }
+
+  static async exportExcel({ year, month }: { year: number; month?: number }) {
+    try {
+      let allActivities;
+      if (!month) {
+        allActivities = await activities.find({
+          activity_start_date: {
+            $gte: new Date(`${year}-01-01T00:00:00.000Z`),
+            $lt: new Date(`${year + 1}-01-01T00:00:00.000Z`),
+          },
+          activity_status: Activity_status.CLOSED,
+        });
+      } else {
+        const nextMonth = month === 12 ? 1 : month + 1;
+        const nextYear = month === 12 ? year + 1 : year;
+
+        allActivities = await activities.find({
+          activity_start_date: {
+            $gte: new Date(
+              `${year}-${String(month).padStart(2, "0")}-01T00:00:00.000Z`
+            ),
+            $lt: new Date(
+              `${nextYear}-${String(nextMonth).padStart(
+                2,
+                "0"
+              )}-01T00:00:00.000Z`
+            ),
+          },
+        });
+      }
+      const allStudents = await students.find({ role: { $ne: Role.ADMIN } });
+
+      // Create a new workbook and worksheet
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Activities");
+
+      const font = { bold: true, size: 11, name: "Cambria" };
+      const lastColumn = String.fromCharCode(65 + allActivities.length + 5);
+
+      // Add merged title rows
+      worksheet.mergeCells(`A1:C1`);
+      worksheet.mergeCells(`A2:C2`);
+      worksheet.mergeCells(`A3:C3`);
+      worksheet.getCell("A1").value = "TRƯỜNG ĐẠI HỌC";
+      worksheet.getCell("A1").alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      };
+      worksheet.getCell("A1").font = font;
+
+      worksheet.getCell("A2").value = "CÔNG THƯƠNG THÀNH PHỐ TP. HỒ CHÍ MINH";
+      worksheet.getCell("A2").alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      };
+      worksheet.getCell("A2").font = font;
+
+      worksheet.getCell("A3").value = "KHOA CÔNG NGHỆ THÔNG TIN";
+      worksheet.getCell("A3").alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      };
+      worksheet.getCell("A3").font = font;
+
+      worksheet.mergeCells(`E1:${lastColumn}1`);
+      worksheet.getCell("E1").value = "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM";
+      worksheet.getCell("E1").alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      };
+      worksheet.getCell("E1").font = font;
+
+      worksheet.mergeCells(`E2:${lastColumn}2`);
+      worksheet.getCell("E2").value = "Độc lập - Tự do - Hạnh Phúc";
+      worksheet.getCell("E2").alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      };
+      worksheet.getCell("E2").font = font;
+
+      worksheet.mergeCells(`A5:${lastColumn}5`);
+      worksheet.getCell("A5").value = "DANH SÁCH CHẤM ĐIỂM";
+      worksheet.getCell("A5").alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      };
+      worksheet.getCell("A5").font = font;
+
+      worksheet.mergeCells(`A6:${lastColumn}6`);
+      worksheet.getCell("A6").value = allActivities
+        .map((activity) => activity.activity_name)
+        .join(", ");
+      worksheet.getCell("A6").alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      };
+      worksheet.getCell("A6").font = font;
+
+      worksheet.addRow([]);
+
+      const headers = [
+        "STT",
+        "MSSV",
+        "Họ và tên",
+        "Lớp",
+        ...allActivities.map((activity, index) => `HD${index + 1}`),
+        "Tổng điểm",
+        "Ghi chú",
+      ];
+
+      const headerRows = worksheet.addRow(headers);
+
+      headerRows.eachCell((cell, colNumber) => {
+        // Add border to the cell
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+
+        // Set alignment to center
+        cell.alignment = {
+          vertical: "middle",
+          horizontal: "center",
+        };
+
+        // Set font style
+        cell.font = { bold: true };
+      });
+
+      allStudents.forEach((student, index) => {
+        const activityPoints = allActivities.map((activity) => {
+          const participation = student.student_participated_activities.find(
+            (participation) =>
+              participation._id.toString() === activity._id.toString()
+          );
+          return participation?.point || 0;
+        });
+
+        const totalPoints = activityPoints.reduce(
+          (sum, point) => sum + point,
+          0
+        );
+
+        const dataRow = [
+          index + 1,
+          student.student_id,
+          student.student_name,
+          student.student_class?.class_name,
+          ...activityPoints,
+          totalPoints,
+          "",
+        ];
+
+        const row = worksheet.addRow(dataRow);
+
+        row.eachCell((cell, colNumber) => {
+          cell.border = {
+            top: { style: "thin" },
+            left: { style: "thin" },
+            bottom: { style: "thin" },
+            right: { style: "thin" },
+          };
+
+          if (colNumber === headers.length) {
+            cell.border = {
+              top: { style: "thin" },
+              left: { style: "thin" },
+              bottom: { style: "thin" },
+              right: { style: "thin" },
+            };
+          }
+        });
+      });
+
+      worksheet.columns.forEach((column) => {
+        column.width = 20;
+      });
+
+      const numberOfColumns = allActivities.length + 5;
+
+      const maxRow = allStudents.length + 10;
+
+      if (numberOfColumns / 4 >= 3) {
+        worksheet.mergeCells(`A${maxRow}:C${maxRow}`);
+        worksheet.getCell(`A${maxRow}`).value = "Trưởng Đơn Vị";
+        worksheet.getCell(`A${maxRow}`).alignment = {
+          vertical: "middle",
+          horizontal: "center",
+        };
+        worksheet.getCell(`A${maxRow}`).font = font;
+
+        const c2 = String.fromCharCode(65 + numberOfColumns / 2 - 1);
+        const endC2 = String.fromCharCode(65 + numberOfColumns / 2 + 1);
+
+        worksheet.mergeCells(`${c2}${maxRow}:${endC2}${maxRow}`);
+        worksheet.getCell(`${c2}${maxRow}`).value = "Ban Tổ Chức";
+        worksheet.getCell(`${c2}${maxRow}`).alignment = {
+          vertical: "middle",
+          horizontal: "center",
+        };
+        worksheet.getCell(`${c2}${maxRow}`).font = font;
+
+        const c3 = String.fromCharCode(65 + numberOfColumns - 2);
+
+        worksheet.mergeCells(`${c3}${maxRow}:${lastColumn}${maxRow}`);
+        worksheet.getCell(`${c3}${maxRow}`).value = "Người Tổng Hợp";
+        worksheet.getCell(`${c3}${maxRow}`).alignment = {
+          vertical: "middle",
+          horizontal: "center",
+        };
+        worksheet.getCell(`${c3}${maxRow}`).font = font;
+      } else {
+        worksheet.mergeCells(`A${maxRow}:C${maxRow}`);
+        worksheet.getCell(`A${maxRow}`).value = "Trưởng Đơn Vị";
+        worksheet.getCell(`A${maxRow}`).alignment = {
+          vertical: "middle",
+          horizontal: "center",
+        };
+        worksheet.getCell(`A${maxRow}`).font = font;
+
+        worksheet.mergeCells(`E${maxRow}:G${maxRow}`);
+        worksheet.getCell(`E${maxRow}`).value = "Ban Tổ Chức";
+        worksheet.getCell(`E${maxRow}`).alignment = {
+          vertical: "middle",
+          horizontal: "center",
+        };
+        worksheet.getCell(`E${maxRow}`).font = font;
+
+        worksheet.mergeCells(`I${maxRow}:K${maxRow}`);
+        worksheet.getCell(`I${maxRow}`).value = "Người Tổng Hợp";
+        worksheet.getCell(`I${maxRow}`).alignment = {
+          vertical: "middle",
+          horizontal: "center",
+        };
+        worksheet.getCell(`I${maxRow}`).font = font;
+      }
+
+      return await workbook.xlsx.writeBuffer();
+    } catch (error) {
+      console.error("Error exporting activities:", error);
+      throw new BadRequestError("Error exporting activities");
+    }
   }
 }
 

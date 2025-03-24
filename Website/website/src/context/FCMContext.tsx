@@ -1,9 +1,6 @@
 "use client";
-import React, { createContext, useEffect, useState, ReactNode } from "react";
+import React, { createContext, ReactNode } from "react";
 import { useFCM, useFCMMessages } from "../hooks/useFCM";
-import { FIREBASE_CONFIG } from "@/configs/config.firebase";
-import { NotificationPayload } from "firebase/messaging";
-import { registerNotificationTokenAPI } from "@/api/api.notification";
 
 interface NotificationContextType {
   payload: any;

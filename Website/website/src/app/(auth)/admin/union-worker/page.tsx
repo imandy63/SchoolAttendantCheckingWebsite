@@ -1,24 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Table } from "../../../../components/Table";
 import { SearchBar } from "../_components/SearchBar";
 import { Pagination } from "../../../../components/Pagination";
-import { Button } from "../_components/Button";
-import { Popup, StudentActivities } from "../_components/Popup";
-import { Menu } from "@headlessui/react";
+import { Assignment, Popup } from "../_components/Popup";
+import ActionButton from "../_components/ActionButton";
+import { useGetUnionWorkers } from "@/query/useUnionWorker";
+import { useToast } from "@/context/ToastContext";
+import { useToStudent } from "@/query/useStudent";
 
+const headers = ["MSSV", "Họ tên"];
 
-const headers = ["MSSV", "Họ tên","Tình trạng"];
-
-const dataFields = ["student_id", "student_name", "status"];
-
-const mockUnionWorkers = [
-  { student_id: "2001215836", student_name: "Kong Hoa Hung", status: "Enable" },
-  { student_id: "2001215837", student_name: "Nguyễn Văn A", status: "Disable" },
-  { student_id: "2001215838", student_name: "Trần Thị B", status: "Enable" },
-];
+const dataFields = ["student_id", "student_name"];
 
 export default function UnionWorkerPage() {
   const searchParams = useSearchParams();
@@ -27,15 +22,25 @@ export default function UnionWorkerPage() {
   const [currentPage, setCurrentPage] = useState(page);
   const [searchQuery, setSearchQuery] = useState(search);
   const router = useRouter();
+  const { showToast } = useToast();
 
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
-  const [workerStatus, setWorkerStatus] = useState(
-    mockUnionWorkers.reduce((acc, worker) => {
-      acc[worker.student_id] = worker.status;
-      return acc;
-    }, {} as { [key: string]: string })
+  const { data, isLoading, error } = useGetUnionWorkers(
+    currentPage,
+    searchQuery
   );
+
+  const [assignment, setAssignment] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const { mutate: toStudent } = useToStudent(currentPage, searchQuery);
+
+  useEffect(() => {
+    console.log(error);
+  }, [error]);
+
+  if (error) {
+    showToast(error.message, "error");
+  }
 
   const handleSearch = (searchQuery: string) => {
     const newParams = new URLSearchParams(searchParams.toString());
@@ -46,111 +51,74 @@ export default function UnionWorkerPage() {
     setCurrentPage(1);
   };
 
-  const openPopup = (studentId: string) => {
-    setSelectedStudentId(studentId);
-    setIsPopupOpen(true);
+  const openAssignment = (id: string) => {
+    setAssignment(true);
+    setSelectedId(id);
   };
 
-  const closePopup = () => {
-    setIsPopupOpen(false);
-    setSelectedStudentId(null);
+  const closeAssignment = () => {
+    setAssignment(false);
+    setSelectedId(null);
   };
 
-  const toggleStatus = (studentId: string) => {
-    setWorkerStatus((prevStatus) => ({
-      ...prevStatus,
-      [studentId]: prevStatus[studentId] === "Enable" ? "Disable" : "Enable",
-    }));
-    console.log(`Status toggled for ${studentId}`);
-  };
-
-  const unionWorkers = mockUnionWorkers;
   const totalPages = 1;
 
   return (
     <main className="flex-1 p-8">
       <div className="flex justify-between items-center mb-4">
         <SearchBar onSearch={handleSearch} />
-        <Button label="Thêm công tác viên" variant="primary" onClick={() => console.log("Add Union Worker")} />
       </div>
 
-      {/* Cập nhật bảng với căn giữa tiêu đề và canh trái dữ liệu */}
       <Table
         headers={headers}
         dataFieldsName={dataFields}
-        data={unionWorkers}
+        data={data?.data || []}
         loading="skeleton"
-        isLoading={false}
+        isLoading={isLoading}
+        specialFields={[
+          {
+            name: "is_active",
+            conditions: [
+              {
+                value: true,
+                fontColor: "GREEN",
+              },
+              {
+                value: false,
+                fontColor: "RED",
+              },
+            ],
+          },
+        ]}
         actions={(worker) => (
-          <div className="flex justify-center items-center space-x-2">
-            {/* Nút trạng thái */}
-            <Button
-              label={workerStatus[worker.student_id]}
-              variant={workerStatus[worker.student_id] === "Enable" ? "primary" : "secondary"}
-              onClick={() => toggleStatus(worker.student_id)}
-              className="w-20"
-            />
-
-            {/* Dropdown tác vụ */}
-            <Menu as="div" className="relative inline-block text-center">
-              <Menu.Button className="px-2 py-1 ml-2 bg-gray-200 rounded text-sm">
-                Tác vụ
-              </Menu.Button>
-              <Menu.Items className="absolute mt-2 w-24 bg-white border rounded-md shadow-lg z-10">
-                <Menu.Item>
-                  {({ active }) => (
-                    <button
-                      onClick={() => openPopup(worker.student_id)}
-                      className={`${
-                        active ? "bg-gray-100" : ""
-                      } w-full px-4 py-2 text-left text-sm`}
-                    >
-                      Xem
-                    </button>
-                  )}
-                </Menu.Item>
-                <Menu.Item>
-                  {({ active }) => (
-                    <button
-                      onClick={() => console.log(`Thêm cho ${worker.student_id}`)}
-                      className={`${
-                        active ? "bg-gray-100" : ""
-                      } w-full px-4 py-2 text-left text-sm`}
-                    >
-                      Thêm
-                    </button>
-                  )}
-                </Menu.Item>
-                <Menu.Item>
-                  {({ active }) => (
-                    <button
-                      onClick={() => console.log(`Sửa cho ${worker.student_id}`)}
-                      className={`${
-                        active ? "bg-gray-100" : ""
-                      } w-full px-4 py-2 text-left text-sm`}
-                    >
-                      Sửa
-                    </button>
-                  )}
-                </Menu.Item>
-                <Menu.Item>
-                  {({ active }) => (
-                    <button
-                      onClick={() => console.log(`Xóa cho ${worker.student_id}`)}
-                      className={`${
-                        active ? "bg-gray-100 text-red-500" : "text-red-500"
-                      } w-full px-4 py-2 text-left text-sm`}
-                    >
-                      Xóa
-                    </button>
-                  )}
-                </Menu.Item>
-              </Menu.Items>
-            </Menu>
-          </div>
+          <ActionButton
+            buttonLabel="Tác vụ"
+            actions={[
+              {
+                label: "Bỏ quyền",
+                onClick: () =>
+                  toStudent(worker._id, {
+                    onSuccess: () => {
+                      showToast("Khóa thành công", "success");
+                    },
+                    onError: () => {
+                      showToast("Lỗi khi cập nhật", "error");
+                    },
+                  }),
+              },
+              {
+                label: "Phân công",
+                onClick: () => {
+                  openAssignment(worker._id);
+                },
+              },
+            ]}
+          />
         )}
       />
-
+      <div className="py-4 font-bold">
+        Tổng số lượng công tác viên: {data?.total ?? 0}
+      </div>
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
@@ -162,13 +130,14 @@ export default function UnionWorkerPage() {
         }}
       />
 
-      {selectedStudentId && (
+      {selectedId && assignment && (
         <Popup
-          isOpen={isPopupOpen}
-          title={`Chi tiết hoạt động của công tác viên mã: ${selectedStudentId}`}
-          onClose={closePopup}
+          className={"w-4/5 h-4/5"}
+          isOpen={assignment}
+          title={`Phân công`}
+          onClose={closeAssignment}
         >
-          <StudentActivities studentId={selectedStudentId} />
+          <Assignment id={selectedId as string} />
         </Popup>
       )}
     </main>

@@ -7,13 +7,17 @@ import { SearchBar } from "../_components/SearchBar";
 import { Pagination } from "../../../../components/Pagination";
 import { Button } from "../_components/Button";
 import { Popup, StudentActivities } from "../_components/Popup";
-import { useStudents } from "@/query/useStudent";
+import { useStudents, useToStudent } from "@/query/useStudent";
+import { useToUnionWorker } from "@/query/useUnionWorker";
+import ActionButton from "../_components/ActionButton";
+import { useToast } from "@/context/ToastContext";
 
 const headers = [
   "MSSV",
   "Họ và tên",
   "Lớp",
   "Khoa",
+  "Vai trò",
   "Điểm rèn luyện",
   "Tổng số hoạt động",
 ];
@@ -23,6 +27,7 @@ const dataFields = [
   "student_name",
   "student_class.class_name",
   "student_class.faculty",
+  "role",
   "student_activity_point",
   "activity_participants_total",
 ];
@@ -30,6 +35,7 @@ const dataFields = [
 export default function Students() {
   const searchParams = useSearchParams();
   const page = searchParams.get("page") ? Number(searchParams.get("page")) : 1;
+  const [totalStudents, setTotalStudents] = useState(0);
   const search = searchParams.get("search") || "";
   const [currentPage, setCurrentPage] = useState(page);
   const [searchQuery, setSearchQuery] = useState(search);
@@ -45,6 +51,10 @@ export default function Students() {
     setSearchQuery(searchQuery);
     setCurrentPage(1);
   };
+
+  const { showToast } = useToast();
+  const { mutate: toWorker } = useToUnionWorker(currentPage, searchQuery);
+  const { mutate: toStudent } = useToStudent(currentPage, searchQuery);
 
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
@@ -69,7 +79,7 @@ export default function Students() {
 
   return (
     <>
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-8 h-screen overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <SearchBar onSearch={handleSearch} />
         </div>
@@ -80,13 +90,49 @@ export default function Students() {
           loading={"skeleton"}
           isLoading={isLoading}
           actions={(student) => (
-            <Button
-              label="Xem"
-              onClick={() => openPopup(student.student_id)}
-              variant="secondary"
+            <ActionButton
+              buttonLabel="Tác vụ"
+              actions={[
+                student.role === "sinh viên"
+                  ? {
+                      label: "Trờ thành công tác viên",
+                      onClick: () => {
+                        toWorker(student._id, {
+                          onSuccess: () => {
+                            showToast("Thành công", "success");
+                          },
+                          onError: () => {
+                            showToast("Lỗi", "error");
+                          },
+                        });
+                      },
+                    }
+                  : {
+                      label: "Tước công tác viên",
+                      onClick: () => {
+                        toStudent(student._id, {
+                          onSuccess: () => {
+                            showToast("Thành công", "success");
+                          },
+                          onError: () => {
+                            showToast("Lỗi", "error");
+                          },
+                        });
+                      },
+                    },
+                {
+                  label: "Xem hoạt động đăng ký",
+                  onClick: () => {
+                    openPopup(student.student_id);
+                  },
+                },
+              ]}
             />
           )}
         />
+        <div className="py-4 font-bold">
+          Tổng số lượng sinh viên: {data?.total ?? 0}
+        </div>
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

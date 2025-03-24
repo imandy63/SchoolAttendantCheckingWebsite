@@ -9,6 +9,13 @@ export const getPostsAPI = async (page: number, search = "") => {
   return response.data.metadata;
 };
 
+export const getTop5LatestPostsAPI = async () => {
+  const response = await axiosInstance.get(
+    `${urlConfig.CORE}/api/post/top-5-latest`
+  );
+  return response.data.metadata;
+};
+
 export const getAllPostsAPI = async (page: number, search = "") => {
   const response = await axiosInstance.get(
     `${urlConfig.CORE}/api/post/all?page=${page}&search=${search}`

@@ -15,3 +15,33 @@ export const getStudentActivitiesAPI = async (studentId: string) => {
 
   return response.data.metadata;
 };
+
+export const changeSubscribeCategoriesAPI = async ({
+  categories,
+}: {
+  categories: string[];
+}) =>
+  axiosInstance.put(`${urlConfig.CORE}/api/student/categories`, {
+    categories,
+  });
+
+export const getPastActivities = async () => {
+  const response = await axiosInstance.get(
+    `${urlConfig.CORE}/api/student/past`
+  );
+  return response.data.metadata;
+};
+
+export const toStudentAPI = async (id: string) => {
+  const response = await axiosInstance.put(
+    `${urlConfig.AUTH}/api/auth/to-student/${id}`
+  );
+  return response.data.metadata;
+};
+
+export const toUnionWorkerAPI = async (id: string) => {
+  const response = await axiosInstance.put(
+    `${urlConfig.AUTH}/api/auth/to-union-worker/${id}`
+  );
+  return response.data.metadata;
+};

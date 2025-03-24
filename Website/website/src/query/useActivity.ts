@@ -14,12 +14,25 @@ import {
   getUpcomingActivitiesGroupByDateAPI,
   participateActivityAPI,
   getActivityForStudent,
+  getActivityCategoriesAPI,
+  getAssignableActivitiesAPI,
+  assignCheckingAPI,
+  getAssignedActivitiesByWorkerAPI,
+  removeCheckingAssignmentAPI,
+  getStatistics,
+  getTimeRange,
+  getYearStatistics,
+  leaveActivityAPI,
+  removeActivityAPI,
+  getTotalActivityAPI,
+  getOverallStatistics,
 } from "@/api/api.activity";
 import {
   ACTIVITIES,
   ACTIVITY_PARTICIPANTS,
   ACTIVITY,
   UPCOMING_ACTIVITIES,
+  STUDENT_ACTIVITIES,
 } from "@/constants/query";
 
 export const useGetAllActivities = (page: number, search: string = "") => {
@@ -29,11 +42,53 @@ export const useGetAllActivities = (page: number, search: string = "") => {
   });
 };
 
+export const useGetActivityInfinite = (
+  searchParam = "",
+  end: null | boolean = null
+) => {
+  return useInfiniteQuery({
+    queryKey: [ACTIVITIES, searchParam],
+    queryFn: ({ pageParam = 1 }: { pageParam: number }) =>
+      getAllActivitiesAPI(pageParam, searchParam, end),
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.data.length < 10) {
+        return undefined;
+      }
+      return pages.length + 1;
+    },
+    initialPageParam: 1,
+  });
+};
+
+export const useGetTotalActivity = (search: string) => {
+  return useQuery({
+    queryKey: [ACTIVITIES, search],
+    queryFn: () => getTotalActivityAPI(search),
+  });
+};
+
+export const useRemoveActivity = (page: number, search: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => removeActivityAPI(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [ACTIVITIES, page, search] });
+    },
+  });
+};
+
 export const useGetActivitiesByDate = (date: string) => {
   return useQuery({
     queryKey: [ACTIVITIES, date],
     queryFn: () => getActivitiesByDateAPI(date),
     retry: false,
+  });
+};
+
+export const useGetActivityCategories = () => {
+  return useQuery({
+    queryKey: [ACTIVITIES, "categories"],
+    queryFn: () => getActivityCategoriesAPI(),
   });
 };
 
@@ -102,5 +157,97 @@ export const useParticipateActivity = (activityId: string) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [ACTIVITY, activityId] });
     },
+  });
+};
+
+export const useLeaveActivity = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (activityId: string) => leaveActivityAPI(activityId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [STUDENT_ACTIVITIES, "past"] });
+    },
+  });
+};
+
+export const useGetAssignableActivity = (id: string) => {
+  return useQuery({
+    queryKey: [ACTIVITIES, "assignable"],
+    queryFn: () => getAssignableActivitiesAPI(id),
+  });
+};
+
+export const useAssignChecking = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      activity_id,
+      student_id,
+    }: {
+      activity_id: string;
+      student_id: string;
+    }) => assignCheckingAPI({ activity_id, student_id }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [ACTIVITIES, "assignable"] });
+      queryClient.invalidateQueries({ queryKey: [ACTIVITIES, "assigned"] });
+    },
+  });
+};
+
+export const useRemoveCheckingAssignment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      activity_id,
+      student_id,
+    }: {
+      activity_id: string;
+      student_id: string;
+    }) => removeCheckingAssignmentAPI({ activity_id, student_id }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [ACTIVITIES, "assignable"] });
+      queryClient.invalidateQueries({ queryKey: [ACTIVITIES, "assigned"] });
+    },
+  });
+};
+
+export const useGetAssignedActivities = (id: string) => {
+  return useQuery({
+    queryKey: [ACTIVITIES, "assigned"],
+    queryFn: () => getAssignedActivitiesByWorkerAPI(id),
+  });
+};
+
+export const useGetTimeRange = () => {
+  return useQuery({
+    queryKey: [ACTIVITIES, "time-range"],
+    queryFn: () => getTimeRange(),
+  });
+};
+
+export const useGetStatistics = ({
+  month,
+  year,
+}: {
+  month: number;
+  year: number;
+}) => {
+  return useQuery({
+    queryKey: [ACTIVITIES, "statistics", month, year],
+    queryFn: () => getStatistics(month, year),
+  });
+};
+
+export const useGetYearStatistics = ({ year }: { year: number }) => {
+  return useQuery({
+    queryKey: [ACTIVITIES, "year-statistics", year],
+    queryFn: () => getYearStatistics(year),
+  });
+};
+
+export const useGetOverallStatistics = () => {
+  return useQuery({
+    queryKey: [ACTIVITIES, "overall-statistics"],
+    queryFn: () => getOverallStatistics(),
   });
 };

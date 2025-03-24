@@ -1,4 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+
+type CheckboxRule = {
+  column: string;
+  data: (string | number | boolean)[];
+};
 
 type TableProps = {
   headers: string[];
@@ -12,7 +17,7 @@ type TableProps = {
     name: string;
     conditions: {
       value: string | number | boolean;
-      fontColor: "RED" | "GREEN";
+      fontColor: "RED" | "GREEN" | "NONE";
     }[];
   }[];
   showCheckbox?: boolean;
@@ -21,11 +26,13 @@ type TableProps = {
     rowData: any,
     rowIndex: number
   ) => void;
+  checkboxRules?: CheckboxRule[];
 };
 
 enum FontColorEnum {
   RED = "text-red-500",
   GREEN = "text-green-500",
+  NONE = "",
 }
 
 const getNestedValue = (obj: any, path: string): any => {
@@ -62,7 +69,37 @@ export const Table = ({
   specialFields,
   showCheckbox = false,
   onCheckboxChange,
+  checkboxRules = [],
 }: TableProps) => {
+  const [checkedRows, setCheckedRows] = useState<Record<number, boolean>>({});
+
+  useEffect(() => {
+    const initialCheckedRows: Record<number, boolean> = {};
+    data.forEach((row, index) => {
+      checkboxRules.forEach(({ column, data: ruleData }) => {
+        const value = getNestedValue(row, column);
+        if (ruleData.includes(value)) {
+          initialCheckedRows[index] = true;
+        }
+      });
+    });
+    setCheckedRows(initialCheckedRows);
+  }, [data, checkboxRules.length]);
+
+  const handleCheckboxChange = (
+    isChecked: boolean,
+    rowData: any,
+    rowIndex: number
+  ) => {
+    setCheckedRows((prevState) => ({
+      ...prevState,
+      [rowIndex]: isChecked,
+    }));
+    if (onCheckboxChange) {
+      onCheckboxChange(isChecked, rowData, rowIndex);
+    }
+  };
+
   const rowsToRender = [...data];
 
   while (rowsToRender.length < 10) {
@@ -149,9 +186,9 @@ export const Table = ({
                     <td className="p-4 border-b text-center">
                       <input
                         type="checkbox"
+                        checked={!!checkedRows[index]}
                         onChange={(e) =>
-                          onCheckboxChange &&
-                          onCheckboxChange(e.target.checked, row, index)
+                          handleCheckboxChange(e.target.checked, row, index)
                         }
                       />
                     </td>

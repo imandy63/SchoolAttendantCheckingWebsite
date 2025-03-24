@@ -18,6 +18,13 @@ router.post("/login", asyncHandler(AccessController.login));
 
 router.post("/logout", asyncHandler(AccessController.logout));
 
+router.put("/to-student/:id", asyncHandler(AccessController.toStudent));
+
+router.put(
+  "/to-union-worker/:id",
+  asyncHandler(AccessController.toUnionWorker)
+);
+
 router.post(
   "/import-xlsx",
   uploadMemory.single("file"),

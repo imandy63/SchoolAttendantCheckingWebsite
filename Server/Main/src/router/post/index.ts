@@ -5,13 +5,15 @@ import { authentication } from "../../auth/authentication";
 
 const router = express.Router();
 
-router.use(asyncHandler(authentication));
-
 router.get("/", asyncHandler(PostController.getPosts));
+
+router.get("/top-5-latest", asyncHandler(PostController.getTop5LatestPosts));
 
 router.get("/all", asyncHandler(PostController.getAllPosts));
 
 router.get("/:id", asyncHandler(PostController.getPostDetails));
+
+router.use(asyncHandler(authentication));
 
 router.post("/", asyncHandler(PostController.createPost));
 

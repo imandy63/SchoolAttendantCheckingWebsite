@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+opencv-python
+pytesseract
+python-multipart
+pydantic_settings

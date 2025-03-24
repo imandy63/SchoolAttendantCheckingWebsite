@@ -13,10 +13,10 @@ const studentSchema = new Schema(
 
     student_name: { type: String, required: true },
     student_avatar_url: { type: String, default: "" },
-    student_address: { type: String, required: true },
+    student_address: { type: String },
     student_class: {
-      class_name: { type: String, required: true },
-      faculty: { type: String, required: true },
+      class_name: { type: String },
+      faculty: { type: String },
     },
     student_activity_point: { type: Number, default: 0 },
     student_participated_activities: {
@@ -50,6 +50,7 @@ const studentSchema = new Schema(
 );
 
 studentSchema.index({ student_name: "text" });
+studentSchema.index({ student_id: "text" });
 
 export interface StudentPayload extends Document {
   student_id: string;

@@ -33,6 +33,7 @@ export default function EditActivityPage() {
   };
 
   const handleSubmit = (formData: CreateAndEditActivityPagePayload) => {
+    console.log(formData.activity_start_datetime);
     if (formData.activity_file) {
       uploadImageAPI(formData.activity_file, {
         onSuccess(data) {
@@ -72,7 +73,7 @@ export default function EditActivityPage() {
   };
 
   return (
-    <main className="flex-1 p-8">
+    <main className="flex-1 p-8 w-full h-[100vh] overflow-y-auto">
       <h1 className="text-2xl font-semibold mb-4">Chỉnh sửa Hoạt Động</h1>
       <EditActivityForm onSubmit={handleSubmit} />
     </main>

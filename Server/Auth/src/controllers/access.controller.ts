@@ -1,7 +1,6 @@
 import { CREATED, SuccessResponse } from "../core/success.response";
 import AccessService from "../services/access.service";
 import { NextFunction, Request, Response } from "express";
-import { IPayload } from "../interfaces/auth";
 import { BadRequestError } from "../core/error.response";
 
 class AccessController {
@@ -82,6 +81,22 @@ class AccessController {
     new SuccessResponse({
       message: "Get me successfully",
       metadata: await AccessService.getMe({ userId }),
+    }).send(res);
+  };
+
+  toStudent = async (req: Request, res: Response, next: NextFunction) => {
+    new SuccessResponse({
+      message: "To student successfully",
+      metadata: await AccessService.toStudent({ id: req.params.id as string }),
+    }).send(res);
+  };
+
+  toUnionWorker = async (req: Request, res: Response, next: NextFunction) => {
+    new SuccessResponse({
+      message: "To union worker successfully",
+      metadata: await AccessService.toUnionWorker({
+        id: req.params.id as string,
+      }),
     }).send(res);
   };
 }

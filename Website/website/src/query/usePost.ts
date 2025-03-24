@@ -6,6 +6,7 @@ import {
   updatePostAPI,
   deletePostAPI,
   restorePostAPI,
+  getTop5LatestPostsAPI,
 } from "@/api/api.post";
 import { POST, POSTS } from "@/constants/query";
 
@@ -21,6 +22,13 @@ export const useGetPostDetails = (id: string) => {
     queryKey: [POST, id],
     queryFn: () => getPostDetailsAPI(id),
     enabled: !!id,
+  });
+};
+
+export const useGetTop5LatestPosts = () => {
+  return useQuery({
+    queryKey: [POSTS, "latest"],
+    queryFn: () => getTop5LatestPostsAPI(),
   });
 };
 

@@ -24,7 +24,7 @@ export const LoginForm = () => {
         if (admin) {
           router.push("/admin/students");
         } else {
-          router.push("/main");
+          router.push("/student/main");
         }
       }
     } catch (error: any) {
@@ -58,25 +58,7 @@ export const LoginForm = () => {
             className="w-full p-2 border rounded"
           />
         </div>
-        <div className="mb-4 flex items-center">
-          <input type="checkbox" id="graduate" className="mr-2" />
-          <label htmlFor="graduate" className="text-sm">
-            Đã tốt nghiệp
-          </label>
-        </div>
-        <div className="mb-4 flex items-center space-x-2">
-          <input
-            type="text"
-            placeholder="Nhập mã"
-            className="flex-1 p-2 border rounded"
-          />
-          <button className="p-2 border rounded bg-gray-200">🔄</button>
-          <img
-            src="/path/to/captcha-image.png"
-            alt="captcha"
-            className="w-20 h-10"
-          />
-        </div>
+
         <button
           onClick={(e) => {
             e.preventDefault();
@@ -89,11 +71,6 @@ export const LoginForm = () => {
         {error && ( // Conditionally render error message
           <div className="mt-4 text-red-500 text-center">{error}</div>
         )}
-        <div className="text-center mt-4">
-          <a href="#" className="text-blue-500 underline hover:text-blue-700">
-            Dành cho phụ huynh
-          </a>
-        </div>
       </form>
     </div>
   );

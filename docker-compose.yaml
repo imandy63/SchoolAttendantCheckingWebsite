@@ -19,6 +19,7 @@ services:
       final_mongo:
         condition: service_started
 
+<<<<<<< HEAD
   final_main:
     container_name: final_main_server
     build: ./Server/Main/
@@ -40,6 +41,18 @@ services:
         condition: service_started
       final_auth_server:
         condition: service_started
+=======
+  final_ocr:
+    build: ./Server/OCR
+    image: ocr:latest
+    container_name: final_ocr_server
+    ports:
+      - "39895:39895"
+    env_file:
+      - "./Server/OCR/.env"
+    networks:
+      - final-network
+>>>>>>> 00210bdcc6fb6f259f5b140b1a784ec753192821
 
   final_notification:
     build: ./Server/Notification

@@ -1,6 +1,7 @@
 import {
   getActivityTrackingDetailAPI,
   getTrackingAPI,
+  imageProcessAPI,
   updateTrackingAPI,
 } from "@/api/api.tracking";
 import { TRACKING } from "@/constants/query";
@@ -22,6 +23,12 @@ export const useUpdateTracking = (activity_id: string) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [TRACKING, activity_id] });
     },
+  });
+};
+
+export const useImageProcessing = () => {
+  return useMutation({
+    mutationFn: (file: File) => imageProcessAPI(file),
   });
 };
 
