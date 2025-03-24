@@ -19,6 +19,28 @@ services:
       final_mongo:
         condition: service_started
 
+  final_main:
+    container_name: final_main_server
+    build: ./Server/Main/
+    ports:
+      - "39898:39898"
+    networks:
+      - final-network
+    env_file:
+      - ./Server/Main/.env
+    environment:
+      - REDIS_HOST=final_redis
+      - MONGODB_HOST=final_mongo
+      - MONGODB_PORT=27017
+      - MONGODB_DATABASE_NAME=activity_tracking
+    depends_on:
+      final_redis:
+        condition: service_healthy
+      final_mongo:
+        condition: service_started
+      final_auth_server:
+        condition: service_started
+
   final_notification:
     build: ./Server/Notification
     image: notification:latest
