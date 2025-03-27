@@ -30,7 +30,18 @@ export const UseAdmin = ({ children }: { children: ReactNode }) => {
     .then((data) => {
       const { status } = data;
       if (status) {
-        setIsLoading(false);
+        // Kiểm tra role từ localStorage
+        const userRole = localStorage.getItem('userRole');
+        if (userRole === 'ADMIN') {
+          setIsLoading(false);
+        } else {
+          // Nếu role không phải ADMIN, chuyển hướng đến trang tương ứng
+          if (userRole === 'UNION_WORKER') {
+            router.push('/union-worker');
+          } else {
+            router.push('/student/main');
+          }
+        }
       } else {
         router.push("/login");
       }
@@ -50,7 +61,18 @@ export const UseUnionWorker = ({ children }: { children: ReactNode }) => {
     .then((data) => {
       const { status } = data;
       if (status) {
-        setIsLoading(false);
+        // Kiểm tra role từ localStorage
+        const userRole = localStorage.getItem('userRole');
+        if (userRole === 'UNION_WORKER') {
+          setIsLoading(false);
+        } else {
+          // Nếu role không phải UNION_WORKER, chuyển hướng đến trang tương ứng
+          if (userRole === 'ADMIN') {
+            router.push('/admin/students');
+          } else {
+            router.push('/student/main');
+          }
+        }
       } else {
         router.push("/login");
       }

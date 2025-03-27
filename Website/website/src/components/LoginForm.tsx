@@ -1,6 +1,6 @@
 "use client";
 
-import { isAdmin, loginUser } from "@/api/api.auth";
+import { isAdmin, isUnionWorker, loginUser } from "@/api/api.auth";
 import React from "react";
 import { useRouter } from "next/navigation";
 
@@ -20,11 +20,32 @@ export const LoginForm = () => {
       });
 
       if (res) {
-        const admin = (await isAdmin()).status;
-        if (admin) {
-          router.push("/admin/students");
-        } else {
+        try {
+          // Lấy thông tin người dùng từ API
+          const userData = res.metadata.user;
+          console.log('User data after login:', userData);
+          
+          // Lưu role vào localStorage để sử dụng sau này
+          if (userData && userData.role) {
+            localStorage.setItem('userRole', userData.role);
+          }
+          
+          // Kiểm tra role dựa trên dữ liệu trả về từ API
+          if (userData && userData.role === "ADMIN") {
+            router.push("/admin/students");
+            return;
+          }
+          
+          if (userData && userData.role === "UNION_WORKER") {
+            router.push("/union-worker");
+            return;
+          }
+          
+          // Nếu không phải admin hoặc union worker, chuyển hướng đến trang student
           router.push("/student/main");
+        } catch (error) {
+          console.error("Error processing user data:", error);
+          router.push("/student/main"); // Fallback to student page
         }
       }
     } catch (error: any) {

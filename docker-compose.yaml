@@ -13,6 +13,7 @@ services:
       - MONGODB_HOST=final_mongo
       - MONGODB_PORT=27017
       - MONGODB_DATABASE_NAME=activity_tracking
+      - MONGODB_URI=mongodb://final_mongo:27017/activity_tracking?retryWrites=true&w=majority&connectTimeoutMS=10000&socketTimeoutMS=45000
     depends_on:
       final_redis:
         condition: service_healthy
@@ -93,10 +94,24 @@ services:
     container_name: final_mongo
     image: mongodb/mongodb-community-server:latest
     ports:
-      - "39990:27017"
+      - "27017:27017"
     networks:
       - final-network
+    volumes:
+      - mongodb_data:/data/db
+    command: mongod --bind_ip_all
+    environment:
+      - MONGO_INITDB_DATABASE=activity_tracking
+    healthcheck:
+      test: mongosh --eval 'db.runCommand("ping").ok' --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 networks:
   final-network:
     name: final-network
+
+volumes:
+  mongodb_data:
+    name: mongodb_data

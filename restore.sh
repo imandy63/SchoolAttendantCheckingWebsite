@@ -3,7 +3,7 @@
 # Configuration
 DB_NAME="activity_tracking"
 BACKUP_BASE_DIR="/mnt/c/Users/kongh/Desktop/DATN/backups"
-PORT="39990"
+PORT="27017"
 
 # Check if timestamp is provided
 if [ -z "$1" ]; then

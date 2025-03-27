@@ -11,61 +11,32 @@ export const HEADER = {
   REFRESHTOKEN: "x-rtoken-id",
 };
 
-const createTokenPair = async (
-  payload: IPayload,
-  publicKey: string,
-  privateKey: string
-) => {
+const JWT_SECRET = "your-super-secret-key";
+
+const createTokenPair = async (payload: IPayload) => {
   try {
-    const accessToken = await JWT.sign(payload, publicKey, {
-      expiresIn: "30 minutes",
-    });
-    const refreshToken = await JWT.sign(payload, privateKey, {
-      expiresIn: "2 days",
-    });
-
-    JWT.verify(accessToken, publicKey, (err, decode) => {
-      if (err) {
-        console.log("Error verify:", err);
-      } else {
-        console.log("Decode verify:", decode);
-      }
-    });
-
-    return { accessToken, refreshToken };
-  } catch (e) {}
-};
-
-const createTokenPairV2 = async (
-  payload: IPayload,
-  publicKey: string,
-  privateKey: string
-) => {
-  try {
-    const accessToken = await JWT.sign(payload, privateKey, {
+    const accessToken = await JWT.sign(payload, JWT_SECRET, {
       expiresIn: "1 hour",
-      algorithm: "RS256",
     });
-    const refreshToken = await JWT.sign(payload, privateKey, {
+    const refreshToken = await JWT.sign(payload, JWT_SECRET, {
       expiresIn: "3 days",
-      algorithm: "RS256",
-    });
-
-    JWT.verify(accessToken, publicKey, (err, decode) => {
-      if (err) {
-        console.log("Error verify:", err);
-      } else {
-        console.log("Decode verify:", decode);
-      }
     });
 
     return { accessToken, refreshToken };
-  } catch (e) {}
+  } catch (e) {
+    console.error("Error creating token pair:", e);
+    throw new AuthFailureError("Failed to create token pair");
+  }
 };
 
-const verifyJWT = (token: string, key: string) => {
-  const decodeUser = JWT.verify(token, key);
-  return decodeUser as IPayload;
+const verifyJWT = (token: string) => {
+  try {
+    const decodeUser = JWT.verify(token, JWT_SECRET);
+    return decodeUser as IPayload;
+  } catch (error) {
+    console.error("Error verifying JWT:", error);
+    throw new AuthFailureError("Invalid token");
+  }
 };
 
-export { createTokenPair, createTokenPairV2, verifyJWT };
+export { createTokenPair, verifyJWT };

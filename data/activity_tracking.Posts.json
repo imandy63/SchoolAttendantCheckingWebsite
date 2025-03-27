@@ -1,0 +1,20 @@
+[{
+  "_id": {
+    "$oid": "67e2d9d2c16df0dd75168f35"
+  },
+  "title": "Thông báo về hội thao mùa xuân",
+  "content": "Trường thông báo về việc tổ chức hội thao mùa xuân 2024...",
+  "author_id": "2001215836",
+  "category": "ANNOUNCEMENT",
+  "status": "PUBLISHED"
+},
+{
+  "_id": {
+    "$oid": "67e2d9d2c16df0dd75168f36"
+  },
+  "title": "Kết quả hội diễn văn nghệ",
+  "content": "Kết quả và hình ảnh từ hội diễn văn nghệ...",
+  "author_id": "2001215837",
+  "category": "NEWS",
+  "status": "PUBLISHED"
+}]

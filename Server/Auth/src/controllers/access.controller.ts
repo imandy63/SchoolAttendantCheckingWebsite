@@ -39,9 +39,13 @@ class AccessController {
   };
 
   login = async (req: Request, res: Response, next: NextFunction) => {
+    const { studentId, password } = req.body;
+    if (!studentId || !password) {
+      throw new BadRequestError("Missing studentId or password");
+    }
     new SuccessResponse({
       message: "Login successfully",
-      metadata: await AccessService.login(req.body),
+      metadata: await AccessService.login({ studentId, password }),
     }).send(res);
   };
 

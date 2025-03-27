@@ -9,40 +9,36 @@ import { Obj } from "./interfaces";
 import { redisInstance } from "./dbs/redis.init";
 import cors from "cors";
 dotenv.config();
-
-MongoConnection();
-redisInstance.initRedis();
+// MongoConnection();
+// redisInstance.initRedis();
 const app = express();
 
+// Middleware
+app.use(cors({
+  origin: process.env.FE_URL || 'http://localhost:3000',
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(morgan("dev"));
 app.use(helmet());
 app.use(compression());
 
-app.use(
-  cors({
-    origin: "*", // Allow your frontend origin
-    methods: "GET,POST,PUT,DELETE,OPTIONS",
-    allowedHeaders: "*", // Allow Authorization header
-  })
-);
-
+// Routes
 app.use("", router);
 
-app.use((req, res, next) => {
-  const error: Obj = new Error("Not found");
-  error.status = 404;
-  next(error);
-});
-
-app.use((error: Obj, req: Request, res: Response, next: NextFunction) => {
-  const statusCode = error.status ?? 500;
-  res.status(statusCode).json({
-    status: "error",
-    code: statusCode,
-    message: error.message || "Internal Server Error",
+// Error handling
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error(err.stack);
+  res.status(500).json({
+    status: 'error',
+    code: 500,
+    message: err.message || 'Internal Server Error'
   });
 });
+
+// Database connection
+MongoConnection();
+redisInstance.initRedis();
 
 export default app;

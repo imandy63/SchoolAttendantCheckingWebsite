@@ -1,0 +1,225 @@
+[{
+  "_id": {
+    "$oid": "67e4136ea02be42ca46bd7b3"
+  },
+  "student_id": "2001215828",
+  "password": "$2y$10$RzK/2fCpx60KkBuMVNCj2.PtFkj/h31SqinIRojKtupGrkPy1Aj0O",
+  "role": "ADMIN",
+  "student_name": "Phạm Hồ Đăng Huy",
+  "student_avatar_url": "",
+  "student_address": "Hồ Chí Minh",
+  "student_class": {
+    "class_name": "12DHTH01",
+    "faculty": "Công nghệ thông tin"
+  },
+  "student_activity_point": 100,
+  "student_participated_activities": [],
+  "subscribed_categories": [
+    "SPORTS",
+    "CULTURAL",
+    "ACADEMIC"
+  ]
+},
+{
+  "_id": {
+    "$oid": "67e4136ea02be42ca46bd7b4"
+  },
+  "student_id": "2001215837",
+  "password": "$2y$10$RzK/2fCpx60KkBuMVNCj2.PtFkj/h31SqinIRojKtupGrkPy1Aj0O",
+  "role": "UNION_WORKER",
+  "student_name": "Nguyễn Trọng Minh",
+  "student_avatar_url": "",
+  "student_address": "Hà Nội",
+  "student_class": {
+    "class_name": "12DHTH01",
+    "faculty": "Công nghệ thông tin"
+  },
+  "student_activity_point": 80,
+  "student_participated_activities": [],
+  "subscribed_categories": [
+    "SPORTS",
+    "CULTURAL"
+  ]
+},
+{
+  "_id": {
+    "$oid": "67e4136ea02be42ca46bd7b5"
+  },
+  "student_id": "2001215838",
+  "password": "$2y$10$RzK/2fCpx60KkBuMVNCj2.PtFkj/h31SqinIRojKtupGrkPy1Aj0O",
+  "role": "STUDENT",
+  "student_name": "Trần Thị Ngọc Mai",
+  "student_avatar_url": "",
+  "student_address": "Đà Nẵng",
+  "student_class": {
+    "class_name": "12DHTH01",
+    "faculty": "Công nghệ thông tin"
+  },
+  "student_activity_point": 60,
+  "student_participated_activities": [],
+  "subscribed_categories": [
+    "ACADEMIC"
+  ]
+},
+{
+  "_id": {
+    "$oid": "67e4136ea02be42ca46bd7b6"
+  },
+  "student_id": "2001215839",
+  "password": "$2y$10$RzK/2fCpx60KkBuMVNCj2.PtFkj/h31SqinIRojKtupGrkPy1Aj0O",
+  "role": "STUDENT",
+  "student_name": "Lê Hoàng Nhật Minh",
+  "student_avatar_url": "",
+  "student_address": "Huế",
+  "student_class": {
+    "class_name": "12DHTH01",
+    "faculty": "Công nghệ thông tin"
+  },
+  "student_activity_point": 40,
+  "student_participated_activities": [],
+  "subscribed_categories": [
+    "SPORTS"
+  ]
+},
+{
+  "_id": {
+    "$oid": "67e4136ea02be42ca46bd7b7"
+  },
+  "student_id": "2001215840",
+  "password": "$2y$10$RzK/2fCpx60KkBuMVNCj2.PtFkj/h31SqinIRojKtupGrkPy1Aj0O",
+  "role": "STUDENT",
+  "student_name": "Phạm Thị Bích Trâm",
+  "student_avatar_url": "",
+  "student_address": "Cần Thơ",
+  "student_class": {
+    "class_name": "12DHTH01",
+    "faculty": "Công nghệ thông tin"
+  },
+  "student_activity_point": 30,
+  "student_participated_activities": [],
+  "subscribed_categories": [
+    "CULTURAL"
+  ]
+},
+{
+  "_id": {
+    "$oid": "67e4136ea02be42ca46bd7b8"
+  },
+  "student_id": "2001215841",
+  "password": "$2y$10$RzK/2fCpx60KkBuMVNCj2.PtFkj/h31SqinIRojKtupGrkPy1Aj0O",
+  "role": "UNION_WORKER",
+  "student_name": "Hoàng Thanh Phương",
+  "student_avatar_url": "",
+  "student_address": "Hải Phòng",
+  "student_class": {
+    "class_name": "12DHTH01",
+    "faculty": "Công nghệ thông tin"
+  },
+  "student_activity_point": 90,
+  "student_participated_activities": [],
+  "subscribed_categories": [
+    "SPORTS",
+    "CULTURAL",
+    "ACADEMIC"
+  ]
+},
+{
+  "_id": {
+    "$oid": "67e4136ea02be42ca46bd7b9"
+  },
+  "student_id": "2001215842",
+  "password": "$2y$10$RzK/2fCpx60KkBuMVNCj2.PtFkj/h31SqinIRojKtupGrkPy1Aj0O",
+  "role": "STUDENT",
+  "student_name": "Nguyễn Văn Thành",
+  "student_avatar_url": "",
+  "student_address": "Hà Nội",
+  "student_class": {
+    "class_name": "12DHTH01",
+    "faculty": "Công nghệ thông tin"
+  },
+  "student_activity_point": 50,
+  "student_participated_activities": [],
+  "subscribed_categories": [
+    "ACADEMIC"
+  ]
+},
+{
+  "_id": {
+    "$oid": "67e4136ea02be42ca46bd7ba"
+  },
+  "student_id": "2001215843",
+  "password": "$2y$10$RzK/2fCpx60KkBuMVNCj2.PtFkj/h31SqinIRojKtupGrkPy1Aj0O",
+  "role": "STUDENT",
+  "student_name": "Lê Thị Hồng Nhung",
+  "student_avatar_url": "",
+  "student_address": "Đà Nẵng",
+  "student_class": {
+    "class_name": "12DHTH01",
+    "faculty": "Công nghệ thông tin"
+  },
+  "student_activity_point": 60,
+  "student_participated_activities": [],
+  "subscribed_categories": [
+    "SPORTS"
+  ]
+},
+{
+  "_id": {
+    "$oid": "67e4136ea02be42ca46bd7bb"
+  },
+  "student_id": "2001215844",
+  "password": "$2y$10$RzK/2fCpx60KkBuMVNCj2.PtFkj/h31SqinIRojKtupGrkPy1Aj0O",
+  "role": "STUDENT",
+  "student_name": "Trần Hoàng Anh",
+  "student_avatar_url": "",
+  "student_address": "Hải Phòng",
+  "student_class": {
+    "class_name": "12DHTH01",
+    "faculty": "Công nghệ thông tin"
+  },
+  "student_activity_point": 55,
+  "student_participated_activities": [],
+  "subscribed_categories": [
+    "CULTURAL"
+  ]
+},
+{
+  "_id": {
+    "$oid": "67e4136ea02be42ca46bd7bc"
+  },
+  "student_id": "2001215845",
+  "password": "$2y$10$RzK/2fCpx60KkBuMVNCj2.PtFkj/h31SqinIRojKtupGrkPy1Aj0O",
+  "role": "STUDENT",
+  "student_name": "Vũ Đức Duy",
+  "student_avatar_url": "",
+  "student_address": "Cần Thơ",
+  "student_class": {
+    "class_name": "12DHTH01",
+    "faculty": "Công nghệ thông tin"
+  },
+  "student_activity_point": 70,
+  "student_participated_activities": [],
+  "subscribed_categories": [
+    "ACADEMIC"
+  ]
+},
+{
+  "_id": {
+    "$oid": "67e4136ea02be42ca46bd7bd"
+  },
+  "student_id": "2001215846",
+  "password": "$2y$10$RzK/2fCpx60KkBuMVNCj2.PtFkj/h31SqinIRojKtupGrkPy1Aj0O",
+  "role": "STUDENT",
+  "student_name": "Nguyễn Thị Hương Giang",
+  "student_avatar_url": "",
+  "student_address": "Huế",
+  "student_class": {
+    "class_name": "12DHTH01",
+    "faculty": "Công nghệ thông tin"
+  },
+  "student_activity_point": 40,
+  "student_participated_activities": [],
+  "subscribed_categories": [
+    "SPORTS"
+  ]
+}]

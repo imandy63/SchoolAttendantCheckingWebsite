@@ -1,4 +1,4 @@
-import express, { Response, Request, NextFunction } from "express";
+import express, { Response, Request, NextFunction, ErrorRequestHandler } from "express";
 import morgan from "morgan";
 import helmet from "helmet";
 import { Obj } from "./interfaces";
@@ -30,13 +30,15 @@ app.use((req, res, next) => {
   next(error);
 });
 
-app.use((error: Obj, req: Request, res: Response, next: NextFunction) => {
+const errorHandler: ErrorRequestHandler = (error: Obj, req: Request, res: Response, next: NextFunction): void => {
   const statusCode = error.status ?? 500;
-  return res.status(statusCode).json({
+  res.status(statusCode).json({
     status: "error",
     code: statusCode,
     message: error.message || "Internal Server Error",
   });
-});
+};
+
+app.use(errorHandler);
 
 export default app;

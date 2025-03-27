@@ -1,0 +1,48 @@
+[{
+  "_id": {
+    "$oid": "67e2d90fc16df0dd75168f29"
+  },
+  "name": "Hội thao mùa xuân 2024",
+  "description": "Hội thao thể thao mùa xuân cho sinh viên",
+  "start_date": "2024-03-15T08:00:00Z",
+  "end_date": "2024-03-17T17:00:00Z",
+  "location": "Sân vận động trường",
+  "max_participants": 200,
+  "current_participants": 0,
+  "category": "SPORTS",
+  "status": "UPCOMING",
+  "points": 10,
+  "created_by": "2001215836"
+},
+{
+  "_id": {
+    "$oid": "67e2d90fc16df0dd75168f2a"
+  },
+  "name": "Hội diễn văn nghệ",
+  "description": "Hội diễn văn nghệ chào mừng ngày thành lập Đoàn",
+  "start_date": "2024-03-26T19:00:00Z",
+  "end_date": "2024-03-26T22:00:00Z",
+  "location": "Hội trường lớn",
+  "max_participants": 500,
+  "current_participants": 0,
+  "category": "CULTURAL",
+  "status": "UPCOMING",
+  "points": 15,
+  "created_by": "2001215837"
+},
+{
+  "_id": {
+    "$oid": "67e2d90fc16df0dd75168f2b"
+  },
+  "name": "Hội thảo công nghệ",
+  "description": "Hội thảo về xu hướng công nghệ mới",
+  "start_date": "2024-04-05T09:00:00Z",
+  "end_date": "2024-04-05T17:00:00Z",
+  "location": "Phòng họp A101",
+  "max_participants": 100,
+  "current_participants": 0,
+  "category": "ACADEMIC",
+  "status": "UPCOMING",
+  "points": 20,
+  "created_by": "2001215836"
+}]

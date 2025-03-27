@@ -1,0 +1,21 @@
+[{
+  "_id": {
+    "$oid": "67e2d949c16df0dd75168f2d"
+  },
+  "name": "SPORTS",
+  "description": "Các hoạt động thể thao"
+},
+{
+  "_id": {
+    "$oid": "67e2d949c16df0dd75168f2e"
+  },
+  "name": "CULTURAL",
+  "description": "Các hoạt động văn hóa nghệ thuật"
+},
+{
+  "_id": {
+    "$oid": "67e2d949c16df0dd75168f2f"
+  },
+  "name": "ACADEMIC",
+  "description": "Các hoạt động học thuật"
+}]

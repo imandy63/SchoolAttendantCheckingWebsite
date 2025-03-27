@@ -1,0 +1,20 @@
+[{
+  "_id": {
+    "$oid": "67e2da1dc16df0dd75168f3c"
+  },
+  "activity_id": "67e2d90fc16df0dd75168f29",
+  "student_id": "2001215836",
+  "status": "REGISTERED",
+  "check_in_time": null,
+  "check_out_time": null
+},
+{
+  "_id": {
+    "$oid": "67e2da1dc16df0dd75168f3d"
+  },
+  "activity_id": "67e2d90fc16df0dd75168f2a",
+  "student_id": "2001215836",
+  "status": "REGISTERED",
+  "check_in_time": null,
+  "check_out_time": null
+}]

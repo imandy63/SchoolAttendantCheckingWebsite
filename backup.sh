@@ -4,7 +4,7 @@
 DB_NAME="activity_tracking"
 BACKUP_DIR="/mnt/c/Users/kongh/Desktop/DATN/backups"
 TIMESTAMP=$(date +%F_%H-%M-%S)
-PORT="39990"
+PORT="27017"
 
 # Ensure backup directory exists
 mkdir -p "$BACKUP_DIR/json_backup_$TIMESTAMP"

@@ -1,9 +1,10 @@
-import express from "express";
+import express, { Request, Response, Router, NextFunction } from "express";
 import authRouter from "./auth";
-const router = express.Router();
 
-router.get("/", (req, res) => {
-  return res.status(200).json({
+const router: Router = express.Router();
+
+router.get("/", (_req: Request, res: Response, _next: NextFunction) => {
+  res.status(200).json({
     message: "OK",
   });
 });
